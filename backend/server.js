@@ -763,6 +763,10 @@ app.put('/api/audits/:id/close', verifyToken, (req, res) => {
     });
 });
 
+// ================= API ระบบแจ้งซ่อม (Repair Tracking) ================= //
+const repairRoutes = require('./repairRoutes')(db, verifyToken);
+app.use('/api/repairs', repairRoutes);
+
 // ================= เริ่มต้นเซิร์ฟเวอร์ ================= //
 app.listen(5000, () => {
     console.log('Server running on http://192.168.1.120:5000');
