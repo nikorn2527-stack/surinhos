@@ -292,6 +292,17 @@ body { font-family: -apple-system, "Noto Sans Thai", sans-serif; margin: 0; over
         <label class="text-sm font-medium text-gray-600 mb-1.5 block">ชื่อผู้แจ้ง</label>
         <input type="text" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="ชื่อ-นามสกุล">
       </div>
+      <!-- Photo upload -->
+      <div>
+        <label class="text-sm font-medium text-gray-600 mb-1.5 block">📷 รูปประกอบ (ถ่ายรูปอาการเสีย)</label>
+        <div id="photo-upload-area" class="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center hover:border-emerald-300 hover:bg-emerald-50/30 transition cursor-pointer relative"
+             onclick="document.getElementById('photo-input').click()">
+          <input id="photo-input" type="file" accept="image/*" multiple class="hidden" onchange="handlePhotoUpload(event)">
+          <div class="text-2xl mb-1">📷</div>
+          <p class="text-xs text-gray-400">คลิกหรือลากรูปมาวาง (รองรับหลายรูป)</p>
+        </div>
+        <div id="photo-preview-area" class="flex gap-2 mt-2 flex-wrap hidden"></div>
+      </div>
     </div>
     <div class="flex justify-end gap-2 mt-6">
       <button onclick="document.getElementById('create-modal').classList.add('hidden')" class="px-4 py-2.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">ยกเลิก</button>
@@ -300,18 +311,71 @@ body { font-family: -apple-system, "Noto Sans Thai", sans-serif; margin: 0; over
   </div>
 </div>
 
+<!-- ===== DISPOSAL MODAL ===== -->
+<div id="disposal-modal" class="modal-overlay hidden" onclick="if(event.target===this)document.getElementById('disposal-modal').classList.add('hidden')">
+  <div class="modal-content p-6">
+    <div class="flex items-center gap-2 mb-5">
+      <span class="text-xl">🗑️</span>
+      <h2 class="text-lg font-bold">ตีแทงจำหน่ายครุภัณฑ์</h2>
+    </div>
+    <p class="text-xs text-gray-400 mb-4" id="disposal-ticket-info"></p>
+    <div class="space-y-4">
+      <div>
+        <label class="text-sm font-medium text-gray-600 mb-1.5 block">เหตุผลที่ต้องจำหน่าย</label>
+        <textarea id="disposal-reason" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400" rows="2" placeholder="เช่น อะไหล่หมดสต็อก ยี่ห้อหยุดผลิตรุ่นนี้"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm font-medium text-gray-600 mb-1.5 block">วิธีจำหน่าย</label>
+          <select id="disposal-method" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400">
+            <option value="">เลือก</option>
+            <option value="จำหน่าย/ชำระ">จำหน่าย/ชำระ (ประมูล)</option>
+            <option value="ทำลาย">ทำลาย</option>
+            <option value="บริจาค">บริจาค</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 mb-1.5 block">ราคาประเมิน (฿)</label>
+          <input id="disposal-value" type="number" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400" placeholder="0.00">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm font-medium text-gray-600 mb-1.5 block">ผู้อนุมัติ</label>
+          <input id="disposal-approver" type="text" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400" placeholder="ชื่อ-นามสกุล">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 mb-1.5 block">หนังสือ ครม.</label>
+          <input id="disposal-comref" type="text" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400" placeholder="เช่น ครม.ที่ 1/2569">
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 mt-6">
+      <button onclick="document.getElementById('disposal-modal').classList.add('hidden')" class="px-4 py-2.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">ยกเลิก</button>
+      <button onclick="submitDisposal()" class="px-5 py-2.5 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 shadow-sm">🗑️ บันทึกการตีแทง</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PHOTO LIGHTBOX ===== -->
+<div id="lightbox" class="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center cursor-zoom-out" onclick="closeLightbox()">
+  <img id="lightbox-img" class="max-w-[90vw] max-h-[90vh] rounded-lg shadow-2xl object-contain">
+</div>
+
 <!-- ===== TOAST ===== -->
 <div id="toast" class="fixed top-4 right-4 z-[60] bg-gray-900 text-white px-4 py-2.5 rounded-xl text-sm shadow-xl transform translate-x-[120%] transition-transform duration-300"></div>
 
 <script>
 // ===================== DATA =====================
 const tickets = [
-  { id:'1', ticketNo:'RPR-260725-001', status:'pending', assetName:'เครื่องพิมพ์ HP LaserJet Pro M404', assetCode:'PRT-69-001', category:'เครื่องพิมพ์', location:'อาคารอำนวยการ, ห้อง 102', problemDetails:'กระดาษตัน แม้เปิดปิดเครื่องใหม่แล้ว ใช้งานไม่ได้เลย', reporterName:'สุภาพร รักงาน', createdAt:'28/ก.ค./69 05:03', receivedBy:null, receivedAt:null, repairCost:null, laborCost:null, totalCost:null, costStatus:null, returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:null },
-  { id:'2', ticketNo:'RPR-260720-001', status:'accepted', assetName:'คอมพิวเตอร์แม่ข่าย (Server)', assetCode:'COM-69-001', category:'อุปกรณ์คอมพิวเตอร์', location:'อาคารอำนวยการ, ห้องเซิร์ฟเวอร์', problemDetails:'เปิดเครื่องไม่ติด ไฟกระพริบที่ปุ่ม power', reporterName:'สมชาย ใจดี', createdAt:'20/ก.ค./68 09:15', receivedBy:'วิชัย ซ่อมดี', receivedAt:'20/ก.ค./68 10:30', repairCost:null, laborCost:null, totalCost:null, costStatus:null, returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:null },
-  { id:'3', ticketNo:'RPR-260718-001', status:'in_progress', assetName:'โน้ตบุ๊ค ASUS ExpertBook B9', assetCode:'COM-69-005', category:'อุปกรณ์คอมพิวเตอร์', location:'อาคารเรียนรวม, ห้อง 202', problemDetails:'จอภาพเบลอ มีจุดสว่างผิดปกติหลายจุด', reporterName:'ธนา พิมพ์ดี', createdAt:'18/ก.ค./68 08:00', receivedBy:'วิชัย ซ่อมดี', receivedAt:'18/ก.ค./68 09:00', repairCost:4500, laborCost:1500, totalCost:6000, costStatus:'approved', returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:null },
-  { id:'4', ticketNo:'RPR-260715-001', status:'returned', assetName:'เร้าเตอร์ TP-Link Archer AX6000', assetCode:'NET-69-002', category:'อุปกรณ์เครือข่าย', location:'อาคารอำนวยการ, ห้องไอที ชั้น 2', problemDetails:'สัญญาณ Wi-Fi ไม่เสถียร หลุดบ่อย', reporterName:'ประยุทธ์ รักเทคโนโลยี', createdAt:'15/ก.ค./68 14:00', receivedBy:'วิชัย ซ่อมดี', receivedAt:'15/ก.ค./68 14:00', repairCost:800, laborCost:500, totalCost:1300, costStatus:'approved', returnMethod:'ส่งมอบถึงห้อง', returnedBy:'วิชัย ซ่อมดี', returnedAt:'17/ก.ค./68 11:00', cancelReason:null },
-  { id:'5', ticketNo:'RPR-260710-001', status:'closed', assetName:'โปรเจกเตอร์ Epson EB-L260F', assetCode:'PRJ-69-001', category:'เครื่องฉาย', location:'อาคารเรียนรวม, ห้องประชุม A', problemDetails:'ภาพเบลอ สีเพี้ยน ตัวเลือนไม่ทำงาน', reporterName:'วรรณา สอนดี', createdAt:'10/ก.ค./68 08:30', receivedBy:'วิชัย ซ่อมดี', receivedAt:'10/ก.ค./68 08:30', repairCost:12000, laborCost:3000, totalCost:15000, costStatus:'paid', returnMethod:'ส่งมอบถึงห้อง', returnedBy:'วิชัย ซ่อมดี', returnedAt:'14/ก.ค./68 16:00', cancelReason:null },
-  { id:'6', ticketNo:'RPR-260712-001', status:'cancelled', assetName:'เครื่องสแกน Fujitsu ScanSnap iX1600', assetCode:'SCN-69-001', category:'เครื่องสแกน', location:'อาคารอำนวยการ, ห้อง 103', problemDetails:'กระดาษฉีกขณะสแคน แทร็คปิดไม่สนิท', reporterName:'สมหญิง รักการ์ด', createdAt:'12/ก.ค./68 10:00', receivedBy:null, receivedAt:null, repairCost:null, laborCost:null, totalCost:null, costStatus:null, returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:'อะแดปเตอร์หมดสต็อก ยี่ห้อหยุดผลิตรุ่นนี้แล้ว ค่าอะไหล่เกินกว่าราคาซื้อเครื่องใหม่' },
+  { id:'1', ticketNo:'RPR-260725-001', status:'pending', assetName:'เครื่องพิมพ์ HP LaserJet Pro M404', assetCode:'PRT-69-001', category:'เครื่องพิมพ์', location:'อาคารอำนวยการ, ห้อง 102', problemDetails:'กระดาษตัน แม้เปิดปิดเครื่องใหม่แล้ว ใช้งานไม่ได้เลย', reporterName:'สุภาพร รักงาน', createdAt:'28/ก.ค./69 05:03', receivedBy:null, receivedAt:null, repairCost:null, laborCost:null, totalCost:null, costStatus:null, returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:null, photos:[], disposalStatus:null, disposalReason:null, disposalMethod:null, disposalValue:null, disposalApprovedBy:null, disposalComRef:null },
+  { id:'2', ticketNo:'RPR-260720-001', status:'accepted', assetName:'คอมพิวเตอร์แม่ข่าย (Server)', assetCode:'COM-69-001', category:'อุปกรณ์คอมพิวเตอร์', location:'อาคารอำนวยการ, ห้องเซิร์ฟเวอร์', problemDetails:'เปิดเครื่องไม่ติด ไฟกระพริบที่ปุ่ม power', reporterName:'สมชาย ใจดี', createdAt:'20/ก.ค./68 09:15', receivedBy:'วิชัย ซ่อมดี', receivedAt:'20/ก.ค./68 10:30', repairCost:null, laborCost:null, totalCost:null, costStatus:null, returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:null, photos:[], disposalStatus:null, disposalReason:null, disposalMethod:null, disposalValue:null, disposalApprovedBy:null, disposalComRef:null },
+  { id:'3', ticketNo:'RPR-260718-001', status:'in_progress', assetName:'โน้ตบุ๊ค ASUS ExpertBook B9', assetCode:'COM-69-005', category:'อุปกรณ์คอมพิวเตอร์', location:'อาคารเรียนรวม, ห้อง 202', problemDetails:'จอภาพเบลอ มีจุดสว่างผิดปกติหลายจุด', reporterName:'ธนา พิมพ์ดี', createdAt:'18/ก.ค./68 08:00', receivedBy:'วิชัย ซ่อมดี', receivedAt:'18/ก.ค./68 09:00', repairCost:4500, laborCost:1500, totalCost:6000, costStatus:'approved', returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:null, photos:[], disposalStatus:null, disposalReason:null, disposalMethod:null, disposalValue:null, disposalApprovedBy:null, disposalComRef:null },
+  { id:'4', ticketNo:'RPR-260715-001', status:'returned', assetName:'เร้าเตอร์ TP-Link Archer AX6000', assetCode:'NET-69-002', category:'อุปกรณ์เครือข่าย', location:'อาคารอำนวยการ, ห้องไอที ชั้น 2', problemDetails:'สัญญาณ Wi-Fi ไม่เสถียร หลุดบ่อย', reporterName:'ประยุทธ์ รักเทคโนโลยี', createdAt:'15/ก.ค./68 14:00', receivedBy:'วิชัย ซ่อมดี', receivedAt:'15/ก.ค./68 14:00', repairCost:800, laborCost:500, totalCost:1300, costStatus:'approved', returnMethod:'ส่งมอบถึงห้อง', returnedBy:'วิชัย ซ่อมดี', returnedAt:'17/ก.ค./68 11:00', cancelReason:null, photos:[], disposalStatus:null, disposalReason:null, disposalMethod:null, disposalValue:null, disposalApprovedBy:null, disposalComRef:null },
+  { id:'5', ticketNo:'RPR-260710-001', status:'closed', assetName:'โปรเจกเตอร์ Epson EB-L260F', assetCode:'PRJ-69-001', category:'เครื่องฉาย', location:'อาคารเรียนรวม, ห้องประชุม A', problemDetails:'ภาพเบลอ สีเพี้ยน ตัวเลือนไม่ทำงาน', reporterName:'วรรณา สอนดี', createdAt:'10/ก.ค./68 08:30', receivedBy:'วิชัย ซ่อมดี', receivedAt:'10/ก.ค./68 08:30', repairCost:12000, laborCost:3000, totalCost:15000, costStatus:'paid', returnMethod:'ส่งมอบถึงห้อง', returnedBy:'วิชัย ซ่อมดี', returnedAt:'14/ก.ค./68 16:00', cancelReason:null, photos:[], disposalStatus:null, disposalReason:null, disposalMethod:null, disposalValue:null, disposalApprovedBy:null, disposalComRef:null },
+  { id:'6', ticketNo:'RPR-260712-001', status:'cancelled', assetName:'เครื่องสแกน Fujitsu ScanSnap iX1600', assetCode:'SCN-69-001', category:'เครื่องสแกน', location:'อาคารอำนวยการ, ห้อง 103', problemDetails:'กระดาษฉีกขณะสแคน แทร็คปิดไม่สนิท', reporterName:'สมหญิง รักการ์ด', createdAt:'12/ก.ค./68 10:00', receivedBy:null, receivedAt:null, repairCost:null, laborCost:null, totalCost:null, costStatus:null, returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:'อะแดปเตอร์หมดสต็อก ยี่ห้อหยุดผลิตรุ่นนี้แล้ว ค่าอะไหล่เกินกว่าราคาซื้อเครื่องใหม่', photos:[], disposalStatus:null, disposalReason:null, disposalMethod:null, disposalValue:null, disposalApprovedBy:null, disposalComRef:null },
+  // Ticket ที่มีรูปประกอบ (simulated placeholders)
+  { id:'7', ticketNo:'RPR-260728-001', status:'pending', assetName:'จอคอมพิวเตอร์ LG 24MP400', assetCode:'COM-69-010', category:'อุปกรณ์คอมพิวเตอร์', location:'อาคารเรียนรวม, ห้อง 301', problemDetails:'จอมีจุดสีแดงกระจายทั่วจอ เปิดมา 10 นาทีจอดับ', reporterName:'นภา แก้วใส', createdAt:'28/ก.ค./69 10:30', receivedBy:null, receivedAt:null, repairCost:null, laborCost:null, totalCost:null, costStatus:null, returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:null, photos:['photo_demo_1','photo_demo_2'], disposalStatus:null, disposalReason:null, disposalMethod:null, disposalValue:null, disposalApprovedBy:null, disposalComRef:null },
 ];
 
 const statusCfg = {
@@ -321,6 +385,19 @@ const statusCfg = {
   returned:   { label:'ส่งคืนแล้ว',   short:'ส่ง',   dot:'#10b981', bg:'bg-emerald-50', text:'text-emerald-600' },
   closed:     { label:'ปิดงาน',      short:'ปิด',   dot:'#6b7280', bg:'bg-gray-100',   text:'text-gray-500' },
   cancelled:  { label:'ยกเลิก',      short:'ยก',   dot:'#ef4444', bg:'bg-red-50',     text:'text-red-500' },
+  disposed:   { label:'ตีแทงจำหน่าย', short:'ตีแทง', dot:'#ea580c', bg:'bg-orange-50', text:'text-orange-600' },
+};
+
+const disposalCfg = {
+  pending_review: { label:'รอพิจารณา', short:'รอพิจารณา', bg:'bg-orange-50', text:'text-orange-500' },
+  approved:      { label:'อนุมัติแล้ว', short:'อนุมัติ', bg:'bg-orange-100', text:'text-orange-700' },
+  disposed:      { label:'จำหน่ายแล้ว', short:'จำหน่ายแล้ว', bg:'bg-emerald-50', text:'text-emerald-600' },
+};
+
+// Photo demo placeholders (simulated — ใน production จะเป็น real base64/URL)
+const photoPlaceholders = {
+  photo_demo_1: { label:'จอมีจุดสีแดงกระจาย', color:'#fee2e2' },
+  photo_demo_2: { label:'จอดับขณะใช้งาน', color:'#fef3c7' },
 };
 
 // ===================== STATE =====================
@@ -452,7 +529,7 @@ function buildDetailHTML(id) {
   const s = statusCfg[t.status];
   const isAdmin = state.view === 'admin';
   const timeline = ['pending','accepted','in_progress','returned','closed'];
-  const idx = t.status === 'cancelled' ? -1 : timeline.indexOf(t.status);
+  const idx = (t.status === 'cancelled' || t.status === 'disposed') ? -1 : timeline.indexOf(t.status);
 
   let html = '';
 
@@ -586,7 +663,7 @@ function buildDetailHTML(id) {
   }
 
   // -- Timeline --
-  if (t.status !== 'cancelled') {
+  if (t.status !== 'cancelled' && t.status !== 'disposed') {
     html += `
       <div class="info-box mb-4">
         <div class="flex items-center gap-0">
@@ -611,17 +688,19 @@ function buildDetailHTML(id) {
   }
 
   // -- Admin Actions --
-  if (isAdmin && t.status !== 'cancelled' && t.status !== 'closed') {
+  if (isAdmin && t.status !== 'cancelled' && t.status !== 'closed' && t.status !== 'disposed') {
     let actions = '';
     if (t.status === 'pending') actions = `
       <button onclick="showToast('✅ รับเรื่องเรียบร้อย')" class="act-btn act-primary">✅ รับเรื่อง</button>
-      <button onclick="showToast('❌ ยกเลิกแล้ว')" class="act-btn act-secondary text-red-500 border-red-200 hover:bg-red-50">ยกเลิก</button>`;
+      <button onclick="showToast('❌ ยกเลิกแล้ว')" class="act-btn act-secondary text-red-500 border-red-200 hover:bg-red-50">❌ ยกเลิก</button>
+      <button onclick="openDisposalModal('${t.id}')" class="act-btn act-secondary text-orange-600 border-orange-200 hover:bg-orange-50">🗑️ ตีแทงจำหน่าย</button>`;
     if (t.status === 'accepted') actions = `
       <button onclick="showToast('🔧 เริ่มซ่อมแล้ว')" class="act-btn act-primary" style="background:#7c3aed">🔧 เริ่มซ่อม</button>
       <button onclick="openReceipt('${t.id}','repair')" class="act-btn act-secondary">🖨️ ปริ้นรับซ่อม</button>`;
     if (t.status === 'in_progress') actions = `
       <button onclick="showToast('💰 เสนอราคาเรียบร้อย')" class="act-btn act-primary" style="background:#d97706">💰 เสนอราคา</button>
-      <button onclick="showToast('📦 ส่งคืนเรียบร้อย')" class="act-btn act-primary">📦 ส่งคืน</button>`;
+      <button onclick="showToast('📦 ส่งคืนเรียบร้อย')" class="act-btn act-primary">📦 ส่งคืน</button>
+      <button onclick="openDisposalModal('${t.id}')" class="act-btn act-secondary text-orange-600 border-orange-200 hover:bg-orange-50">🗑️ ซ่อมไม่ได้ — ตีแทง</button>`;
     if (t.status === 'returned') actions = `
       <button onclick="showToast('✅ ปิดงานเรียบร้อย')" class="act-btn act-primary" style="background:#374151">✅ ปิดงาน</button>
       <button onclick="openReceipt('${t.id}','return')" class="act-btn act-secondary">🖨️ ปริ้นส่งคืน</button>`;
@@ -635,6 +714,45 @@ function buildDetailHTML(id) {
     }
   }
 
+  // -- Photos --
+  if (t.photos && t.photos.length > 0) {
+    html += `
+      <div class="info-box mb-4">
+        <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">📷 รูปประกอบ (${t.photos.length} รูป)</h4>
+        <div class="flex gap-2 flex-wrap">
+          ${t.photos.map((p, i) => {
+            const ph = photoPlaceholders[p];
+            if (ph) {
+              return `<div class="w-16 h-16 rounded-md border border-gray-200 flex items-center justify-center text-xs text-gray-400 relative overflow-hidden cursor-pointer hover:opacity-80 transition" onclick="showToast('📸 ${ph.label}')" title="${ph.label}">
+                <div class="absolute inset-0" style="background:${ph.color}"></div>
+                <span class="relative">📷</span>
+              </div>`;
+            }
+            return `<div class="w-16 h-16 rounded-md border border-gray-200 flex items-center justify-center text-xs text-gray-400 bg-gray-50 cursor-pointer hover:opacity-80 transition" onclick="showLightbox('${p}')">
+              <img src="${p}" class="w-full h-full object-cover rounded-md" alt="รูปที่ ${i+1}">
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
+  // -- Disposal Info --
+  if (t.disposalStatus) {
+    const dc = disposalCfg[t.disposalStatus];
+    html += `
+      <div class="info-box mb-4 border-orange-200 bg-orange-50/50">
+        <h4 class="text-[10px] font-semibold text-orange-500 uppercase tracking-wider mb-2">🗑️ ตีแทงจำหน่ายครุภัณฑ์</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+          <div><span class="text-gray-400 block text-[10px]">สถานะ</span><span class="font-medium ${dc?.text || 'text-gray-600'}">${dc?.label || t.disposalStatus}</span></div>
+          ${t.disposalReason ? `<div class="col-span-2 md:col-span-3"><span class="text-gray-400 block text-[10px]">เหตุผล</span><span class="text-gray-700">${t.disposalReason}</span></div>` : ''}
+          ${t.disposalMethod ? `<div><span class="text-gray-400 block text-[10px]">วิธีจำหน่าย</span><span class="text-gray-700">${t.disposalMethod}</span></div>` : ''}
+          ${t.disposalValue != null ? `<div><span class="text-gray-400 block text-[10px]">ราคาประเมิน</span><span class="font-semibold text-gray-800">${t.disposalValue.toLocaleString()} ฿</span></div>` : ''}
+          ${t.disposalApprovedBy ? `<div><span class="text-gray-400 block text-[10px]">ผู้อนุมัติ</span><span class="text-gray-700">${t.disposalApprovedBy}</span></div>` : ''}
+          ${t.disposalComRef ? `<div><span class="text-gray-400 block text-[10px]">หนังสือ</span><span class="text-gray-700 font-mono">${t.disposalComRef}</span></div>` : ''}
+        </div>
+      </div>`;
+  }
+
   // -- Customer: status message --
   if (!isAdmin) {
     let msg = '';
@@ -644,6 +762,7 @@ function buildDetailHTML(id) {
     if (t.status === 'returned') msg = '✅ ซ่อมเสร็จแล้ว กรุณารับอุปกรณ์คืน';
     if (t.status === 'closed') msg = '🎉 ดำเนินการเสร็จสิ้นแล้ว';
     if (t.status === 'cancelled') msg = '❌ รายการนี้ถูกยกเลิก';
+    if (t.status === 'disposed') msg = '🗑️ ครุภัณฑ์ซ่อมไม่ได้ กำลังดำเนินการตีแทงจำหน่าย';
     if (msg) {
       html += `
         <div class="info-box ${t.status === 'cancelled' ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}">
@@ -700,6 +819,102 @@ function closeReceiptModal() { document.getElementById('receipt-modal').classLis
 function doPrint() { closeReceiptModal(); setTimeout(() => window.print(), 200); }
 
 // ===================== ACTIONS =====================
+
+// -- Photo Upload --
+let uploadedPhotos = [];
+function handlePhotoUpload(e) {
+  const files = Array.from(e.target.files);
+ const previewArea = document.getElementById('photo-preview-area');
+  const uploadArea = document.getElementById('photo-upload-area');
+
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      uploadedPhotos.push(ev.target.result);
+      renderPhotoPreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPhotoPreviews() {
+  const area = document.getElementById('photo-preview-area');
+  if (uploadedPhotos.length === 0) {
+    area.classList.add('hidden');
+    return;
+  }
+  area.classList.remove('hidden');
+  area.innerHTML = uploadedPhotos.map((p, i) => `
+    <div class="relative group">
+      <div class="w-16 h-16 rounded-md border border-gray-200 overflow-hidden cursor-pointer" onclick="showLightbox('${p.substring(0,50)}...')">
+        <img src="${p}" class="w-full h-full object-cover">
+      </div>
+      <button onclick="removePhoto(${i})" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow">×</button>
+    </div>
+  `).join('') + `
+    <div class="w-16 h-16 rounded-md border-2 border-dashed border-gray-200 flex items-center justify-center cursor-pointer hover:border-emerald-300 hover:bg-emerald-50/30 transition" onclick="document.getElementById('photo-input').click()">
+      <span class="text-gray-400 text-lg">+</span>
+    </div>`;
+}
+
+function removePhoto(index) {
+  uploadedPhotos.splice(index, 1);
+  renderPhotoPreviews();
+}
+
+// -- Lightbox --
+function showLightbox(src) {
+  const lb = document.getElementById('lightbox');
+  document.getElementById('lightbox-img').src = src;
+  lb.classList.remove('hidden');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.add('hidden');
+}
+
+// -- Disposal --
+let disposalTicketId = null;
+function openDisposalModal(id) {
+  disposalTicketId = id;
+  const t = tickets.find(x => x.id === id);
+  document.getElementById('disposal-ticket-info').innerHTML = `<strong>${t.ticketNo}</strong> — ${t.assetName} (${t.assetCode})`;
+  // Reset fields
+  document.getElementById('disposal-reason').value = '';
+  document.getElementById('disposal-method').value = '';
+  document.getElementById('disposal-value').value = '';
+  document.getElementById('disposal-approver').value = '';
+  document.getElementById('disposal-comref').value = '';
+  document.getElementById('disposal-modal').classList.remove('hidden');
+}
+
+function submitDisposal() {
+  const reason = document.getElementById('disposal-reason').value;
+  const method = document.getElementById('disposal-method').value;
+  const value = parseFloat(document.getElementById('disposal-value').value) || 0;
+  const approver = document.getElementById('disposal-approver').value;
+  const comref = document.getElementById('disposal-comref').value;
+
+  if (!reason || !method) {
+    showToast('⚠️ กรุณากรอกเหตุผลและวิธีจำหน่าย');
+    return;
+  }
+
+  const t = tickets.find(x => x.id === disposalTicketId);
+  if (t) {
+    t.status = 'disposed';
+    t.disposalStatus = 'pending_review';
+    t.disposalReason = reason;
+    t.disposalMethod = method;
+    t.disposalValue = value;
+    t.disposalApprovedBy = approver || null;
+    t.disposalComRef = comref || null;
+  }
+
+  document.getElementById('disposal-modal').classList.add('hidden');
+  showToast('🗑️ บันทึกการตีแทงจำหน่ายเรียบร้อย');
+  render();
+}
+
 function setView(view) {
   state.view = view;
   state.selectedId = null;

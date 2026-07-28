@@ -1,0 +1,736 @@
+     1→<!DOCTYPE html>
+     2→<html lang="th">
+     3→<head>
+     4→<meta charset="UTF-8">
+     5→<meta name="viewport" content="width=device-width, initial-scale=1.0">
+     6→<title>ระบบแจ้งซ่อม — Surinhos</title>
+     7→<script src="https://cdn.tailwindcss.com"></script>
+     8→<script>
+     9→tailwind.config = {
+    10→  theme: {
+    11→    extend: {
+    12→      fontFamily: { sans: ["-apple-system","Noto Sans Thai","sans-serif"] }
+    13→    }
+    14→  }
+    15→}
+    16→</script>
+    17→<style>
+    18→body { font-family: -apple-system, "Noto Sans Thai", sans-serif; margin: 0; overflow: hidden; }
+    19→
+    20→/* ========== APP SHELL ========== */
+    21→.app { display: grid; grid-template-rows: 52px 1fr 30px; height: 100vh; background: #fff; }
+    22→.app-body { display: grid; overflow: hidden; }
+    23→
+    24→/* Desktop */
+    25→@media (min-width: 1024px) {
+    26→  .app-body { grid-template-columns: 300px 1fr; }
+    27→  .sidebar { border-right: 1px solid #f0f0f0; }
+    28→  .detail-panel { background: #f8faf9; }
+    29→  .mobile-detail-wrap { display: none; }
+    30→}
+    31→/* Tablet */
+    32→@media (min-width: 768px) and (max-width: 1023px) {
+    33→  .app-body { grid-template-columns: 280px 1fr; }
+    34→  .sidebar { border-right: 1px solid #f0f0f0; }
+    35→  .detail-panel { background: #f8faf9; }
+    36→  .mobile-detail-wrap { display: none; }
+    37→}
+    38→/* Mobile */
+    39→@media (max-width: 767px) {
+    40→  .app-body { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+    41→  .detail-panel { display: none; }
+    42→  .mobile-detail-wrap { display: block; position: fixed; inset: 0; z-index: 40; background: #f8faf9; overflow-y: auto; }
+    43→  .mobile-detail-wrap.hidden { display: none; }
+    44→}
+    45→
+    46→/* ========== SIDEBAR ========== */
+    47→.sidebar { display: flex; flex-direction: column; background: #fff; overflow: hidden; }
+    48→.sidebar-list { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #e5e7eb transparent; }
+    49→.sidebar-list::-webkit-scrollbar { width: 3px; }
+    50→.sidebar-list::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+    51→
+    52→/* ========== TICKET ROW ========== */
+    53→.t-row {
+    54→  display: grid; grid-template-columns: auto 1fr auto;
+    55→  gap: 10px; align-items: center;
+    56→  padding: 10px 14px; cursor: pointer;
+    57→  border-left: 3px solid transparent;
+    58→  border-bottom: 1px solid #f5f5f5;
+    59→  transition: all 0.15s;
+    60→}
+    61→.t-row:hover { background: #f0fdf4; border-left-color: #34d399; }
+    62→.t-row.active { background: #ecfdf5; border-left-color: #059669; }
+    63→.t-row .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    64→
+    65→/* ========== VIEW TOGGLE ========== */
+    66→.view-toggle { display: inline-flex; gap: 2px; background: #f3f4f6; border-radius: 8px; padding: 2px; }
+    67→.view-btn {
+    68→  padding: 4px 14px; border-radius: 6px; font-size: 12px; font-weight: 500;
+    69→  cursor: pointer; transition: all 0.2s; border: none; background: transparent; color: #6b7280;
+    70→  display: flex; align-items: center; gap: 5px;
+    71→}
+    72→.view-btn.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+    73→
+    74→/* ========== DETAIL ========== */
+    75→.detail-panel { overflow-y: auto; scrollbar-width: thin; scrollbar-color: #e5e7eb transparent; }
+    76→.detail-panel::-webkit-scrollbar { width: 4px; }
+    77→.detail-panel::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+    78→.info-box { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 14px 16px; }
+    79→.info-label { font-size: 11px; color: #9ca3af; margin-bottom: 2px; }
+    80→.info-val { font-size: 13px; color: #374151; font-weight: 500; }
+    81→
+    82→/* ========== TIMELINE ========== */
+    83→.tl-step { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    84→.tl-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 10px; }
+    85→.tl-line { flex: 1; height: 2px; margin: 0 -2px; min-width: 16px; }
+    86→
+    87→/* ========== STAT BADGE ========== */
+    88→.stat-badge { display: flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+    89→
+    90→/* ========== ACTION BTN ========== */
+    91→.act-btn {
+    92→  padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    93→  cursor: pointer; transition: all 0.15s; border: none; display: inline-flex;
+    94→  align-items: center; gap: 5px;
+    95→}
+    96→.act-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    97→.act-primary { background: #059669; color: white; }
+    98→.act-secondary { background: #fff; color: #374151; border: 1px solid #e5e7eb; }
+    99→
+   100→/* ========== RECEIPT (50mm thermal) ========== */
+   101→.thermal-receipt {
+   102→  font-family: 'Courier New', 'Noto Sans Thai', monospace;
+   103→  width: 50mm; min-width: 50mm; max-width: 50mm;
+   104→  margin: 0 auto; background: #fff; color: #1a1a1a;
+   105→  font-size: 7pt; line-height: 1.4; padding: 0;
+   106→}
+   107→.receipt-cut-top, .receipt-cut-bottom {
+   108→  width: 50mm; height: 4mm;
+   109→  background: repeating-linear-gradient(135deg,#fff 0px,#fff 2px,#ddd 2px,#ddd 4px,#fff 4px,#fff 6px);
+   110→}
+   111→.receipt-cut-bottom { margin-top: 2mm; }
+   112→.receipt-content { padding: 2mm 3mm; }
+   113→.r-logo { font-size:16pt; line-height:1; margin-bottom:1mm; text-align:center; }
+   114→.r-org { font-size:9pt; font-weight:700; letter-spacing:3px; text-align:center; }
+   115→.r-sub { font-size:6pt; letter-spacing:2px; opacity:.7; text-align:center; }
+   116→.r-title { font-size:8pt; font-weight:700; margin:1.5mm 0; text-align:center; }
+   117→.r-div { border:none; border-top:1px dashed #999; margin:1.5mm 0; }
+   118→.r-num-row { display:flex; align-items:baseline; justify-content:center; gap:2mm; margin:1mm 0; }
+   119→.r-num-lbl { font-size:6pt; opacity:.6; }
+   120→.r-num-val { font-size:11pt; font-weight:900; font-family:'Courier New',monospace; }
+   121→.r-date { text-align:center; font-size:6.5pt; opacity:.7; }
+   122→.r-row { display:flex; justify-content:space-between; align-items:flex-start; margin:.5mm 0; gap:1mm; }
+   123→.r-lbl { font-size:6.5pt; opacity:.5; white-space:nowrap; flex-shrink:0; }
+   124→.r-val { font-size:6.5pt; font-weight:500; text-align:right; word-break:break-word; }
+   125→.r-val.bold { font-weight:700; }
+   126→.r-center { justify-content:center; }
+   127→.r-sect { font-size:6.5pt; font-weight:700; opacity:.5; letter-spacing:.5px; margin-bottom:.5mm; padding-bottom:.3mm; border-bottom:.5px solid #ccc; }
+   128→.r-desc { font-size:6.5pt; line-height:1.4; margin:.5mm 0; word-break:break-word; }
+   129→.r-danger { color:#dc3545; }
+   130→.r-sig-sec { display:flex; gap:2mm; margin:1mm 0; }
+   131→.r-sig-blk { flex:1; text-align:center; }
+   132→.r-sig-lbl { font-size:5.5pt; opacity:.5; margin-bottom:.5mm; }
+   133→.r-sig-wrap { border:.5px solid #ccc; height:8mm; display:flex; align-items:center; justify-content:center; padding:.5mm; background:#fafafa; }
+   134→.r-total-row { border-top:1px solid #333; padding-top:.5mm; margin-top:.5mm; }
+   135→.r-total-row .r-lbl { font-weight:700; opacity:1; }
+   136→.r-total-row .r-val { font-size:8pt; font-weight:900; }
+   137→.r-footer { text-align:center; margin-top:2mm; padding-top:1mm; }
+   138→.r-foot-line { font-size:5pt; opacity:.4; margin:.3mm 0; }
+   139→.r-foot-thanks { font-size:6pt; margin-top:1mm; opacity:.6; }
+   140→.s-pending { background:#fff3cd; color:#856404; }
+   141→.s-accepted { background:#d1ecf1; color:#0c5460; }
+   142→.s-in_progress { background:#e2d5f1; color:#4a1d8e; }
+   143→.s-returned { background:#d4edda; color:#155724; }
+   144→.s-closed { background:#e2e3e5; color:#383d41; }
+   145→.s-cancelled { background:#f8d7da; color:#721c24; }
+   146→.receipt-preview-wrap {
+   147→  background:#e8e8e8; padding:20px 24px; border-radius:12px;
+   148→  display:flex; justify-content:center; overflow-x:auto;
+   149→}
+   150→.receipt-preview-wrap .thermal-receipt {
+   151→  transform:scale(2.2); transform-origin:top center;
+   152→  box-shadow:2px 4px 16px rgba(0,0,0,.18); border-radius:2px;
+   153→}
+   154→
+   155→/* ========== MODAL ========== */
+   156→.modal-overlay {
+   157→  position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:50;
+   158→  display:flex; align-items:center; justify-content:center; padding:16px;
+   159→  backdrop-filter: blur(2px);
+   160→}
+   161→.modal-content {
+   162→  background:#fff; border-radius:12px; max-width:420px; width:100%;
+   163→  max-height:90vh; overflow-y:auto;
+   164→}
+   165→
+   166→/* ========== PRINT ========== */
+   167→@media print {
+   168→  body * { visibility: hidden; }
+   169→  .print-area, .print-area * { visibility: visible; }
+   170→  .print-area { position:fixed; top:0; left:0; width:100%; background:#fff; z-index:99999; }
+   171→  .print-area .thermal-receipt { transform:none!important; box-shadow:none!important; }
+   172→  @page { size:50mm auto; margin:0; }
+   173→}
+   174→@media (max-width:640px) {
+   175→  .receipt-preview-wrap .thermal-receipt { transform:scale(1.8); }
+   176→}
+   177→</style>
+   178→</head>
+   179→<body class="text-gray-800">
+   180→
+   181→<div class="app">
+   182→  <!-- ===== HEADER ===== -->
+   183→  <header class="flex items-center justify-between px-5 border-b border-gray-100 bg-white z-20">
+   184→    <div class="flex items-center gap-3">
+   185→      <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
+   186→        <span class="text-white text-sm">🔧</span>
+   187→      </div>
+   188→      <span class="text-sm font-bold text-gray-800">ระบบแจ้งซ่อม</span>
+   189→    </div>
+   190→
+   191→    <div class="view-toggle" id="view-toggle">
+   192→      <button class="view-btn active" data-view="customer" onclick="setView('customer')">
+   193→        <span>👤</span> ผู้แจ้งซ่อม
+   194→      </button>
+   195→      <button class="view-btn" data-view="admin" onclick="setView('admin')">
+   196→        <span>⚙️</span> ผู้ดูแล
+   197→      </button>
+   198→    </div>
+   199→
+   200→    <div class="flex items-center gap-2">
+   201→      <button onclick="showCreateForm()" id="btn-create"
+   202→        class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-1.5 rounded-lg font-medium transition shadow-sm flex items-center gap-1">
+   203→        + แจ้งซ่อม
+   204→      </button>
+   205→    </div>
+   206→  </header>
+   207→
+   208→  <!-- ===== BODY ===== -->
+   209→  <div class="app-body">
+   210→    <!-- SIDEBAR -->
+   211→    <div class="sidebar">
+   212→      <!-- Stats -->
+   213→      <div class="px-3 pt-3 pb-2" id="stats-area"></div>
+   214→      <!-- Search -->
+   215→      <div class="px-3 pb-2">
+   216→        <div class="relative">
+   217→          <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-300 text-xs">🔍</span>
+   218→          <input id="search-input" type="text" placeholder="ค้นหา..."
+   219→            class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition"
+   220→            oninput="render()">
+   221→        </div>
+   222→      </div>
+   223→      <!-- Ticket list -->
+   224→      <div class="sidebar-list" id="list-area"></div>
+   225→    </div>
+   226→
+   227→    <!-- DETAIL PANEL (desktop/tablet) -->
+   228→    <div class="detail-panel" id="detail-area">
+   229→      <div class="p-6 max-w-4xl" id="detail-content"></div>
+   230→    </div>
+   231→
+   232→    <!-- MOBILE DETAIL -->
+   233→    <div class="mobile-detail-wrap hidden" id="mobile-detail">
+   234→      <div class="sticky top-0 bg-white border-b border-gray-100 z-10">
+   235→        <div class="flex items-center gap-2 px-4 h-12">
+   236→          <button onclick="closeMobileDetail()" class="text-gray-400 hover:text-gray-600">
+   237→            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+   238→          </button>
+   239→          <span class="text-sm font-medium">รายละเอียด</span>
+   240→        </div>
+   241→      </div>
+   242→      <div class="p-4" id="mobile-detail-content"></div>
+   243→    </div>
+   244→  </div>
+   245→
+   246→  <!-- ===== FOOTER ===== -->
+   247→  <footer class="flex items-center justify-between px-5 border-t border-gray-100 text-[10px] text-gray-300 bg-white">
+   248→    <span>Surinhos Repair Tracking</span>
+   249→    <span>&copy; 2026</span>
+   250→  </footer>
+   251→</div>
+   252→
+   253→<!-- ===== RECEIPT MODAL ===== -->
+   254→<div id="receipt-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeReceiptModal()">
+   255→  <div class="modal-content p-0 overflow-hidden">
+   256→    <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b">
+   257→      <div class="flex items-center gap-2">
+   258→        <span class="text-base">🖨️</span>
+   259→        <span id="modal-title" class="text-sm font-semibold">พรีวิวใบรับซ่อม</span>
+   260→      </div>
+   261→      <span class="text-[11px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded">50mm</span>
+   262→    </div>
+   263→    <div class="px-5 py-5">
+   264→      <div class="receipt-preview-wrap">
+   265→        <div id="receipt-render"></div>
+   266→      </div>
+   267→    </div>
+   268→    <div class="flex items-center justify-end gap-2 border-t px-5 py-3.5">
+   269→      <button onclick="closeReceiptModal()" class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition">ปิด</button>
+   270→      <button onclick="doPrint()" class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition shadow-sm">🖨️ ปริ้น</button>
+   271→    </div>
+   272→  </div>
+   273→</div>
+   274→
+   275→<!-- ===== PRINT AREA ===== -->
+   276→<div id="print-area" class="print-area hidden"></div>
+   277→
+   278→<!-- ===== CREATE MODAL ===== -->
+   279→<div id="create-modal" class="modal-overlay hidden" onclick="if(event.target===this)document.getElementById('create-modal').classList.add('hidden')">
+   280→  <div class="modal-content p-6">
+   281→    <h2 class="text-lg font-bold mb-5">แจ้งซ่อมอุปกรณ์ใหม่</h2>
+   282→    <div class="space-y-4">
+   283→      <div>
+   284→        <label class="text-sm font-medium text-gray-600 mb-1.5 block">ชื่ออุปกรณ์</label>
+   285→        <input type="text" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="เช่น คอมพิวเตอร์ Dell OptiPlex">
+   286→      </div>
+   287→      <div>
+   288→        <label class="text-sm font-medium text-gray-600 mb-1.5 block">รายละเอียดปัญหา</label>
+   289→        <textarea class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" rows="3" placeholder="อธิบายอาการที่พบ"></textarea>
+   290→      </div>
+   291→      <div>
+   292→        <label class="text-sm font-medium text-gray-600 mb-1.5 block">ชื่อผู้แจ้ง</label>
+   293→        <input type="text" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="ชื่อ-นามสกุล">
+   294→      </div>
+   295→    </div>
+   296→    <div class="flex justify-end gap-2 mt-6">
+   297→      <button onclick="document.getElementById('create-modal').classList.add('hidden')" class="px-4 py-2.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">ยกเลิก</button>
+   298→      <button onclick="document.getElementById('create-modal').classList.add('hidden');showToast('✅ บันทึกแจ้งซ่อมเรียบร้อย')" class="px-5 py-2.5 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 shadow-sm">บันทึก</button>
+   299→    </div>
+   300→  </div>
+   301→</div>
+   302→
+   303→<!-- ===== TOAST ===== -->
+   304→<div id="toast" class="fixed top-4 right-4 z-[60] bg-gray-900 text-white px-4 py-2.5 rounded-xl text-sm shadow-xl transform translate-x-[120%] transition-transform duration-300"></div>
+   305→
+   306→<script>
+   307→// ===================== DATA =====================
+   308→const tickets = [
+   309→  { id:'1', ticketNo:'RPR-260725-001', status:'pending', assetName:'เครื่องพิมพ์ HP LaserJet Pro M404', assetCode:'PRT-69-001', category:'เครื่องพิมพ์', location:'อาคารอำนวยการ, ห้อง 102', problemDetails:'กระดาษตัน แม้เปิดปิดเครื่องใหม่แล้ว ใช้งานไม่ได้เลย', reporterName:'สุภาพร รักงาน', createdAt:'28/ก.ค./69 05:03', receivedBy:null, receivedAt:null, repairCost:null, laborCost:null, totalCost:null, costStatus:null, returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:null },
+   310→  { id:'2', ticketNo:'RPR-260720-001', status:'accepted', assetName:'คอมพิวเตอร์แม่ข่าย (Server)', assetCode:'COM-69-001', category:'อุปกรณ์คอมพิวเตอร์', location:'อาคารอำนวยการ, ห้องเซิร์ฟเวอร์', problemDetails:'เปิดเครื่องไม่ติด ไฟกระพริบที่ปุ่ม power', reporterName:'สมชาย ใจดี', createdAt:'20/ก.ค./68 09:15', receivedBy:'วิชัย ซ่อมดี', receivedAt:'20/ก.ค./68 10:30', repairCost:null, laborCost:null, totalCost:null, costStatus:null, returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:null },
+   311→  { id:'3', ticketNo:'RPR-260718-001', status:'in_progress', assetName:'โน้ตบุ๊ค ASUS ExpertBook B9', assetCode:'COM-69-005', category:'อุปกรณ์คอมพิวเตอร์', location:'อาคารเรียนรวม, ห้อง 202', problemDetails:'จอภาพเบลอ มีจุดสว่างผิดปกติหลายจุด', reporterName:'ธนา พิมพ์ดี', createdAt:'18/ก.ค./68 08:00', receivedBy:'วิชัย ซ่อมดี', receivedAt:'18/ก.ค./68 09:00', repairCost:4500, laborCost:1500, totalCost:6000, costStatus:'approved', returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:null },
+   312→  { id:'4', ticketNo:'RPR-260715-001', status:'returned', assetName:'เร้าเตอร์ TP-Link Archer AX6000', assetCode:'NET-69-002', category:'อุปกรณ์เครือข่าย', location:'อาคารอำนวยการ, ห้องไอที ชั้น 2', problemDetails:'สัญญาณ Wi-Fi ไม่เสถียร หลุดบ่อย', reporterName:'ประยุทธ์ รักเทคโนโลยี', createdAt:'15/ก.ค./68 14:00', receivedBy:'วิชัย ซ่อมดี', receivedAt:'15/ก.ค./68 14:00', repairCost:800, laborCost:500, totalCost:1300, costStatus:'approved', returnMethod:'ส่งมอบถึงห้อง', returnedBy:'วิชัย ซ่อมดี', returnedAt:'17/ก.ค./68 11:00', cancelReason:null },
+   313→  { id:'5', ticketNo:'RPR-260710-001', status:'closed', assetName:'โปรเจกเตอร์ Epson EB-L260F', assetCode:'PRJ-69-001', category:'เครื่องฉาย', location:'อาคารเรียนรวม, ห้องประชุม A', problemDetails:'ภาพเบลอ สีเพี้ยน ตัวเลือนไม่ทำงาน', reporterName:'วรรณา สอนดี', createdAt:'10/ก.ค./68 08:30', receivedBy:'วิชัย ซ่อมดี', receivedAt:'10/ก.ค./68 08:30', repairCost:12000, laborCost:3000, totalCost:15000, costStatus:'paid', returnMethod:'ส่งมอบถึงห้อง', returnedBy:'วิชัย ซ่อมดี', returnedAt:'14/ก.ค./68 16:00', cancelReason:null },
+   314→  { id:'6', ticketNo:'RPR-260712-001', status:'cancelled', assetName:'เครื่องสแกน Fujitsu ScanSnap iX1600', assetCode:'SCN-69-001', category:'เครื่องสแกน', location:'อาคารอำนวยการ, ห้อง 103', problemDetails:'กระดาษฉีกขณะสแคน แทร็คปิดไม่สนิท', reporterName:'สมหญิง รักการ์ด', createdAt:'12/ก.ค./68 10:00', receivedBy:null, receivedAt:null, repairCost:null, laborCost:null, totalCost:null, costStatus:null, returnMethod:null, returnedBy:null, returnedAt:null, cancelReason:'อะแดปเตอร์หมดสต็อก ยี่ห้อหยุดผลิตรุ่นนี้แล้ว ค่าอะไหล่เกินกว่าราคาซื้อเครื่องใหม่' },
+   315→];
+   316→
+   317→const statusCfg = {
+   318→  pending:    { label:'รอรับเรื่อง', short:'รอ',   dot:'#f59e0b', bg:'bg-amber-50',   text:'text-amber-600' },
+   319→  accepted:   { label:'รับเรื่องแล้ว', short:'รับ',   dot:'#3b82f6', bg:'bg-blue-50',    text:'text-blue-600' },
+   320→  in_progress:{ label:'กำลังซ่อม',   short:'ซ่อม',  dot:'#8b5cf6', bg:'bg-violet-50',  text:'text-violet-600' },
+   321→  returned:   { label:'ส่งคืนแล้ว',   short:'ส่ง',   dot:'#10b981', bg:'bg-emerald-50', text:'text-emerald-600' },
+   322→  closed:     { label:'ปิดงาน',      short:'ปิด',   dot:'#6b7280', bg:'bg-gray-100',   text:'text-gray-500' },
+   323→  cancelled:  { label:'ยกเลิก',      short:'ยก',   dot:'#ef4444', bg:'bg-red-50',     text:'text-red-500' },
+   324→};
+   325→
+   326→// ===================== STATE =====================
+   327→let state = { view: 'customer', selectedId: null };
+   328→const isMobile = () => window.innerWidth < 768;
+   329→
+   330→// ===================== RENDER =====================
+   331→function render() {
+   332→  renderToggle();
+   333→  renderStats();
+   334→  renderList();
+   335→  renderDetail();
+   336→}
+   337→
+   338→// -- Toggle --
+   339→function renderToggle() {
+   340→  document.querySelectorAll('.view-btn').forEach(b => {
+   341→    b.classList.toggle('active', b.dataset.view === state.view);
+   342→  });
+   343→  // Show/hide create button (customer only)
+   344→  document.getElementById('btn-create').style.display = state.view === 'customer' ? '' : 'none';
+   345→}
+   346→
+   347→// -- Stats --
+   348→function renderStats() {
+   349→  const counts = {};
+   350→  Object.keys(statusCfg).forEach(k => counts[k] = 0);
+   351→  tickets.forEach(t => counts[t.status]++);
+   352→  const total = tickets.length;
+   353→  const area = document.getElementById('stats-area');
+   354→
+   355→  if (state.view === 'customer') {
+   356→    area.innerHTML = `
+   357→      <div class="flex items-center gap-2 flex-wrap">
+   358→        <span class="text-xs text-gray-400">งานของคุณ</span>
+   359→        <span class="text-sm font-bold text-gray-700">${total}</span>
+   360→        <span class="text-xs text-gray-300">รายการ</span>
+   361→        <div class="ml-auto flex gap-1">
+   362→          ${Object.entries(statusCfg).map(([k,v]) => counts[k] > 0 ? `
+   363→            <span class="inline-flex items-center gap-1 text-[10px] ${v.text} bg-white px-1.5 py-0.5 rounded border border-gray-100">
+   364→              <span class="w-1.5 h-1.5 rounded-full" style="background:${v.dot}"></span>${counts[k]}
+   365→            </span>` : '').join('')}
+   366→        </div>
+   367→      </div>`;
+   368→  } else {
+   369→    area.innerHTML = `
+   370→      <div class="flex items-center gap-2 flex-wrap">
+   371→        <span class="stat-badge bg-gray-50 text-gray-600">
+   372→          <span class="font-bold">${total}</span> ทั้งหมด
+   373→        </span>
+   374→        ${Object.entries(statusCfg).map(([k,v]) => counts[k] > 0 ? `
+   375→          <span class="stat-badge ${v.bg} ${v.text}">
+   376→            <span class="w-1.5 h-1.5 rounded-full" style="background:${v.dot}"></span>
+   377→            <span class="font-bold">${counts[k]}</span> ${v.short}
+   378→          </span>` : '').join('')}
+   379→      </div>`;
+   380→  }
+   381→}
+   382→
+   383→// -- Ticket List --
+   384→function renderList() {
+   385→  const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+   386→  const filtered = query ? tickets.filter(t =>
+   387→    t.ticketNo.toLowerCase().includes(query) ||
+   388→    t.assetName.toLowerCase().includes(query) ||
+   389→    t.reporterName?.toLowerCase().includes(query)
+   390→  ) : tickets;
+   391→
+   392→  const el = document.getElementById('list-area');
+   393→  if (filtered.length === 0) {
+   394→    el.innerHTML = '<div class="text-center py-8 text-gray-300 text-xs">ไม่พบรายการ</div>';
+   395→    return;
+   396→  }
+   397→
+   398→  el.innerHTML = filtered.map(t => {
+   399→    const s = statusCfg[t.status];
+   400→    const active = t.id === state.selectedId;
+   401→    return `
+   402→      <div class="t-row ${active ? 'active' : ''}" onclick="selectTicket('${t.id}')">
+   403→        <div class="dot" style="background:${s.dot}"></div>
+   404→        <div class="min-w-0">
+   405→          <div class="flex items-center gap-2">
+   406→            <span class="text-xs font-semibold text-gray-700 font-mono">${t.ticketNo}</span>
+   407→            <span class="text-[10px] ${s.text} ${s.bg} px-1.5 py-0.5 rounded font-medium">${s.short}</span>
+   408→          </div>
+   409→          <p class="text-xs text-gray-500 truncate mt-0.5">${t.assetName}</p>
+   410→        </div>
+   411→        <span class="text-[10px] text-gray-300 whitespace-nowrap">${t.createdAt.split(' ')[0]}</span>
+   412→      </div>`;
+   413→  }).join('');
+   414→}
+   415→
+   416→// -- Detail --
+   417→function renderDetail() {
+   418→  const html = state.selectedId ? buildDetailHTML(state.selectedId) : buildEmptyHTML();
+   419→
+   420→  // Desktop/tablet
+   421→  document.getElementById('detail-content').innerHTML = html;
+   422→
+   423→  // Mobile
+   424→  const mWrap = document.getElementById('mobile-detail');
+   425→  const mContent = document.getElementById('mobile-detail-content');
+   426→  if (isMobile() && state.selectedId) {
+   427→    mContent.innerHTML = html;
+   428→    mWrap.classList.remove('hidden');
+   429→  } else {
+   430→    mWrap.classList.add('hidden');
+   431→  }
+   432→}
+   433→
+   434→function buildEmptyHTML() {
+   435→  if (state.view === 'customer') {
+   436→    return `
+   437→      <div class="flex flex-col items-center justify-center h-full min-h-[400px] text-center">
+   438→        <div class="text-4xl mb-4">📋</div>
+   439→        <p class="text-sm text-gray-400">เลือกรายการแจ้งซ่อมเพื่อติดตามสถานะ</p>
+   440→      </div>`;
+   441→  }
+   442→  return `
+   443→    <div class="flex flex-col items-center justify-center h-full min-h-[400px] text-center">
+   444→      <div class="text-4xl mb-4">📊</div>
+   445→      <p class="text-sm text-gray-400">เลือกรายการเพื่อดูรายละเอียดและจัดการ</p>
+   446→    </div>`;
+   447→}
+   448→
+   449→function buildDetailHTML(id) {
+   450→  const t = tickets.find(x => x.id === id);
+   451→  if (!t) return '';
+   452→  const s = statusCfg[t.status];
+   453→  const isAdmin = state.view === 'admin';
+   454→  const timeline = ['pending','accepted','in_progress','returned','closed'];
+   455→  const idx = t.status === 'cancelled' ? -1 : timeline.indexOf(t.status);
+   456→
+   457→  let html = '';
+   458→
+   459→  // -- Header row --
+   460→  html += `
+   461→    <div class="flex items-center justify-between mb-5">
+   462→      <div>
+   463→        <div class="flex items-center gap-3">
+   464→          <span class="text-lg font-bold text-gray-900 font-mono">${t.ticketNo}</span>
+   465→          <span class="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full ${s.bg} ${s.text}">
+   466→            <span class="w-1.5 h-1.5 rounded-full" style="background:${s.dot}"></span>
+   467→            ${s.label}
+   468→          </span>
+   469→        </div>
+   470→        <p class="text-xs text-gray-400 mt-1">${t.createdAt}</p>
+   471→      </div>
+   472→      <div class="flex items-center gap-2" id="detail-actions-top">
+   473→        ${isAdmin ? '' : ''}
+   474→        ${t.receivedBy ? `
+   475→          <button onclick="openReceipt('${t.id}','repair')" class="act-btn act-secondary text-xs" title="ปริ้นใบรับซ่อม">🖨️ ใบรับ</button>` : ''}
+   476→        ${t.returnedBy ? `
+   477→          <button onclick="openReceipt('${t.id}','return')" class="act-btn act-secondary text-xs" title="ปริ้นใบส่งคืน">🖨️ ใบส่งคืน</button>` : ''}
+   478→      </div>
+   479→    </div>`;
+   480→
+   481→  // -- Cancel reason --
+   482→  if (t.cancelReason) {
+   483→    html += `
+   484→      <div class="bg-red-50 border border-red-100 rounded-lg p-3 mb-4">
+   485→        <p class="text-[11px] font-semibold text-red-500 mb-1">เหตุผลการยกเลิก</p>
+   486→        <p class="text-xs text-red-400 leading-relaxed">${t.cancelReason}</p>
+   487→      </div>`;
+   488→  }
+   489→
+   490→  // -- Info grid: 3 columns on desktop, 2 on tablet, 1 on mobile --
+   491→  const hasCost = t.totalCost != null;
+   492→  const hasReturn = t.returnedBy != null;
+   493→  const colsClass = hasCost ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2';
+   494→
+   495→  html += `<div class="grid ${colsClass} gap-3 mb-4">`;
+   496→
+   497→  // Col 1: Equipment
+   498→  html += `
+   499→    <div class="info-box">
+   500→      <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">🖥️ อุปกรณ์</h4>
+   501→      <div class="space-y-1.5">
+   502→        <div><div class="info-label">ชื่อ</div><div class="info-val">${t.assetName}</div></div>
+   503→        <div><div class="info-label">ครุภัณฑ์</div><div class="info-val font-mono text-xs">${t.assetCode}</div></div>
+   504→        <div><div class="info-label">ประเภท</div><div class="info-val">${t.category}</div></div>
+   505→        <div><div class="info-label">สถานที่</div><div class="info-val">${t.location}</div></div>
+   506→      </div>
+   507→    </div>`;
+   508→
+   509→  // Col 2: Problem + Reporter
+   510→  html += `
+   511→    <div class="info-box">
+   512→      <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">📋 รายละเอียด</h4>
+   513→      <div class="space-y-1.5">
+   514→        <div><div class="info-label">ปัญหา</div><div class="info-val text-xs leading-relaxed">${t.problemDetails}</div></div>
+   515→        <div><div class="info-label">ผู้แจ้ง</div><div class="info-val">${t.reporterName}</div></div>
+   516→        ${t.receivedBy ? `
+   517→        <div><div class="info-label">ผู้รับเรื่อง</div><div class="info-val">${t.receivedBy}</div></div>
+   518→        <div><div class="info-label">รับเมื่อ</div><div class="info-val">${t.receivedAt}</div></div>` : ''}
+   519→      </div>
+   520→    </div>`;
+   521→
+   522→  // Col 3: Cost (if applicable)
+   523→  if (hasCost) {
+   524→    html += `
+   525→      <div class="info-box">
+   526→        <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">💰 ค่าใช้จ่าย</h4>
+   527→        <div class="space-y-1.5">
+   528→          <div class="flex justify-between"><span class="info-label">ค่าอะไหล่</span><span class="info-val">${t.repairCost.toLocaleString()} ฿</span></div>
+   529→          <div class="flex justify-between"><span class="info-label">ค่าแรง</span><span class="info-val">${t.laborCost.toLocaleString()} ฿</span></div>
+   530→          <div class="border-t border-dashed border-gray-200 pt-1.5 mt-1.5 flex justify-between items-baseline">
+   531→            <span class="text-xs font-semibold text-gray-500">รวม</span>
+   532→            <span class="text-base font-bold text-emerald-600">${t.totalCost.toLocaleString()} <span class="text-xs font-normal text-gray-400">฿</span></span>
+   533→          </div>
+   534→          <div class="text-[10px] text-gray-400 mt-1">
+   535→            สถานะ: ${t.costStatus === 'approved' ? '✅ อนุมัติแล้ว' : t.costStatus === 'paid' ? '💰 ชำระแล้ว' : '-'}
+   536→          </div>
+   537→        </div>
+   538→      </div>`;
+   539→  }
+   540→
+   541→  html += `</div>`; // end grid
+   542→
+   543→  // -- Return info (compact strip) --
+   544→  if (hasReturn) {
+   545→    html += `
+   546→      <div class="info-box mb-4 flex flex-wrap items-center gap-x-6 gap-y-1">
+   547→        <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">📦 ส่งคืน</span>
+   548→        <span class="text-xs text-gray-500">${t.returnMethod}</span>
+   549→        <span class="text-xs text-gray-500">โดย ${t.returnedBy}</span>
+   550→        <span class="text-xs text-gray-400">${t.returnedAt}</span>
+   551→      </div>`;
+   552→  }
+   553→
+   554→  // -- Signatures (compact, inline) --
+   555→  if (t.receivedBy && isAdmin) {
+   556→    html += `
+   557→      <div class="info-box mb-4">
+   558→        <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">✍️ ลายเซ็น</h4>
+   559→        <div class="grid grid-cols-2 gap-3">
+   560→          <div class="border border-gray-100 rounded-md p-2 text-center bg-gray-50/30">
+   561→            <p class="text-[9px] text-gray-400 mb-1">ผู้ส่ง</p>
+   562→            <svg viewBox="0 0 100 30" class="w-full h-8"><path d="M5 25Q15 5 25 20Q30 10 35 15Q40 5 50 25Q55 10 60 20Q70 5 80 15Q85 25 95 10" stroke="#bbb" stroke-width="1.2" fill="none"/></svg>
+   563→          </div>
+   564→          <div class="border border-gray-100 rounded-md p-2 text-center bg-gray-50/30">
+   565→            <p class="text-[9px] text-gray-400 mb-1">ผู้รับ</p>
+   566→            <svg viewBox="0 0 100 30" class="w-full h-8"><path d="M8 22Q18 8 28 18Q33 12 38 20Q48 5 58 22Q63 8 73 18Q78 25 88 12Q92 8 95 15" stroke="#bbb" stroke-width="1.2" fill="none"/></svg>
+   567→          </div>
+   568→        </div>
+   569→      </div>`;
+   570→  }
+   571→  if (t.returnedBy && isAdmin) {
+   572→    html += `
+   573→      <div class="info-box mb-4">
+   574→        <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">✍️ ลายเซ็น — ส่งคืน</h4>
+   575→        <div class="grid grid-cols-2 gap-3">
+   576→          <div class="border border-gray-100 rounded-md p-2 text-center bg-gray-50/30">
+   577→            <p class="text-[9px] text-gray-400 mb-1">ผู้ส่งคืน</p>
+   578→            <svg viewBox="0 0 100 30" class="w-full h-8"><path d="M5 20Q15 5 25 18Q30 10 40 22Q50 5 60 20Q70 10 80 18Q85 25 95 8" stroke="#bbb" stroke-width="1.2" fill="none"/></svg>
+   579→          </div>
+   580→          <div class="border border-gray-100 rounded-md p-2 text-center bg-gray-50/30">
+   581→            <p class="text-[9px] text-gray-400 mb-1">ผู้รับคืน</p>
+   582→            <svg viewBox="0 0 100 30" class="w-full h-8"><path d="M10 18Q20 8 30 22Q35 12 45 20Q55 5 65 18Q75 10 85 22Q90 15 95 20" stroke="#bbb" stroke-width="1.2" fill="none"/></svg>
+   583→          </div>
+   584→        </div>
+   585→      </div>`;
+   586→  }
+   587→
+   588→  // -- Timeline --
+   589→  if (t.status !== 'cancelled') {
+   590→    html += `
+   591→      <div class="info-box mb-4">
+   592→        <div class="flex items-center gap-0">
+   593→          ${timeline.map((st, i) => {
+   594→            const sc = statusCfg[st];
+   595→            const done = i <= idx;
+   596→            const current = i === idx;
+   597→            const isLast = i === timeline.length - 1;
+   598→            return `
+   599→              <div class="flex items-center ${isLast ? '' : 'flex-1'}">
+   600→                <div class="tl-step">
+   601→                  <div class="tl-dot ${current ? 'bg-emerald-600 text-white ring-[3px] ring-emerald-100' : done ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-300'}">
+   602→                    ${done ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : '<div class="w-1.5 h-1.5 rounded-full bg-gray-300"></div>'}
+   603→                  </div>
+   604→                  <span class="text-[10px] ${current ? 'font-bold text-emerald-700' : done ? 'text-gray-500' : 'text-gray-300'}">${sc.short}</span>
+   605→                </div>
+   606→                ${isLast ? '' : `<div class="tl-line ${i < idx ? 'bg-emerald-400' : 'bg-gray-200'}"></div>`}
+   607→              </div>`;
+   608→          }).join('')}
+   609→        </div>
+   610→      </div>`;
+   611→  }
+   612→
+   613→  // -- Admin Actions --
+   614→  if (isAdmin && t.status !== 'cancelled' && t.status !== 'closed') {
+   615→    let actions = '';
+   616→    if (t.status === 'pending') actions = `
+   617→      <button onclick="showToast('✅ รับเรื่องเรียบร้อย')" class="act-btn act-primary">✅ รับเรื่อง</button>
+   618→      <button onclick="showToast('❌ ยกเลิกแล้ว')" class="act-btn act-secondary text-red-500 border-red-200 hover:bg-red-50">ยกเลิก</button>`;
+   619→    if (t.status === 'accepted') actions = `
+   620→      <button onclick="showToast('🔧 เริ่มซ่อมแล้ว')" class="act-btn act-primary" style="background:#7c3aed">🔧 เริ่มซ่อม</button>
+   621→      <button onclick="openReceipt('${t.id}','repair')" class="act-btn act-secondary">🖨️ ปริ้นรับซ่อม</button>`;
+   622→    if (t.status === 'in_progress') actions = `
+   623→      <button onclick="showToast('💰 เสนอราคาเรียบร้อย')" class="act-btn act-primary" style="background:#d97706">💰 เสนอราคา</button>
+   624→      <button onclick="showToast('📦 ส่งคืนเรียบร้อย')" class="act-btn act-primary">📦 ส่งคืน</button>`;
+   625→    if (t.status === 'returned') actions = `
+   626→      <button onclick="showToast('✅ ปิดงานเรียบร้อย')" class="act-btn act-primary" style="background:#374151">✅ ปิดงาน</button>
+   627→      <button onclick="openReceipt('${t.id}','return')" class="act-btn act-secondary">🖨️ ปริ้นส่งคืน</button>`;
+   628→
+   629→    if (actions) {
+   630→      html += `
+   631→        <div class="info-box flex flex-wrap items-center gap-2">
+   632→          <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mr-2">ดำเนินการ</span>
+   633→          ${actions}
+   634→        </div>`;
+   635→    }
+   636→  }
+   637→
+   638→  // -- Customer: status message --
+   639→  if (!isAdmin) {
+   640→    let msg = '';
+   641→    if (t.status === 'pending') msg = '📄 รอเจ้าหน้าที่รับเรื่อง กรุณารอสักครู่';
+   642→    if (t.status === 'accepted') msg = '🔍 เจ้าหน้าที่รับเรื่องแล้ว กำลังดำเนินการต่อ';
+   643→    if (t.status === 'in_progress') msg = '🔧 กำลังซ่อมอุปกรณ์ของคุณอยู่';
+   644→    if (t.status === 'returned') msg = '✅ ซ่อมเสร็จแล้ว กรุณารับอุปกรณ์คืน';
+   645→    if (t.status === 'closed') msg = '🎉 ดำเนินการเสร็จสิ้นแล้ว';
+   646→    if (t.status === 'cancelled') msg = '❌ รายการนี้ถูกยกเลิก';
+   647→    if (msg) {
+   648→      html += `
+   649→        <div class="info-box ${t.status === 'cancelled' ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}">
+   650→          <p class="text-xs text-gray-600">${msg}</p>
+   651→        </div>`;
+   652→    }
+   653→  }
+   654→
+   655→  return html;
+   656→}
+   657→
+   658→// ===================== RECEIPT =====================
+   659→function sigSVG(seed) {
+   660→  const p = ['M5 25Q15 5 25 20Q30 10 35 15Q40 5 50 25Q55 10 60 20Q70 5 80 15Q85 25 95 10','M8 22Q18 8 28 18Q33 12 38 20Q48 5 58 22Q63 8 73 18Q78 25 88 12Q92 8 95 15','M5 20Q15 5 25 18Q30 10 40 22Q50 5 60 20Q70 10 80 18Q85 25 95 8','M10 18Q20 8 30 22Q35 12 45 20Q55 5 65 18Q75 10 85 22Q90 15 95 20','M3 22Q13 6 23 20Q28 14 33 18Q43 4 53 22Q58 8 68 20Q78 6 88 16Q93 22 97 8'];
+   661→  return `<svg viewBox="0 0 100 30" style="width:100%;height:100%"><path d="${p[seed%p.length]}" stroke="#333" stroke-width="1" fill="none"/></svg>`;
+   662→}
+   663→
+   664→function buildReceiptHTML(t, type) {
+   665→  const isReturn = type === 'return';
+   666→  const sc = statusCfg[t.status];
+   667→  const now = new Date();
+   668→  const nowStr = `${String(now.getDate()).padStart(2,'0')}/${['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][now.getMonth()]}/${(now.getFullYear()+543).toString().slice(-2)}`;
+   669→  let h = `<div class="thermal-receipt"><div class="receipt-cut-top"></div><div class="receipt-content">
+   670→    <div style="text-align:center"><div class="r-logo">🔧</div><div class="r-org">SURINHOS</div><div class="r-sub">REPAIR CENTER</div><div class="r-div"></div><div class="r-title">${isReturn?'ใบส่งคืนครุภัณฑ์':'ใบรับซ่อมอุปกรณ์'}</div><div class="r-div"></div></div>
+   671→    <div class="r-num-row"><div class="r-num-lbl">เลขที่</div><div class="r-num-val">${t.ticketNo}</div></div><div class="r-date">${t.createdAt}</div><div class="r-div"></div>
+   672→    <div class="r-row r-center"><span class="r-lbl">สถานะ</span><span class="r-val s-${t.status}" style="padding:.3mm 1.5mm;border-radius:1mm;font-weight:700;font-size:6.5pt">${sc.label}</span></div><div class="r-div"></div>
+   673→    <div class="r-sect">อุปกรณ์</div>
+   674→    <div class="r-row"><span class="r-lbl">ชื่อ</span><span class="r-val bold">${t.assetName}</span></div>
+   675→    <div class="r-row"><span class="r-lbl">ครุภัณฑ์</span><span class="r-val">${t.assetCode}</span></div>
+   676→    <div class="r-row"><span class="r-lbl">ประเภท</span><span class="r-val">${t.category}</span></div>
+   677→    <div class="r-row"><span class="r-lbl">สถานที่</span><span class="r-val">${t.location}</span></div><div class="r-div"></div>
+   678→    <div class="r-sect">รายละเอียดปัญหา</div><div class="r-desc">${t.problemDetails||'-'}</div><div class="r-div"></div>
+   679→    <div class="r-row"><span class="r-lbl">ผู้แจ้ง</span><span class="r-val">${t.reporterName||'-'}</span></div>`;
+   680→  if (!isReturn && t.receivedBy) {
+   681→    h += `<div class="r-row"><span class="r-lbl">ผู้รับเรื่อง</span><span class="r-val">${t.receivedBy}</span></div><div class="r-row"><span class="r-lbl">วันรับ</span><span class="r-val">${t.receivedAt}</span></div><div class="r-div"></div><div class="r-sig-sec"><div class="r-sig-blk"><div class="r-sig-lbl">ลายเซ็น ผู้ส่ง</div><div class="r-sig-wrap">${sigSVG(0)}</div></div><div class="r-sig-blk"><div class="r-sig-lbl">ลายเซ็น ผู้รับ</div><div class="r-sig-wrap">${sigSVG(1)}</div></div></div><div class="r-div"></div>`;
+   682→  }
+   683→  if (isReturn) { if(t.returnMethod) h+=`<div class="r-row"><span class="r-lbl">วิธีส่งคืน</span><span class="r-val">${t.returnMethod}</span></div>`; if(t.returnedBy) h+=`<div class="r-row"><span class="r-lbl">ผู้ส่งคืน</span><span class="r-val">${t.returnedBy}</span></div>`; if(t.returnedAt) h+=`<div class="r-row"><span class="r-lbl">วันส่งคืน</span><span class="r-val">${t.returnedAt}</span></div>`; h+=`<div class="r-div"></div>`; }
+   684→  if (t.totalCost != null) { h+=`<div class="r-sect">ค่าใช้จ่าย</div><div class="r-row"><span class="r-lbl">ค่าอะไหล่</span><span class="r-val">${t.repairCost?.toLocaleString()||'-'}</span></div><div class="r-row"><span class="r-lbl">ค่าแรง</span><span class="r-val">${t.laborCost?.toLocaleString()||'-'}</span></div><div class="r-row r-total-row"><span class="r-lbl">รวมทั้งหมด</span><span class="r-val">${t.totalCost.toLocaleString()} บาท</span></div><div class="r-div"></div>`; }
+   685→  if (isReturn && t.returnedBy) { h+=`<div class="r-sig-sec"><div class="r-sig-blk"><div class="r-sig-lbl">ลายเซ็น ผู้ส่งคืน</div><div class="r-sig-wrap">${sigSVG(2)}</div></div><div class="r-sig-blk"><div class="r-sig-lbl">ลายเซ็น ผู้รับคืน</div><div class="r-sig-wrap">${sigSVG(3)}</div></div></div><div class="r-div"></div>`; }
+   686→  if (t.cancelReason) { h+=`<div class="r-sect r-danger">เหตุผลยกเลิก</div><div class="r-desc r-danger">${t.cancelReason}</div><div class="r-div"></div>`; }
+   687→  h += `<div class="r-footer"><div class="r-foot-line">พิมพ์เมื่อ: ${nowStr}</div><div class="r-foot-line">Surinhos Asset Management</div><div class="r-foot-thanks">☆ ขอบคุณที่ใช้บริการ ☆</div></div></div><div class="receipt-cut-bottom"></div></div>`;
+   688→  return h;
+   689→}
+   690→
+   691→function openReceipt(id, type) {
+   692→  const t = tickets.find(x => x.id === id);
+   693→  if (!t) return;
+   694→  document.getElementById('modal-title').textContent = type === 'return' ? 'พรีวิวใบส่งคืน' : 'พรีวิวใบรับซ่อม';
+   695→  document.getElementById('receipt-render').innerHTML = buildReceiptHTML(t, type);
+   696→  document.getElementById('print-area').innerHTML = buildReceiptHTML(t, type);
+   697→  document.getElementById('receipt-modal').classList.remove('hidden');
+   698→}
+   699→function closeReceiptModal() { document.getElementById('receipt-modal').classList.add('hidden'); }
+   700→function doPrint() { closeReceiptModal(); setTimeout(() => window.print(), 200); }
+   701→
+   702→// ===================== ACTIONS =====================
+   703→function setView(view) {
+   704→  state.view = view;
+   705→  state.selectedId = null;
+   706→  render();
+   707→}
+   708→
+   709→function selectTicket(id) {
+   710→  state.selectedId = id;
+   711→  render();
+   712→}
+   713→
+   714→function closeMobileDetail() {
+   715→  state.selectedId = null;
+   716→  document.getElementById('mobile-detail').classList.add('hidden');
+   717→  renderList();
+   718→}
+   719→
+   720→function showCreateForm() { document.getElementById('create-modal').classList.remove('hidden'); }
+   721→
+   722→function showToast(msg) {
+   723→  const el = document.getElementById('toast');
+   724→  el.textContent = msg; el.classList.remove('translate-x-[120%]'); el.classList.add('translate-x-0');
+   725→  setTimeout(() => { el.classList.remove('translate-x-0'); el.classList.add('translate-x-[120%]'); }, 2500);
+   726→}
+   727→
+   728→// ===================== INIT =====================
+   729→render();
+   730→
+   731→// Handle resize
+   732→window.addEventListener('resize', () => render());
+   733→</script>
+   734→</body>
+   735→</html>
+   736→

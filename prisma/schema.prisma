@@ -86,6 +86,21 @@ model RepairTicket {
   // --- ยกเลิก/ไม่คุ้มซ่อม (ใหม่ — surinhos ไม่มี) ---
   cancelReason   String?                          // เหตุผลการยกเลิก (เช่น อะไหล่หายาก, ค่าซ่อมสูงกว่าราคาเครื่อง)
 
+  // --- รูปประกอบการแจ้งซ่อม (ใหม่ — surinhos ไม่มี) ---
+  // เก็บเป็น JSON array ของ base64 data URL หรือ file path
+  // เช่น ["data:image/jpeg;base64,...", "data:image/jpeg;base64,..."]
+  photos          String?                          // JSON string array
+
+  // --- ตีแทงจำหน่าย (ใหม่ — surinhos ไม่มี) ---
+  // เมื่อครุภัณฑ์ซ่อมไม่ได้ งานภาครัฐต้องผ่านขั้นตอนตีแทงจำหน่าย
+  disposalStatus      String?                     // pending_review / approved / disposed
+  disposalReason      String?                     // เหตุผลที่ต้องจำหน่าย (เช่น อะไหล่หมดสต็อก, ไม่สามารถซ่อมได้)
+  disposalMethod      String?                     // วิธีจำหน่าย: จำหน่าย/ชำระ (ประมูล), ทำลาย, บริจาค
+  disposalValue       Float?                      // ราคาประเมิน/ราคาชำระ (THB)
+  disposalApprovedBy  String?                     // ผู้อนุมัติจำหน่าย
+  disposalApprovedAt  DateTime?                    // วันอนุมัติ
+  disposalComRef      String?                     // เลขที่หนังสือคณะกรรมการ (เช่น ครม.ที่ .../...)
+
   // --- timestamps ---
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
