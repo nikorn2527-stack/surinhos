@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { RepairForm } from '@/components/repair/repair-form'
 import { RepairList } from '@/components/repair/repair-list'
-import { TicketDetail } from '@/components/repair/ticket-detail'
+import TicketDetail from '@/components/repair/ticket-detail'
 
 interface Repair {
   id: string

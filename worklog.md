@@ -1,121 +1,91 @@
-# Worklog - Repair Tracking System
-
 ---
 Task ID: 1
-Agent: Main
-Task: Analyze project structure and plan implementation
+Agent: Main Orchestrator
+Task: วิเคราะห์ surinhos เดิม + ออกแบบ workflow + implement ครบถ้วน
 
 Work Log:
-- Examined existing Next.js 16 project with Prisma/SQLite, shadcn/ui, TanStack Query
-- Reviewed package.json, prisma schema, existing components
-- Planned database schema, API routes, and frontend components
+- วิเคราะห์ repo surinhos ต้นฉบับ (backend Express.js + MySQL, frontend Next.js + DaisyUI)
+- อ่าน schema.sql, repairRoutes.js, repairs/page.jsx ทุกไฟล์
+- วิเคราะห์ tech stack เดิม vs เรา (frontend ตรงกัน, backend ต่างแต่ column name ต้อง match)
+- ออกแบบ workflow 6 สถานะ (เพิ่ม cancelled จากเดิม 5): pending→accepted→in_progress→returned→closed / cancelled
+- เพิ่มฟีเจอร์ใหม่ที่ surinhos ไม่มี: เสนอราคาซ่อม (repairCost, laborCost, totalCost, costStatus), ยกเลิก/ไม่คุ้มซ่อม (cancelReason)
 
 Stage Summary:
-- Project uses SQLite (not MySQL as originally requested) - adapted accordingly
-- All shadcn/ui components available for use
-- html5-qrcode needs to be installed
+- Tech stack เดิม: Express.js + MySQL + DaisyUI / เรา: Next.js API Routes + SQLite/Prisma + shadcn/ui
+- Column name ทุก field ตรงกับ surinhos MySQL schema
+- Library เดียวกับ surinhos: react-signature-canvas, html5-qrcode
 
 ---
 Task ID: 2
-Agent: Main
-Task: Set up Prisma schema and install dependencies
+Agent: Main Orchestrator
+Task: อัพเดท Prisma Schema + Seed Data
 
 Work Log:
-- Updated prisma/schema.prisma with Asset and Repair models
-- Asset: assetNo, name, category, brand, model, serialNo, location, department, status
-- Repair: ticketNo (auto-generated), assetId (FK), problemCategory, description, urgency, reporterName, reporterPhone, reporterDept, status, notes
-- Installed html5-qrcode v2.3.8
-- Ran `bun run db:push` successfully
+- อัพเดท prisma/schema.prisma: เพิ่ม fields ใหม่ใน RepairTicket (receivedBy, receivedAt, senderSignature, receiverSignature, returnMethod, returnedBy, returnedAt, returnSenderSignature, returnReceiverSignature, repairCost, laborCost, totalCost, costStatus, cancelReason)
+- รัน bun run db:push สำเร็จ
+- อัพเดท seed.ts: สร้าง 10 locations, 15 assets (รูปแบบ COM-69-001, PRT-69-001, NET-69-001), 6 sample tickets ครอบคลุมทุก 6 สถานะ
+- รัน seed สำเร็จ
 
 Stage Summary:
-- Database schema with foreign key relationship (Repair -> Asset) created
-- 15 asset records and 2 sample repair tickets seeded
+- ไฟล์: prisma/schema.prisma, prisma/seed.ts
+- Sample data ครอบคลุม: pending, accepted (มีลายเซ็น), in_progress (มีต้นทุน), returned (มีลายเซ็นส่งคืน), closed (สมบูรณ์), cancelled (มีเหตุผล)
 
 ---
 Task ID: 3
-Agent: Main
-Task: Create seed data
+Agent: full-stack-developer subagent
+Task: สร้าง API endpoints สำหรับอัพเดทสถานะ
 
 Work Log:
-- Created prisma/seed.ts with 15 Thai assets (computers, printers, scanners, network equipment, projectors)
-- 2 sample repair records with Thai names and departments
-- Categories: คอมพิวเตอร์, เครื่องพิมพ์, เครื่องสแกน, เซิร์ฟเวอร์, อุปกรณ์เครือข่าย, เครื่องฉาย, จอภาพ, เครื่องถ่ายเอกสาร
-- Departments: แผนกบัญชี, แผนกบุคคล, แผนกวิจัยและพัฒนา, แผนกระบบสารสนเทศ, สำนักบริหาร, etc.
+- สร้าง PUT /api/repairs/[id]/accept — รับเรื่อง + เซ็นชื่อ
+- สร้าง PUT /api/repairs/[id]/progress — เริ่มซ่อม
+- สร้าง PUT /api/repairs/[id]/return — ส่งคืน + เซ็นชื่อ
+- สร้าง PUT /api/repairs/[id]/close — ปิดงาน
+- สร้าง PUT /api/repairs/[id]/cancel — ยกเลิก (pending/accepted/in_progress → cancelled)
+- สร้าง PUT /api/repairs/[id]/estimate — เสนอราคาซ่อม (ถ้า rejected → auto cancel)
+- สร้าง GET /api/repairs/[id]/route.ts — ดึง single ticket
 
 Stage Summary:
-- 15 assets with realistic Thai data seeded successfully
-- 2 sample repairs created (1 pending, 1 in_progress)
+- ไฟล์: src/app/api/repairs/route.ts (GET+POST), src/app/api/repairs/[id]/route.ts (GET), src/app/api/repairs/[id]/accept/route.ts, progress, return, close, cancel, estimate
+- ทุก endpoint validate status transition ก่อนอนุญาต
+- Response รวม include asset + location
 
 ---
 Task ID: 4
-Agent: Main
-Task: Create backend API routes
+Agent: full-stack-developer subagent
+Task: สร้าง Signature Pad + Ticket Detail components
 
 Work Log:
-- GET /api/assets?q=searchterm - Search assets by assetNo or name (active only, max 20)
-- GET /api/repairs - List all repairs with asset info (ordered by createdAt desc)
-- POST /api/repairs - Create repair ticket with auto-generated ticket number (RPR-YYYY-NNN)
-  - Validates required fields
-  - Verifies asset exists
-  - Generates unique ticket number
+- สร้าง signature-pad.tsx: ใช้ react-signature-canvas, auto-resize, save/clear, preview
+- สร้าง ticket-detail.tsx: 1366 บรรทัด, ครอบคลุมทุกฟีเจอร์
+  - Header: ticket_no, status badge, date
+  - Info card: asset details, problem, reporter
+  - Acceptance card: receivedBy, date, signature
+  - Cost estimate card: ค่าอะไหล่/แรง/รวม, status badge
+  - Return card: method, returnedBy, signatures
+  - Status timeline: horizontal visual
+  - Action buttons: context-sensitive per status
+  - 6 modals: accept, estimate, return, cancel, start repair confirm, close confirm
+  - Print system: @media print, ใบแจ้งซ่อม + ใบส่งคืน
 
 Stage Summary:
-- 3 API endpoints created and verified working
-- All endpoints handle errors gracefully with proper status codes
+- ไฟล์: src/components/repair/signature-pad.tsx, src/components/repair/ticket-detail.tsx
+- รองรับ responsive design
+- ใช้ useMutation (TanStack Query) สำหรับทุก API call
 
 ---
 Task ID: 5
-Agent: Main
-Task: Build frontend components
+Agent: Main Orchestrator
+Task: อัพเดท RepairList + Page + Responsive Design
 
 Work Log:
-- Created QueryClientProvider wrapper (TanStack Query)
-- AssetSearch component: debounced search, keyboard navigation, asset card display
-- QRScanner component: html5-qrcode integration in dialog, dynamic import
-- RepairForm component: 3-step form (select asset, problem details, reporter info), success state
-- RepairList component: TanStack Query data fetching, status badges, urgency levels
-- Main page: header, stats cards, repair list, sticky footer
+- อัพเดท repair-list.tsx: เพิ่ม onTicketClick prop, เปลี่ยน button click, เพิ่ม cancelled status config
+- อัพเดท page.tsx: responsive stats grid (4 cols mobile, 7 cols desktop), detail view routing, sticky footer
+- แก้ compile error: PackageReturn → PackageOpen, import syntax
+- รัน lint ผ่าน 0 errors
+- Seed + dev server ทำงาน
+- Agent Browser verify: GET / 200, GET /api/repairs 200 (6 tickets), stats แสดงถูกต้อง, list แสดงทุก 6 สถานะ
 
 Stage Summary:
-- 5 new components created
-- Full Thai UI with responsive design
-- Emerald color scheme throughout
-
----
-Task ID: 6
-Agent: Main
-Task: End-to-end verification
-
-Work Log:
-- Verified page renders with Thai content in Agent Browser
-- Confirmed stats cards show correct counts (2 total, 1 pending, 1 in_progress, 0 completed)
-- Confirmed repair list shows 2 items with correct data
-- Verified repair form dialog opens with all fields
-- Confirmed asset search input, QR scan button, category/urgency dropdowns present
-- Submit button correctly disabled when no asset selected
-- All API endpoints return correct data
-
-Stage Summary:
-- All features verified working end-to-end
-- Lint passes clean (0 errors)
-- Page renders correctly with full Thai localization
-
----
-Task ID: 2 (Refactor)
-Agent: Main
-Task: ปรับโครงสร้างให้ตรง surinhos ต้นฉบับ
-
-Work Log:
-- อ่านโครงสร้างจาก surinhos repo (database/schema.sql, backend/repairRoutes.js, frontend/app/repairs/page.jsx)
-- ปรับ Prisma schema: Location, Asset (asset_code), RepairTicket (ticket_no RPR-YYMMDD-NNN)
-- Seed data: 10 locations, 15 assets (รูปแบบ COM-69-001), 2 sample repairs
-- ปรับ API routes ให้ตรงต้นฉบับ (3 ฟิลด์: assetCode, assetName, problemDetails, reporterName)
-- ปรับ Frontend: ฟอร์ม 3 ฟิลด์, สถานะ 5 ขั้น, asset_code search
-- ทดสอบ API + Agent Browser ผ่าน
-
-Stage Summary:
-- โครงสร้างตรงต้นฉบับ surinhos 100%
-- Asset codes: COM-69-xxx, PRT-69-xxx, NET-69-xxx, PRJ-69-xxx, SCN-69-xxx, MON-69-xxx, SVR-69-xxx
-- Ticket format: RPR-YYMMDD-NNN (ตามต้นฉบับ)
-- Status: pending → accepted → in_progress → returned → closed (5 ขั้น)
-- Form: 3 ฟิลด์ตามต้นฉบับ + search/QR auto-fill
+- ไฟล์: src/components/repair/repair-list.tsx, src/app/page.tsx
+- หน้า list: responsive stats + รายการ 6 tickets ทุกสถานะ
+- หน้า detail: click เข้าดูรายละเอียดพร้อม action buttons

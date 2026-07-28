@@ -8,7 +8,7 @@ import {
   Clock,
   CheckCircle,
   Wrench,
-  PackageReturn,
+  PackageOpen,
   CheckCircle2,
   XCircle,
   Printer,
@@ -131,7 +131,7 @@ const statusConfig: Record<
   returned: {
     label: 'ส่งคืนแล้ว',
     color: 'bg-emerald-100 text-emerald-700',
-    icon: 'PackageReturn',
+    icon: 'PackageOpen',
   },
   closed: {
     label: 'ปิดงาน',
@@ -151,7 +151,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Clock: <Clock className="size-4" />,
   CheckCircle: <CheckCircle className="size-4" />,
   Wrench: <Wrench className="size-4" />,
-  PackageReturn: <PackageReturn className="size-4" />,
+  PackageOpen: <PackageOpen className="size-4" />,
   CheckCircle2: <CheckCircle2 className="size-4" />,
   XCircle: <XCircle className="size-4" />,
 }
@@ -235,16 +235,18 @@ export default function TicketDetail({
   const fetchTicket = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/repairs')
-      if (!res.ok) throw new Error('Failed to fetch')
-      const tickets: RepairTicket[] = await res.json()
-      const found = tickets.find((t) => t.id === ticketId)
-      if (found) {
-        setTicket(found)
-      } else {
-        toast.error('ไม่พบใบแจ้งซ่อมที่ต้องการ')
-        onClose()
+      const res = await fetch(`/api/repairs/${ticketId}`)
+      if (!res.ok) {
+        if (res.status === 404) {
+          toast.error('ไม่พบใบแจ้งซ่อมที่ต้องการ')
+          onClose()
+        } else {
+          throw new Error('Failed to fetch')
+        }
+        return
       }
+      const data: RepairTicket = await res.json()
+      setTicket(data)
     } catch {
       toast.error('เกิดข้อผิดพลาดในการโหลดข้อมูล')
     } finally {
@@ -679,7 +681,7 @@ export default function TicketDetail({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <PackageReturn className="size-4" />
+                <PackageOpen className="size-4" />
                 ข้อมูลการส่งคืน
               </CardTitle>
               <CardDescription>
@@ -850,7 +852,7 @@ export default function TicketDetail({
                       className="w-full sm:w-auto"
                       disabled={isAnyMutationLoading}
                     >
-                      <PackageReturn className="size-4" />
+                      <PackageOpen className="size-4" />
                       ส่งคืน
                     </Button>
                     <Button
