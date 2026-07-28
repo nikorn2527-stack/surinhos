@@ -5,17 +5,19 @@ import { Search, X, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 
+interface Location {
+  buildingName: string
+  roomName: string
+}
+
 interface Asset {
   id: string
-  assetNo: string
+  assetCode: string
   name: string
   category: string
-  brand: string
-  model: string
-  serialNo: string | null
-  location: string
-  department: string | null
+  locationId: string | null
   status: string
+  location: Location | null
 }
 
 interface AssetSearchProps {
@@ -59,13 +61,11 @@ export function AssetSearch({ onSelect, selectedAsset, onClear }: AssetSearchPro
     debounceRef.current = setTimeout(() => {
       searchAssets(query)
     }, 300)
-
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [query, searchAssets])
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -84,7 +84,6 @@ export function AssetSearch({ onSelect, selectedAsset, onClear }: AssetSearchPro
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen || results.length === 0) return
-
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault()
@@ -96,9 +95,7 @@ export function AssetSearch({ onSelect, selectedAsset, onClear }: AssetSearchPro
         break
       case 'Enter':
         e.preventDefault()
-        if (highlightIndex >= 0) {
-          handleSelect(results[highlightIndex])
-        }
+        if (highlightIndex >= 0) handleSelect(results[highlightIndex])
         break
       case 'Escape':
         setIsOpen(false)
@@ -106,7 +103,12 @@ export function AssetSearch({ onSelect, selectedAsset, onClear }: AssetSearchPro
     }
   }
 
+  // แสดงข้อมูลครุภัณฑ์ที่เลือก
   if (selectedAsset) {
+    const locationStr = selectedAsset.location
+      ? `${selectedAsset.location.buildingName}, ${selectedAsset.location.roomName}`
+      : '-'
+
     return (
       <div className="space-y-3">
         <label className="text-sm font-medium text-foreground">ข้อมูลครุภัณฑ์</label>
@@ -115,17 +117,12 @@ export function AssetSearch({ onSelect, selectedAsset, onClear }: AssetSearchPro
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-200 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-200">
-                  {selectedAsset.assetNo}
+                  {selectedAsset.assetCode}
                 </span>
                 <span className="text-xs text-muted-foreground">{selectedAsset.category}</span>
               </div>
               <p className="font-medium text-sm">{selectedAsset.name}</p>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span>ยี่ห้อ: {selectedAsset.brand}</span>
-                <span>รุ่น: {selectedAsset.model}</span>
-                <span>สถานที่: {selectedAsset.location}</span>
-                <span>แผนก: {selectedAsset.department || '-'}</span>
-              </div>
+              <p className="text-xs text-muted-foreground">📍 {locationStr}</p>
             </div>
             <button
               onClick={onClear}
@@ -139,13 +136,14 @@ export function AssetSearch({ onSelect, selectedAsset, onClear }: AssetSearchPro
     )
   }
 
+  // ช่องค้นหา
   return (
     <div className="space-y-2" ref={containerRef}>
       <label className="text-sm font-medium text-foreground">ค้นหาครุภัณฑ์</label>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="พิมพ์หมายเลขครุภัณฑ์ หรือ ชื่ออุปกรณ์..."
+          placeholder="พิมพ์หมายเลขครุภัณฑ์ (เช่น COM-69-001) หรือชื่ออุปกรณ์..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -170,19 +168,19 @@ export function AssetSearch({ onSelect, selectedAsset, onClear }: AssetSearchPro
                 key={asset.id}
                 onClick={() => handleSelect(asset)}
                 onMouseEnter={() => setHighlightIndex(idx)}
-                className={`w-full px-4 py-3 text-left transition-colors flex items-start gap-3 ${
-                  idx === highlightIndex
-                    ? 'bg-accent'
-                    : 'hover:bg-accent/50'
+                className={`w-full px-4 py-3 text-left transition-colors ${
+                  idx === highlightIndex ? 'bg-accent' : 'hover:bg-accent/50'
                 } ${idx !== results.length - 1 ? 'border-b border-border' : ''}`}
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-semibold text-primary">{asset.assetNo}</span>
+                    <span className="text-xs font-semibold text-primary">{asset.assetCode}</span>
                     <span className="text-xs text-muted-foreground">{asset.category}</span>
                   </div>
                   <p className="text-sm font-medium truncate">{asset.name}</p>
-                  <p className="text-xs text-muted-foreground">{asset.location} {asset.department ? `• ${asset.department}` : ''}</p>
+                  <p className="text-xs text-muted-foreground">
+                    📍 {asset.location ? `${asset.location.buildingName}, ${asset.location.roomName}` : '-'}
+                  </p>
                 </div>
               </button>
             ))}

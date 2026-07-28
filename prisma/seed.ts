@@ -1,65 +1,79 @@
 import { db } from '../src/lib/db'
 
 async function main() {
-  console.log('🌱 Seeding assets...')
+  console.log('🌱 Seeding surinhos data...')
 
   // Delete existing
-  await db.repair.deleteMany()
+  await db.repairTicket.deleteMany()
   await db.asset.deleteMany()
+  await db.location.deleteMany()
 
+  // สร้างสถานที่ (locations)
+  const loc1 = await db.location.create({ data: { buildingName: 'อาคารอำนวยการ', roomName: 'ห้องไอที ชั้น 2' } })
+  const loc2 = await db.location.create({ data: { buildingName: 'อาคารอำนวยการ', roomName: 'ห้อง 101' } })
+  const loc3 = await db.location.create({ data: { buildingName: 'อาคารอำนวยการ', roomName: 'ห้อง 102' } })
+  const loc4 = await db.location.create({ data: { buildingName: 'อาคารอำนวยการ', roomName: 'ห้อง 103' } })
+  const loc5 = await db.location.create({ data: { buildingName: 'อาคารเรียนรวม', roomName: 'ห้อง 201' } })
+  const loc6 = await db.location.create({ data: { buildingName: 'อาคารเรียนรวม', roomName: 'ห้อง 202' } })
+  const loc7 = await db.location.create({ data: { buildingName: 'อาคารเรียนรวม', roomName: 'ห้องประชุม A' } })
+  const loc8 = await db.location.create({ data: { buildingName: 'อาคารอำนวยการ', roomName: 'ห้องเซิร์ฟเวอร์' } })
+  const loc9 = await db.location.create({ data: { buildingName: 'อาคารอำนวยการ', roomName: 'ห้อง 105' } })
+  const loc10 = await db.location.create({ data: { buildingName: 'อาคารเรียนรวม', roomName: 'ห้อง 301' } })
+
+  // สร้างครุภัณฑ์ (assets) — รูปแบบ asset_code ตาม surinhos
   const assets = [
-    { assetNo: 'INV-2024-001', name: 'คอมพิวเตอร์ Dell OptiPlex 7090', category: 'คอมพิวเตอร์', brand: 'Dell', model: 'OptiPlex 7090', serialNo: 'DL7090X-20240001', location: 'ห้อง 101', department: 'แผนกบัญชี', status: 'active' },
-    { assetNo: 'INV-2024-002', name: 'เครื่องพิมพ์ HP LaserJet Pro M404', category: 'เครื่องพิมพ์', brand: 'HP', model: 'LaserJet Pro M404', serialNo: 'HPM404-20240002', location: 'ห้อง 102', department: 'แผนกบัญชี', status: 'active' },
-    { assetNo: 'INV-2024-003', name: 'คอมพิวเตอร์ Lenovo ThinkCentre M90q', category: 'คอมพิวเตอร์', brand: 'Lenovo', model: 'ThinkCentre M90q', serialNo: 'LN90Q-20240003', location: 'ห้อง 201', department: 'แผนกบุคคล', status: 'active' },
-    { assetNo: 'INV-2024-004', name: 'โน้ตบุ๊ค ASUS ExpertBook B9', category: 'คอมพิวเตอร์', brand: 'ASUS', model: 'ExpertBook B9', serialNo: 'ASB9-20240004', location: 'ห้อง 202', department: 'แผนกบุคคล', status: 'active' },
-    { assetNo: 'INV-2024-005', name: 'เครื่องสแกนเอกสาร Fujitsu ScanSnap iX1600', category: 'เครื่องสแกน', brand: 'Fujitsu', model: 'ScanSnap iX1600', serialNo: 'FJ1600-20240005', location: 'ห้อง 103', department: 'แผนกวิจัยและพัฒนา', status: 'active' },
-    { assetNo: 'INV-2024-006', name: 'เซิร์ฟเวอร์ Dell PowerEdge R750', category: 'เซิร์ฟเวอร์', brand: 'Dell', model: 'PowerEdge R750', serialNo: 'DLR750-20240006', location: 'ห้องเซิร์ฟเวอร์', department: 'แผนกระบบสารสนเทศ', status: 'active' },
-    { assetNo: 'INV-2024-007', name: 'อัปเทตเตอร์ Cisco Catalyst 9200', category: 'อุปกรณ์เครือข่าย', brand: 'Cisco', model: 'Catalyst 9200', serialNo: 'CS9200-20240007', location: 'ห้องเซิร์ฟเวอร์', department: 'แผนกระบบสารสนเทศ', status: 'active' },
-    { assetNo: 'INV-2024-008', name: 'โปรเจกเตอร์ Epson EB-L260F', category: 'เครื่องฉาย', brand: 'Epson', model: 'EB-L260F', serialNo: 'EP260F-20240008', location: 'ห้องประชุม A', department: 'สำนักบริหาร', status: 'active' },
-    { assetNo: 'INV-2024-009', name: 'เครื่องพิมพ์ Canon imageCLASS MF743Cdw', category: 'เครื่องพิมพ์', brand: 'Canon', model: 'imageCLASS MF743Cdw', serialNo: 'CN743C-20240009', location: 'ห้อง 105', department: 'แผนกจัดซื้อ', status: 'active' },
-    { assetNo: 'INV-2024-010', name: 'จอภาพ LG 27UK850-W', category: 'จอภาพ', brand: 'LG', model: '27UK850-W', serialNo: 'LG27UK-20240010', location: 'ห้อง 301', department: 'แผนกการตลาด', status: 'active' },
-    { assetNo: 'INV-2024-011', name: 'คอมพิวเตอร์ HP ProDesk 400 G7', category: 'คอมพิวเตอร์', brand: 'HP', model: 'ProDesk 400 G7', serialNo: 'HP400G7-20240011', location: 'ห้อง 302', department: 'แผนกการตลาด', status: 'active' },
-    { assetNo: 'INV-2024-012', name: 'เร้าเตอร์ TP-Link Archer AX6000', category: 'อุปกรณ์เครือข่าย', brand: 'TP-Link', model: 'Archer AX6000', serialNo: 'TPL6000-20240012', location: 'ชั้น 3', department: 'แผนกระบบสารสนเทศ', status: 'active' },
-    { assetNo: 'INV-2024-013', name: 'เครื่องถ่ายเอกสาร Ricoh MP C3004', category: 'เครื่องถ่ายเอกสาร', brand: 'Ricoh', model: 'MP C3004', serialNo: 'RC3004-20240013', location: 'ห้องถ่ายเอกสาร', department: 'สำนักบริหาร', status: 'active' },
-    { assetNo: 'INV-2024-014', name: 'โน้ตบุ๊ค Acer TravelMate P2', category: 'คอมพิวเตอร์', brand: 'Acer', model: 'TravelMate P2', serialNo: 'ACTP2-20240014', location: 'ห้อง 401', department: 'แผนกกฎหมาย', status: 'active' },
-    { assetNo: 'INV-2024-015', name: 'เครื่องพิมพ์ Brother HL-L2350DW', category: 'เครื่องพิมพ์', brand: 'Brother', model: 'HL-L2350DW', serialNo: 'BR2350-20240015', location: 'ห้อง 402', department: 'แผนกกฎหมาย', status: 'inactive' },
+    { assetCode: 'COM-69-001', name: 'คอมพิวเตอร์แม่ข่าย (Server)', category: 'อุปกรณ์คอมพิวเตอร์', locationId: loc8.id, status: 'ปกติ', price: 150000 },
+    { assetCode: 'COM-69-002', name: 'คอมพิวเตอร์ Dell OptiPlex 7090', category: 'อุปกรณ์คอมพิวเตอร์', locationId: loc2.id, status: 'ปกติ', price: 35000 },
+    { assetCode: 'COM-69-003', name: 'คอมพิวเตอร์ Dell OptiPlex 7090', category: 'อุปกรณ์คอมพิวเตอร์', locationId: loc3.id, status: 'ปกติ', price: 35000 },
+    { assetCode: 'COM-69-004', name: 'คอมพิวเตอร์ Lenovo ThinkCentre', category: 'อุปกรณ์คอมพิวเตอร์', locationId: loc5.id, status: 'ปกติ', price: 28000 },
+    { assetCode: 'COM-69-005', name: 'โน้ตบุ๊ค ASUS ExpertBook B9', category: 'อุปกรณ์คอมพิวเตอร์', locationId: loc6.id, status: 'ปกติ', price: 42000 },
+    { assetCode: 'COM-69-006', name: 'โน้ตบุ๊ค HP ProBook 450', category: 'อุปกรณ์คอมพิวเตอร์', locationId: loc1.id, status: 'ชำรุด', price: 32000 },
+    { assetCode: 'PRT-69-001', name: 'เครื่องพิมพ์ HP LaserJet Pro M404', category: 'เครื่องพิมพ์', locationId: loc3.id, status: 'ปกติ', price: 18000 },
+    { assetCode: 'PRT-69-002', name: 'เครื่องพิมพ์ Canon imageCLASS MF743', category: 'เครื่องพิมพ์', locationId: loc9.id, status: 'ปกติ', price: 25000 },
+    { assetCode: 'PRT-69-003', name: 'เครื่องพิมพ์ Brother HL-L2350DW', category: 'เครื่องพิมพ์', locationId: loc10.id, status: 'ปกติ', price: 8000 },
+    { assetCode: 'NET-69-001', name: 'อัปเทตเตอร์ Cisco Catalyst 9200', category: 'อุปกรณ์เครือข่าย', locationId: loc8.id, status: 'ปกติ', price: 85000 },
+    { assetCode: 'NET-69-002', name: 'เร้าเตอร์ TP-Link Archer AX6000', category: 'อุปกรณ์เครือข่าย', locationId: loc1.id, status: 'ปกติ', price: 5500 },
+    { assetCode: 'PRJ-69-001', name: 'โปรเจกเตอร์ Epson EB-L260F', category: 'เครื่องฉาย', locationId: loc7.id, status: 'ปกติ', price: 45000 },
+    { assetCode: 'SCN-69-001', name: 'เครื่องสแกน Fujitsu ScanSnap iX1600', category: 'เครื่องสแกน', locationId: loc4.id, status: 'ปกติ', price: 22000 },
+    { assetCode: 'MON-69-001', name: 'จอภาพ LG 27UK850-W 4K', category: 'จอภาพ', locationId: loc10.id, status: 'ปกติ', price: 15000 },
+    { assetCode: 'SVR-69-001', name: 'เซิร์ฟเวอร์ Dell PowerEdge R750', category: 'เซิร์ฟเวอร์', locationId: loc8.id, status: 'ปกติ', price: 250000 },
   ]
 
   for (const asset of assets) {
     await db.asset.create({ data: asset })
-    console.log(`  ✅ ${asset.assetNo} - ${asset.name}`)
+    console.log(`  ✅ ${asset.assetCode} - ${asset.name}`)
   }
 
-  // Create some sample repairs
-  const sampleRepairs = [
-    {
-      ticketNo: 'RPR-2025-001',
-      assetId: (await db.asset.findFirst({ where: { assetNo: 'INV-2024-001' } }))!.id,
-      problemCategory: 'ฮาร์ดแวร์',
-      description: 'เปิดเครื่องไม่ติด ไฟกระพริบที่ปุ่ม power ไม่สามารถบูตเข้าระบบได้',
-      urgency: 'ด่วน',
-      reporterName: 'สมชาย ใจดี',
-      reporterPhone: '081-234-5678',
-      reporterDept: 'แผนกบัญชี',
-      status: 'in_progress',
-      notes: 'นัดเข้าซ่อมวันที่ 20 ก.ค.',
-    },
-    {
-      ticketNo: 'RPR-2025-002',
-      assetId: (await db.asset.findFirst({ where: { assetNo: 'INV-2024-002' } }))!.id,
-      problemCategory: 'ฮาร์ดแวร์',
-      description: 'กระดาษตัน เปิดปิดเครื่องแล้วยังมีปัญหาเดิม กระดาษติดในเลเซอร์',
-      urgency: 'ปกติ',
-      reporterName: 'สุภาพร รักงาน',
-      reporterPhone: '082-345-6789',
-      reporterDept: 'แผนกบัญชี',
-      status: 'pending',
-    },
-  ]
+  // สร้างแจ้งซ่อมตัวอย่าง 2 รายการ
+  const serverAsset = await db.asset.findFirst({ where: { assetCode: 'COM-69-001' } })
+  const printerAsset = await db.asset.findFirst({ where: { assetCode: 'PRT-69-001' } })
 
-  for (const repair of sampleRepairs) {
-    await db.repair.create({ data: repair })
-    console.log(`  ✅ ${repair.ticketNo}`)
+  if (serverAsset) {
+    await db.repairTicket.create({
+      data: {
+        ticketNo: 'RPR-260727-001',
+        assetId: serverAsset.id,
+        assetName: serverAsset.name,
+        problemDetails: 'เปิดเครื่องไม่ติด ไฟกระพริบที่ปุ่ม power',
+        reporterName: 'สมชาย ใจดี',
+        status: 'accepted',
+      },
+    })
+    console.log('  ✅ RPR-260727-001')
+  }
+
+  if (printerAsset) {
+    await db.repairTicket.create({
+      data: {
+        ticketNo: 'RPR-260728-001',
+        assetId: printerAsset.id,
+        assetName: printerAsset.name,
+        problemDetails: 'กระดาษตัน แม้เปิดปิดเครื่องใหม่แล้ว',
+        reporterName: 'สุภาพร รักงาน',
+        status: 'pending',
+      },
+    })
+    console.log('  ✅ RPR-260728-001')
   }
 
   console.log('🎉 Seeding complete!')

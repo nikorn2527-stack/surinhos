@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Wrench, ClipboardList, AlertCircle, CheckCircle2, Loader2, Building2 } from 'lucide-react'
+import { Wrench, Clock, CheckCircle2, Loader2, Building2, ClipboardCheck, PackageReturn } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Toaster } from '@/components/ui/sonner'
 import { RepairForm } from '@/components/repair/repair-form'
@@ -11,29 +11,15 @@ import { RepairList } from '@/components/repair/repair-list'
 interface Repair {
   id: string
   ticketNo: string
-  assetId: string
-  problemCategory: string
-  description: string
-  urgency: string
-  reporterName: string
-  reporterPhone: string
-  reporterDept: string
   status: string
-  notes: string | null
   createdAt: string
-  updatedAt: string
-  asset: {
-    assetNo: string
-    name: string
-    location: string
-  }
 }
 
 export default function Home() {
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
-  const { data: repairs = [] } = useQuery<Repair[]>({
-    queryKey: ['repairs', refreshTrigger],
+  const { data: tickets = [] } = useQuery<Repair[]>({
+    queryKey: ['repairs-stats', refreshTrigger],
     queryFn: async () => {
       const res = await fetch('/api/repairs')
       return res.json()
@@ -41,10 +27,12 @@ export default function Home() {
   })
 
   const stats = {
-    total: repairs.length,
-    pending: repairs.filter((r) => r.status === 'pending').length,
-    inProgress: repairs.filter((r) => r.status === 'in_progress').length,
-    completed: repairs.filter((r) => r.status === 'completed').length,
+    total: tickets.length,
+    pending: tickets.filter((r) => r.status === 'pending').length,
+    accepted: tickets.filter((r) => r.status === 'accepted').length,
+    inProgress: tickets.filter((r) => r.status === 'in_progress').length,
+    returned: tickets.filter((r) => r.status === 'returned').length,
+    closed: tickets.filter((r) => r.status === 'closed').length,
   }
 
   const handleRepairSubmitted = useCallback(() => {
@@ -61,71 +49,52 @@ export default function Home() {
               <Wrench className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold leading-tight">ระบบแจ้งซ่อมอุปกรณ์</h1>
-              <p className="text-xs text-muted-foreground leading-tight">Repair Tracking System</p>
+              <h1 className="text-lg font-bold leading-tight">🔧 ระบบแจ้งซ่อม (Repair Tracking)</h1>
+              <p className="text-xs text-muted-foreground leading-tight">Surinhos Asset Management</p>
             </div>
           </div>
           <RepairForm onSubmit={handleRepairSubmitted} />
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main */}
       <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 w-full space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-l-4 border-l-emerald-500">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                  <ClipboardList className="h-5 w-5 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                  <p className="text-xs text-muted-foreground">ทั้งหมด</p>
-                </div>
-              </div>
+        {/* Stats — สถานะ 5 ขั้น + ทั้งหมด */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <Card className="border-l-4 border-l-gray-400">
+            <CardContent className="p-3 text-center">
+              <p className="text-2xl font-bold">{stats.total}</p>
+              <p className="text-xs text-muted-foreground">ทั้งหมด</p>
             </CardContent>
           </Card>
-
-          <Card className="border-l-4 border-l-amber-500">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                  <AlertCircle className="h-5 w-5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.pending}</p>
-                  <p className="text-xs text-muted-foreground">รอดำเนินการ</p>
-                </div>
-              </div>
+          <Card className="border-l-4 border-l-amber-400">
+            <CardContent className="p-3 text-center">
+              <p className="text-2xl font-bold">{stats.pending}</p>
+              <p className="text-xs text-muted-foreground">รอรับเรื่อง</p>
             </CardContent>
           </Card>
-
-          <Card className="border-l-4 border-l-sky-500">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center">
-                  <Loader2 className="h-5 w-5 text-sky-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.inProgress}</p>
-                  <p className="text-xs text-muted-foreground">กำลังดำเนินการ</p>
-                </div>
-              </div>
+          <Card className="border-l-4 border-l-blue-400">
+            <CardContent className="p-3 text-center">
+              <p className="text-2xl font-bold">{stats.accepted}</p>
+              <p className="text-xs text-muted-foreground">รับเรื่องแล้ว</p>
             </CardContent>
           </Card>
-
-          <Card className="border-l-4 border-l-emerald-500">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.completed}</p>
-                  <p className="text-xs text-muted-foreground">เสร็จสิ้น</p>
-                </div>
-              </div>
+          <Card className="border-l-4 border-l-violet-400">
+            <CardContent className="p-3 text-center">
+              <p className="text-2xl font-bold">{stats.inProgress}</p>
+              <p className="text-xs text-muted-foreground">กำลังซ่อม</p>
+            </CardContent>
+          </Card>
+          <Card className="border-l-4 border-l-emerald-400">
+            <CardContent className="p-3 text-center">
+              <p className="text-2xl font-bold">{stats.returned}</p>
+              <p className="text-xs text-muted-foreground">ส่งคืนแล้ว</p>
+            </CardContent>
+          </Card>
+          <Card className="border-l-4 border-l-gray-400">
+            <CardContent className="p-3 text-center">
+              <p className="text-2xl font-bold">{stats.closed}</p>
+              <p className="text-xs text-muted-foreground">ปิดงาน</p>
             </CardContent>
           </Card>
         </div>

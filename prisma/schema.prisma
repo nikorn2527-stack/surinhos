@@ -1,5 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+// โครงสร้างอ้างอิงจาก surinhos_asset database
 
 generator client {
   provider = "prisma-client-js"
@@ -28,37 +29,45 @@ model Post {
   updatedAt DateTime @updatedAt
 }
 
-model Asset {
-  id        String   @id @default(cuid())
-  assetNo   String   @unique              // หมายเลขครุภัณฑ์ เช่น INV-2024-001
-  name      String                         // ชื่ออุปกรณ์ เช่น คอมพิวเตอร์ Dell OptiPlex 7090
-  category  String                         // หมวดหมู่ เช่น คอมพิวเตอร์, เครื่องพิมพ์, เครือข่าย
-  brand     String                         // ยี่ห้อ
-  model     String                         // รุ่น
-  serialNo  String?                        // เลขซีเรียล
-  location  String                         // สถานที่ตั้ง เช่น ห้อง 101, อาคาร A
-  department String?                       // แผนก/กลุ่มงาน
-  status    String   @default("active")    // active, inactive, disposed
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ตารางสถานที่ (อ้างอิงจาก surinhos locations)
+model Location {
+  id            String   @id @default(cuid())
+  buildingName  String                      // ชื่ออาคาร เช่น อาคารอำนวยการ
+  roomName      String                      // ชื่อห้อง เช่น ห้องไอที ชั้น 2
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  repairs Repair[]
+  assets Asset[]
 }
 
-model Repair {
-  id          String   @id @default(cuid())
-  ticketNo    String   @unique             // เลขที่แจ้งซ่อม เช่น RPR-2025-001
-  assetId     String                         // FK -> Asset.id
-  problemCategory String                   // หมวดหมู่ปัญหา: ฮาร์ดแวร์, ซอฟต์แวร์, เครือข่าย, อื่นๆ
-  description String                        // รายละเอียดอาการเสีย
-  urgency     String   @default("normal")   // ปกติ, ด่วน, ด่วนที่สุด
-  reporterName   String                     // ชื่อผู้แจ้ง
-  reporterPhone  String                     // เบอร์ติดต่อ
-  reporterDept   String                     // แผนกผู้แจ้ง
-  status      String   @default("pending") // pending, in_progress, completed, cancelled
-  notes       String?                        // หมายเหตุจากช่าง
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// ตารางครุภัณฑ์ (อ้างอิงจาก surinhos assets)
+model Asset {
+  id            String    @id @default(cuid())
+  assetCode     String    @unique               // หมายเลขครุภัณฑ์ เช่น COM-69-001
+  name          String                           // ชื่ออุปกรณ์ เช่น คอมพิวเตอร์แม่ข่าย (Server)
+  category      String                           // หมวดหมู่ เช่น อุปกรณ์คอมพิวเตอร์
+  locationId    String?                          // FK -> Location.id
+  status        String    @default("ปกติ")      // ปกติ, ชำรุด, รอจำหน่าย
+  acquiredDate  String?                          // วันที่ได้มา
+  price         Float?                           // ราคา
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  asset Asset @relation(fields: [assetId], references: [id])
+  location    Location?      @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  repairTickets RepairTicket[]
+}
+
+// ตารางแจ้งซ่อม (อ้างอิงจาก surinhos repair_tickets)
+model RepairTicket {
+  id             String    @id @default(cuid())
+  ticketNo       String    @unique               // เลขที่ใบแจ้งซ่อม เช่น RPR-260728-001
+  assetId        String?                          // FK -> Asset.id (ถ้ามี)
+  assetName      String                           // ชื่ออุปกรณ์ / สถานที่
+  problemDetails String?                          // รายละเอียดปัญหา
+  reporterName   String?                          // ชื่อผู้แจ้ง
+  status         String    @default("pending")   // pending, accepted, in_progress, returned, closed
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  asset Asset? @relation(fields: [assetId], references: [id])
 }

@@ -1,90 +1,94 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// GET /api/repairs - List all repairs with asset info
+// GET /api/repairs - ดึงรายการแจ้งซ่อมทั้งหมด
 export async function GET() {
   try {
-    const repairs = await db.repair.findMany({
+    const tickets = await db.repairTicket.findMany({
       include: {
         asset: {
           select: {
-            assetNo: true,
+            assetCode: true,
             name: true,
-            location: true,
+            category: true,
+            location: {
+              select: { buildingName: true, roomName: true },
+            },
           },
         },
       },
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json(repairs)
+    return NextResponse.json(tickets)
   } catch (error) {
     console.error('Error fetching repairs:', error)
     return NextResponse.json({ error: 'Failed to fetch repairs' }, { status: 500 })
   }
 }
 
-// POST /api/repairs - Create a new repair ticket
+// POST /api/repairs - สร้างใบแจ้งซ่อมใหม่ (สถานะ: pending)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    const { assetCode, assetName, problemDetails, reporterName } = body
 
-    const { assetId, problemCategory, description, urgency, reporterName, reporterPhone, reporterDept } = body
-
-    // Validate required fields
-    if (!assetId || !problemCategory || !description || !reporterName || !reporterPhone || !reporterDept) {
+    if (!assetName || !reporterName) {
       return NextResponse.json(
         { error: 'กรุณากรอกข้อมูลให้ครบถ้วน' },
         { status: 400 }
       )
     }
 
-    // Verify asset exists
-    const asset = await db.asset.findUnique({ where: { id: assetId } })
-    if (!asset) {
-      return NextResponse.json(
-        { error: 'ไม่พบข้อมูลครุภัณฑ์ที่เลือก' },
-        { status: 404 }
-      )
-    }
+    // สร้างเลข Ticket (รูปแบบ: RPR-YYMMDD-001)
+    const today = new Date()
+    const yy = String(today.getFullYear()).slice(-2)
+    const mm = String(today.getMonth() + 1).padStart(2, '0')
+    const dd = String(today.getDate()).padStart(2, '0')
+    const dateStr = `${yy}${mm}${dd}`
+    const searchPattern = `RPR-${dateStr}-%`
 
-    // Generate ticket number: RPR-YYYY-NNN
-    const now = new Date()
-    const year = now.getFullYear()
-    const count = await db.repair.count({
+    const countResult = await db.repairTicket.count({
       where: {
-        createdAt: {
-          gte: new Date(year, 0, 1),
-          lt: new Date(year + 1, 0, 1),
-        },
+        ticketNo: { startsWith: `RPR-${dateStr}-` },
       },
     })
-    const ticketNo = `RPR-${year}-${String(count + 1).padStart(3, '0')}`
 
-    const repair = await db.repair.create({
+    const nextSeq = String(countResult + 1).padStart(3, '0')
+    const ticketNo = `RPR-${dateStr}-${nextSeq}`
+
+    // หา asset_id ถ้ามี assetCode
+    let assetId: string | null = null
+    if (assetCode) {
+      const asset = await db.asset.findUnique({ where: { assetCode } })
+      if (asset) {
+        assetId = asset.id
+      }
+    }
+
+    const ticket = await db.repairTicket.create({
       data: {
         ticketNo,
         assetId,
-        problemCategory,
-        description,
-        urgency: urgency || 'ปกติ',
+        assetName,
+        problemDetails,
         reporterName,
-        reporterPhone,
-        reporterDept,
         status: 'pending',
       },
       include: {
         asset: {
           select: {
-            assetNo: true,
+            assetCode: true,
             name: true,
-            location: true,
+            location: {
+              select: { buildingName: true, roomName: true },
+            },
           },
         },
       },
     })
 
-    return NextResponse.json(repair, { status: 201 })
+    return NextResponse.json(ticket, { status: 201 })
   } catch (error) {
     console.error('Error creating repair:', error)
     return NextResponse.json({ error: 'Failed to create repair' }, { status: 500 })

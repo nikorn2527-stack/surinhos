@@ -99,3 +99,23 @@ Stage Summary:
 - All features verified working end-to-end
 - Lint passes clean (0 errors)
 - Page renders correctly with full Thai localization
+
+---
+Task ID: 2 (Refactor)
+Agent: Main
+Task: ปรับโครงสร้างให้ตรง surinhos ต้นฉบับ
+
+Work Log:
+- อ่านโครงสร้างจาก surinhos repo (database/schema.sql, backend/repairRoutes.js, frontend/app/repairs/page.jsx)
+- ปรับ Prisma schema: Location, Asset (asset_code), RepairTicket (ticket_no RPR-YYMMDD-NNN)
+- Seed data: 10 locations, 15 assets (รูปแบบ COM-69-001), 2 sample repairs
+- ปรับ API routes ให้ตรงต้นฉบับ (3 ฟิลด์: assetCode, assetName, problemDetails, reporterName)
+- ปรับ Frontend: ฟอร์ม 3 ฟิลด์, สถานะ 5 ขั้น, asset_code search
+- ทดสอบ API + Agent Browser ผ่าน
+
+Stage Summary:
+- โครงสร้างตรงต้นฉบับ surinhos 100%
+- Asset codes: COM-69-xxx, PRT-69-xxx, NET-69-xxx, PRJ-69-xxx, SCN-69-xxx, MON-69-xxx, SVR-69-xxx
+- Ticket format: RPR-YYMMDD-NNN (ตามต้นฉบับ)
+- Status: pending → accepted → in_progress → returned → closed (5 ขั้น)
+- Form: 3 ฟิลด์ตามต้นฉบับ + search/QR auto-fill

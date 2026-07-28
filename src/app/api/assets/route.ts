@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// GET /api/assets?q=searchterm - Search assets by asset number or name
+// GET /api/assets?q=searchterm - ค้นหาครุภัณฑ์จาก asset_code หรือ name (เชื่อม location)
 export async function GET(request: NextRequest) {
   try {
     const q = request.nextUrl.searchParams.get('q')?.trim() || ''
@@ -10,17 +10,22 @@ export async function GET(request: NextRequest) {
       where: q
         ? {
             AND: [
-              { status: 'active' },
+              { status: 'ปกติ' },
               {
                 OR: [
-                  { assetNo: { contains: q } },
+                  { assetCode: { contains: q } },
                   { name: { contains: q } },
                 ],
               },
             ],
           }
-        : { status: 'active' },
-      orderBy: { assetNo: 'asc' },
+        : { status: 'ปกติ' },
+      include: {
+        location: {
+          select: { buildingName: true, roomName: true },
+        },
+      },
+      orderBy: { assetCode: 'asc' },
       take: 20,
     })
 
