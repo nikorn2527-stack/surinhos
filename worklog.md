@@ -121,3 +121,21 @@ Stage Summary:
 - อัพเดท ticket-detail.tsx พร้อม receipt preview dialog
 - Standalone demo: `public/receipt-preview.html` (ดูได้โดยตรงไม่ต้องรัน server)
 - Screenshot: screenshot-receipt.png (desktop), screenshot-receipt-mobile.png (mobile)
+
+---
+Task ID: 3
+Agent: Main Orchestrator
+Task: สร้าง standalone demo page เพื่อแก้ปัญหา sandbox memory ที่ทำให้ Next.js server ถูก kill บ่อย
+
+Work Log:
+- สร้าง `public/demo.html` — standalone interactive demo page (HTML + vanilla JS + Tailwind CDN)
+- รวมทุกฟีเจอร์: รายการแจ้งซ่อม, รายละเอียด, thermal receipt preview
+- ทดสอบผ่าน agent-browser ด้วย file:// protocol (ไม่ต้องรัน server)
+- Screenshot สำเร็จทุกหน้า: main, detail, receipt preview, return receipt, mobile
+- ตรวจสอบ: รายการ 6 tickets แสดงครบ, detail มีทุก section, receipt preview modal แสดง thermal receipt 50mm
+
+Stage Summary:
+- Demo page: `public/demo.html` (เปิดได้เลยโดยไม่ต้องรัน Next.js server)
+- Thermal receipt 2 แบบ: ใบรับซ่อม + ใบส่งคืน (50mm, zoomed 2.2x preview)
+- ตรวจสอบผ่าน agent-browser: เข้าได้, คลิก ticket แสดง detail, กดปริ้นแสดง receipt modal
+- Screenshot ทั้งหมด: screenshot-demo-main.png, screenshot-demo-detail.png, screenshot-demo-receipt.png, screenshot-demo-return-receipt.png, screenshot-demo-mobile.png

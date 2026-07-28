@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔧 ระบบแจ้งซ่อม — Surinhos Repair Tracking</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ["-apple-system","Noto Sans Thai","sans-serif"] }
+    }
+  }
+}
+</script>
+<style>
+body { font-family: -apple-system, "Noto Sans Thai", sans-serif; }
+/* Hide scrollbar for cleaner look */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ===== THERMAL RECEIPT ===== */
+.thermal-receipt {
+  font-family: 'Courier New', 'Noto Sans Thai', monospace;
+  width: 50mm; min-width: 50mm; max-width: 50mm;
+  margin: 0 auto; background: #fff; color: #1a1a1a;
+  font-size: 7pt; line-height: 1.4; padding: 0;
+}
+.receipt-cut-top, .receipt-cut-bottom {
+  width: 50mm; height: 4mm;
+  background: repeating-linear-gradient(135deg,#fff 0px,#fff 2px,#ddd 2px,#ddd 4px,#fff 4px,#fff 6px);
+}
+.receipt-cut-bottom { margin-top: 2mm; }
+.receipt-content { padding: 2mm 3mm; }
+.r-logo { font-size:16pt; line-height:1; margin-bottom:1mm; text-align:center; }
+.r-org { font-size:9pt; font-weight:700; letter-spacing:3px; text-align:center; }
+.r-sub { font-size:6pt; letter-spacing:2px; opacity:.7; text-align:center; }
+.r-title { font-size:8pt; font-weight:700; margin:1.5mm 0; text-align:center; }
+.r-div { border:none; border-top:1px dashed #999; margin:1.5mm 0; }
+.r-num-row { display:flex; align-items:baseline; justify-content:center; gap:2mm; margin:1mm 0; }
+.r-num-lbl { font-size:6pt; opacity:.6; }
+.r-num-val { font-size:11pt; font-weight:900; font-family:'Courier New',monospace; }
+.r-date { text-align:center; font-size:6.5pt; opacity:.7; }
+.r-row { display:flex; justify-content:space-between; align-items:flex-start; margin:.5mm 0; gap:1mm; }
+.r-lbl { font-size:6.5pt; opacity:.5; white-space:nowrap; flex-shrink:0; }
+.r-val { font-size:6.5pt; font-weight:500; text-align:right; word-break:break-word; }
+.r-val.bold { font-weight:700; }
+.r-center { justify-content:center; }
+.r-sect { font-size:6.5pt; font-weight:700; opacity:.5; letter-spacing:.5px; margin-bottom:.5mm; padding-bottom:.3mm; border-bottom:.5px solid #ccc; }
+.r-desc { font-size:6.5pt; line-height:1.4; margin:.5mm 0; word-break:break-word; }
+.r-danger { color:#dc3545; }
+.r-sig-sec { display:flex; gap:2mm; margin:1mm 0; }
+.r-sig-blk { flex:1; text-align:center; }
+.r-sig-lbl { font-size:5.5pt; opacity:.5; margin-bottom:.5mm; }
+.r-sig-wrap { border:.5px solid #ccc; height:8mm; display:flex; align-items:center; justify-content:center; padding:.5mm; background:#fafafa; }
+.r-total-row { border-top:1px solid #333; padding-top:.5mm; margin-top:.5mm; }
+.r-total-row .r-lbl { font-weight:700; opacity:1; }
+.r-total-row .r-val { font-size:8pt; font-weight:900; }
+.r-footer { text-align:center; margin-top:2mm; padding-top:1mm; }
+.r-foot-line { font-size:5pt; opacity:.4; margin:.3mm 0; }
+.r-foot-thanks { font-size:6pt; margin-top:1mm; opacity:.6; }
+
+/* Status badge colors for receipt */
+.s-pending { background:#fff3cd; color:#856404; }
+.s-accepted { background:#d1ecf1; color:#0c5460; }
+.s-in_progress { background:#e2d5f1; color:#4a1d8e; }
+.s-returned { background:#d4edda; color:#155724; }
+.s-closed { background:#e2e3e5; color:#383d41; }
+.s-cancelled { background:#f8d7da; color:#721c24; }
+
+/* Receipt preview wrapper */
+.receipt-preview-wrap {
+  background:#e8e8e8; padding:20px 24px; border-radius:12px;
+  display:flex; justify-content:center; overflow-x:auto;
+}
+.receipt-preview-wrap .thermal-receipt {
+  transform:scale(2.2); transform-origin:top center;
+  box-shadow:2px 4px 16px rgba(0,0,0,.18); border-radius:2px;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:50;
+  display:flex; align-items:center; justify-content:center; padding:16px;
+}
+.modal-content {
+  background:#fff; border-radius:12px; max-width:420px; width:100%;
+  max-height:90vh; overflow-y:auto;
+}
+
+/* Print */
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area {
+    position:fixed; top:0; left:0; width:100%; background:#fff; z-index:99999;
+  }
+  .print-area .thermal-receipt { transform:none!important; box-shadow:none!important; }
+  @page { size:50mm auto; margin:0; }
+}
+
+/* Responsive receipt scale */
+@media (max-width:640px) {
+  .receipt-preview-wrap .thermal-receipt { transform:scale(1.8); }
+}
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+<!-- ========== HEADER ========== -->
+<header class="sticky top-0 z-40 border-b bg-white/95 backdrop-blur">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+    <div class="flex items-center gap-2 sm:gap-3">
+      <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-emerald-600 flex items-center justify-center shrink-0">
+        <span class="text-white text-sm sm:text-base">🔧</span>
+      </div>
+      <div>
+        <h1 class="text-sm sm:text-lg font-bold leading-tight">ระบบแจ้งซ่อม</h1>
+        <p class="text-[10px] sm:text-xs text-gray-500">Surinhos Asset Management</p>
+      </div>
+    </div>
+    <button onclick="showCreateForm()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition">
+      + แจ้งซ่อมใหม่
+    </button>
+  </div>
+</header>
+
+<!-- ========== MAIN CONTENT ========== -->
+<main id="app" class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-6 w-full space-y-4 sm:space-y-6">
+  <!-- Stats -->
+  <div id="stats-area"></div>
+  <!-- List or Detail -->
+  <div id="content-area"></div>
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer class="border-t py-3 sm:py-4 mt-auto bg-white">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between text-xs text-gray-400">
+    <span>🏢 Surinhos Repair Tracking System</span>
+    <span>&copy; 2026</span>
+  </div>
+</footer>
+
+<!-- ========== RECEIPT PREVIEW MODAL ========== -->
+<div id="receipt-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeReceiptModal()">
+  <div class="modal-content p-0 overflow-hidden">
+    <div class="flex items-center justify-between px-4 pt-4 pb-2 border-b">
+      <div class="flex items-center gap-2">
+        <span>🖨️</span>
+        <span id="modal-title" class="text-sm font-medium">พรีวิวใบรับซ่อม</span>
+      </div>
+      <span class="text-xs text-gray-400">ขนาดกระดาษ 50mm</span>
+    </div>
+    <div class="px-4 py-4">
+      <div class="receipt-preview-wrap">
+        <div id="receipt-render"></div>
+      </div>
+    </div>
+    <div class="flex items-center justify-end gap-2 border-t px-4 py-3">
+      <button onclick="closeReceiptModal()" class="px-4 py-1.5 text-sm border rounded-lg hover:bg-gray-50">ปิด</button>
+      <button onclick="doPrint()" class="px-4 py-1.5 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">🖨️ ปริ้น</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PRINT AREA (hidden, used for actual printing) ========== -->
+<div id="print-area" class="print-area hidden"></div>
+
+<!-- ========== CREATE FORM MODAL ========== -->
+<div id="create-modal" class="modal-overlay hidden" onclick="if(event.target===this)document.getElementById('create-modal').classList.add('hidden')">
+  <div class="modal-content p-6">
+    <h2 class="text-lg font-bold mb-4">แจ้งซ่อมอุปกรณ์ใหม่</h2>
+    <div class="space-y-3">
+      <div>
+        <label class="text-sm font-medium text-gray-600">ชื่ออุปกรณ์</label>
+        <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="เช่น คอมพิวเตอร์ Dell OptiPlex">
+      </div>
+      <div>
+        <label class="text-sm font-medium text-gray-600">รายละเอียดปัญหา</label>
+        <textarea class="mt-1 w-full border rounded-lg px-3 py-2 text-sm" rows="3" placeholder="อธิบายอาการที่พบ"></textarea>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-gray-600">ชื่อผู้แจ้ง</label>
+        <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="ชื่อ-นามสกุล">
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 mt-6">
+      <button onclick="document.getElementById('create-modal').classList.add('hidden')" class="px-4 py-2 text-sm border rounded-lg">ยกเลิก</button>
+      <button onclick="document.getElementById('create-modal').classList.add('hidden');showToast('✅ บันทึกแจ้งซ่อมเรียบร้อย')" class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TOAST ========== -->
+<div id="toast" class="fixed top-4 right-4 z-50 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm shadow-lg transform translate-x-full transition-transform duration-300"></div>
+
+<script>
+// ===== DATA =====
+const tickets = [
+  {
+    id: '1', ticketNo: 'RPR-260725-001', status: 'pending',
+    assetName: 'เครื่องพิมพ์ HP LaserJet Pro M404', assetCode: 'PRT-69-001',
+    category: 'เครื่องพิมพ์', location: 'อาคารอำนวยการ, ห้อง 102',
+    problemDetails: 'กระดาษตัน แม้เปิดปิดเครื่องใหม่แล้ว ใช้งานไม่ได้เลย',
+    reporterName: 'สุภาพร รักงาน', createdAt: '28/ก.ค./69 05:03',
+    receivedBy: null, receivedAt: null,
+    repairCost: null, laborCost: null, totalCost: null, costStatus: null,
+    returnMethod: null, returnedBy: null, returnedAt: null,
+    cancelReason: null,
+  },
+  {
+    id: '2', ticketNo: 'RPR-260720-001', status: 'accepted',
+    assetName: 'คอมพิวเตอร์แม่ข่าย (Server)', assetCode: 'COM-69-001',
+    category: 'อุปกรณ์คอมพิวเตอร์', location: 'อาคารอำนวยการ, ห้องเซิร์ฟเวอร์',
+    problemDetails: 'เปิดเครื่องไม่ติด ไฟกระพริบที่ปุ่ม power',
+    reporterName: 'สมชาย ใจดี', createdAt: '20/ก.ค./68 09:15',
+    receivedBy: 'วิชัย ซ่อมดี', receivedAt: '20/ก.ค./68 10:30',
+    repairCost: null, laborCost: null, totalCost: null, costStatus: null,
+    returnMethod: null, returnedBy: null, returnedAt: null,
+    cancelReason: null,
+  },
+  {
+    id: '3', ticketNo: 'RPR-260718-001', status: 'in_progress',
+    assetName: 'โน้ตบุ๊ค ASUS ExpertBook B9', assetCode: 'COM-69-005',
+    category: 'อุปกรณ์คอมพิวเตอร์', location: 'อาคารเรียนรวม, ห้อง 202',
+    problemDetails: 'จอภาพเบลอ มีจุดสว่างผิดปกติหลายจุด',
+    reporterName: 'ธนา พิมพ์ดี', createdAt: '18/ก.ค./68 08:00',
+    receivedBy: 'วิชัย ซ่อมดี', receivedAt: '18/ก.ค./68 09:00',
+    repairCost: 4500, laborCost: 1500, totalCost: 6000, costStatus: 'approved',
+    returnMethod: null, returnedBy: null, returnedAt: null,
+    cancelReason: null,
+  },
+  {
+    id: '4', ticketNo: 'RPR-260715-001', status: 'returned',
+    assetName: 'เร้าเตอร์ TP-Link Archer AX6000', assetCode: 'NET-69-002',
+    category: 'อุปกรณ์เครือข่าย', location: 'อาคารอำนวยการ, ห้องไอที ชั้น 2',
+    problemDetails: 'สัญญาณ Wi-Fi ไม่เสถียร หลุดบ่อย',
+    reporterName: 'ประยุทธ์ รักเทคโนโลยี', createdAt: '15/ก.ค./68 14:00',
+    receivedBy: 'วิชัย ซ่อมดี', receivedAt: '15/ก.ค./68 14:00',
+    repairCost: 800, laborCost: 500, totalCost: 1300, costStatus: 'approved',
+    returnMethod: 'ส่งมอบถึงห้อง', returnedBy: 'วิชัย ซ่อมดี', returnedAt: '17/ก.ค./68 11:00',
+    cancelReason: null,
+  },
+  {
+    id: '5', ticketNo: 'RPR-260710-001', status: 'closed',
+    assetName: 'โปรเจกเตอร์ Epson EB-L260F', assetCode: 'PRJ-69-001',
+    category: 'เครื่องฉาย', location: 'อาคารเรียนรวม, ห้องประชุม A',
+    problemDetails: 'ภาพเบลอ สีเพี้ยน ตัวเลือนไม่ทำงาน',
+    reporterName: 'วรรณา สอนดี', createdAt: '10/ก.ค./68 08:30',
+    receivedBy: 'วิชัย ซ่อมดี', receivedAt: '10/ก.ค./68 08:30',
+    repairCost: 12000, laborCost: 3000, totalCost: 15000, costStatus: 'paid',
+    returnMethod: 'ส่งมอบถึงห้อง', returnedBy: 'วิชัย ซ่อมดี', returnedAt: '14/ก.ค./68 16:00',
+    cancelReason: null,
+  },
+  {
+    id: '6', ticketNo: 'RPR-260712-001', status: 'cancelled',
+    assetName: 'เครื่องสแกน Fujitsu ScanSnap iX1600', assetCode: 'SCN-69-001',
+    category: 'เครื่องสแกน', location: 'อาคารอำนวยการ, ห้อง 103',
+    problemDetails: 'กระดาษฉีกขณะสแกน แทร็คปิดไม่สนิท',
+    reporterName: 'สมหญิง รักการ์ด', createdAt: '12/ก.ค./68 10:00',
+    receivedBy: null, receivedAt: null,
+    repairCost: null, laborCost: null, totalCost: null, costStatus: null,
+    returnMethod: null, returnedBy: null, returnedAt: null,
+    cancelReason: 'อะแดปเตอร์หมดสต็อก ยี่ห้อหยุดผลิตรุ่นนี้แล้ว ค่าอะไหล่เกินราคาซื้อเครื่องใหม่ (ราคาซ่อม ~15,000 บาท vs เครื่องใหม่ 12,000 บาท)',
+  },
+];
+
+const statusMap = {
+  pending:    { label:'รอรับเรื่อง', color:'amber',  icon:'⏳', tailwind:'bg-amber-100 text-amber-700 border-amber-200' },
+  accepted:   { label:'รับเรื่องแล้ว', color:'blue', icon:'✅', tailwind:'bg-blue-100 text-blue-700 border-blue-200' },
+  in_progress:{ label:'กำลังซ่อม', color:'violet', icon:'🔧', tailwind:'bg-violet-100 text-violet-700 border-violet-200' },
+  returned:   { label:'ส่งคืนแล้ว', color:'green', icon:'📦', tailwind:'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  closed:     { label:'ปิดงาน', color:'gray', icon:'✅', tailwind:'bg-gray-100 text-gray-600 border-gray-200' },
+  cancelled:  { label:'ยกเลิก', color:'red', icon:'❌', tailwind:'bg-red-100 text-red-700 border-red-200' },
+};
+
+let currentView = 'list';
+let selectedTicketId = null;
+
+// ===== RENDER STATS =====
+function renderStats() {
+  const counts = { total:tickets.length, pending:0, accepted:0, in_progress:0, returned:0, closed:0, cancelled:0 };
+  tickets.forEach(t => { if(counts[t.status]!==undefined) counts[t.status]++; });
+
+  document.getElementById('stats-area').innerHTML = `
+    <div class="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3">
+      ${[
+        {key:'total',label:'ทั้งหมด',val:counts.total,color:'gray'},
+        {key:'pending',label:'รอรับเรื่อง',val:counts.pending,color:'amber'},
+        {key:'accepted',label:'รับเรื่องแล้ว',val:counts.accepted,color:'blue'},
+        {key:'in_progress',label:'กำลังซ่อม',val:counts.in_progress,color:'violet'},
+        {key:'returned',label:'ส่งคืนแล้ว',val:counts.returned,color:'emerald'},
+        {key:'closed',label:'ปิดงาน',val:counts.closed,color:'gray'},
+        {key:'cancelled',label:'ยกเลิก',val:counts.cancelled,color:'red'},
+      ].map(s => `
+        <div class="bg-white border rounded-lg p-2 sm:p-3 text-center ${s.key==='returned'||s.key==='closed'||s.key==='cancelled' ? 'hidden sm:block' : ''}">
+          <p class="text-lg sm:text-2xl font-bold ${s.color==='amber'?'text-amber-600':s.color==='blue'?'text-blue-600':s.color==='violet'?'text-violet-600':s.color==='emerald'?'text-emerald-600':s.color==='red'?'text-red-600':'text-gray-800'}">${s.val}</p>
+          <p class="text-[10px] sm:text-xs text-gray-500">${s.label}</p>
+        </div>
+      `).join('')}
+    </div>
+    <!-- Mobile hidden stats -->
+    <div class="sm:hidden grid grid-cols-3 gap-2 mt-2">
+      <div class="bg-white border rounded-lg p-2 text-center">
+        <p class="text-lg font-bold text-emerald-600">${counts.returned}</p>
+        <p class="text-[10px] text-gray-500">ส่งคืนแล้ว</p>
+      </div>
+      <div class="bg-white border rounded-lg p-2 text-center">
+        <p class="text-lg font-bold text-gray-800">${counts.closed}</p>
+        <p class="text-[10px] text-gray-500">ปิดงาน</p>
+      </div>
+      <div class="bg-white border rounded-lg p-2 text-center">
+        <p class="text-lg font-bold text-red-600">${counts.cancelled}</p>
+        <p class="text-[10px] text-gray-500">ยกเลิก</p>
+      </div>
+    </div>
+  `;
+}
+
+// ===== RENDER LIST =====
+function renderList() {
+  currentView = 'list';
+  selectedTicketId = null;
+  renderStats();
+  document.getElementById('content-area').innerHTML = `
+    <div class="space-y-2 sm:space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold text-gray-700">รายการแจ้งซ่อม <span class="text-gray-400 font-normal">(${tickets.length} รายการ)</span></h2>
+      </div>
+      ${tickets.map(t => {
+        const s = statusMap[t.status];
+        return `
+        <div onclick="showDetail('${t.id}')" class="bg-white border rounded-xl p-3 sm:p-4 cursor-pointer hover:shadow-md hover:border-emerald-200 transition-all group">
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-sm font-mono font-bold text-gray-800 shrink-0">${t.ticketNo}</span>
+              <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full border font-medium shrink-0 ${s.tailwind}">${s.icon} ${s.label}</span>
+            </div>
+          </div>
+          <p class="text-sm font-medium text-gray-800 mb-1">📦 ${t.assetName}</p>
+          <p class="text-xs text-gray-500 mb-1">🔖 ${t.assetCode} · 📍 ${t.location}</p>
+          <p class="text-xs text-gray-500 mb-2 line-clamp-1">⚠️ ${t.problemDetails}</p>
+          <div class="flex items-center justify-between text-[10px] sm:text-xs text-gray-400">
+            <span>👤 ${t.reporterName}</span>
+            <span>${t.createdAt}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ===== RENDER DETAIL =====
+function showDetail(id) {
+  const t = tickets.find(x => x.id === id);
+  if (!t) return;
+  currentView = 'detail';
+  selectedTicketId = id;
+  const s = statusMap[t.status];
+
+  // Timeline
+  const timeline = ['pending','accepted','in_progress','returned','closed'];
+  const idx = t.status === 'cancelled' ? -1 : timeline.indexOf(t.status);
+
+  let timelineHTML = '';
+  if (t.status !== 'cancelled') {
+    timelineHTML = `<div class="bg-white border rounded-xl p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">สถานะการดำเนินการ</h3>
+      <div class="flex items-center justify-between relative">
+        <div class="absolute top-3 left-0 right-0 h-0.5 bg-gray-200 z-0"></div>
+        ${timeline.map((st, i) => {
+          const active = i <= idx;
+          const current = i === idx;
+          const sc = statusMap[st];
+          return `<div class="flex flex-col items-center relative z-10 ${i < timeline.length-1 ? 'flex-1' : ''}">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${current ? 'bg-emerald-600 text-white ring-2 ring-emerald-200' : active ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-400'}">${sc.icon}</div>
+            <span class="text-[9px] sm:text-[10px] mt-1 ${current ? 'font-bold text-emerald-700' : 'text-gray-400'}">${sc.label}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  // Action buttons
+  let actions = '';
+  if (t.status === 'pending') actions = `<button onclick="showToast('✅ รับเรื่องเรียบร้อย')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg">✅ รับเรื่อง</button>`;
+  if (t.status === 'accepted') actions = `<button onclick="showToast('🔧 เริ่มซ่อมแล้ว')" class="bg-violet-600 hover:bg-violet-700 text-white text-sm px-4 py-2 rounded-lg">🔧 เริ่มซ่อม</button><button onclick="openReceipt('${t.id}','repair')" class="border text-sm px-4 py-2 rounded-lg hover:bg-gray-50">🖨️ ปริ้นใบรับซ่อม</button>`;
+  if (t.status === 'in_progress') actions = `<button onclick="showToast('💰 เสนอราคาเรียบร้อย')" class="bg-amber-600 hover:bg-amber-700 text-white text-sm px-4 py-2 rounded-lg">💰 เสนอราคา</button><button onclick="showToast('📦 ส่งคืนเรียบร้อย')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg">📦 ส่งคืน</button>`;
+  if (t.status === 'returned') actions = `<button onclick="showToast('✅ ปิดงานเรียบร้อย')" class="bg-gray-700 hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-lg">✅ ปิดงาน</button><button onclick="openReceipt('${t.id}','return')" class="border text-sm px-4 py-2 rounded-lg hover:bg-gray-50">🖨️ ปริ้นใบส่งคืน</button><button onclick="openReceipt('${t.id}','repair')" class="border text-sm px-4 py-2 rounded-lg hover:bg-gray-50">🖨️ ปริ้นใบรับซ่อม</button>`;
+  if (t.status === 'closed') actions = `<button onclick="openReceipt('${t.id}','repair')" class="border text-sm px-4 py-2 rounded-lg hover:bg-gray-50">🖨️ ปริ้นใบรับซ่อม</button><button onclick="openReceipt('${t.id}','return')" class="border text-sm px-4 py-2 rounded-lg hover:bg-gray-50">🖨️ ปริ้นใบส่งคืน</button>`;
+
+  document.getElementById('stats-area').innerHTML = '';
+  document.getElementById('content-area').innerHTML = `
+    <div class="space-y-4">
+      <!-- Header -->
+      <div class="flex items-center gap-3">
+        <button onclick="renderList()" class="p-2 hover:bg-gray-100 rounded-lg transition" aria-label="กลับ">←</button>
+        <div class="flex-1 min-w-0">
+          <h1 class="text-xl font-bold">${t.ticketNo}</h1>
+          <p class="text-sm text-gray-500">${t.createdAt}</p>
+        </div>
+        <span class="text-xs px-3 py-1 rounded-full border font-medium shrink-0 ${s.tailwind}">${s.icon} ${s.label}</span>
+      </div>
+
+      <!-- Cancel Reason -->
+      ${t.cancelReason ? `<div class="bg-red-50 border border-red-200 rounded-xl p-4"><p class="text-sm font-semibold text-red-700 mb-1">❌ เหตุผลการยกเลิก</p><p class="text-sm text-red-600">${t.cancelReason}</p></div>` : ''}
+
+      <!-- Equipment Info -->
+      <div class="bg-white border rounded-xl p-4 space-y-2">
+        <h3 class="text-sm font-semibold text-gray-700">ข้อมูลอุปกรณ์</h3>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div><span class="text-gray-500">ชื่อ:</span> <span class="font-medium">${t.assetName}</span></div>
+          <div><span class="text-gray-500">ครุภัณฑ์:</span> <span class="font-medium">${t.assetCode}</span></div>
+          <div><span class="text-gray-500">ประเภท:</span> <span class="font-medium">${t.category}</span></div>
+          <div><span class="text-gray-500">สถานที่:</span> <span class="font-medium">${t.location}</span></div>
+        </div>
+        <div class="text-sm"><span class="text-gray-500">ปัญหา:</span> <span class="font-medium">${t.problemDetails}</span></div>
+        <div class="text-sm"><span class="text-gray-500">ผู้แจ้ง:</span> <span class="font-medium">${t.reporterName}</span></div>
+      </div>
+
+      ${t.receivedBy ? `
+      <!-- Acceptance Info -->
+      <div class="bg-white border rounded-xl p-4 space-y-2">
+        <h3 class="text-sm font-semibold text-gray-700">ข้อมูลรับเรื่อง</h3>
+        <div class="text-sm"><span class="text-gray-500">ผู้รับ:</span> <span class="font-medium">${t.receivedBy}</span></div>
+        <div class="text-sm"><span class="text-gray-500">วันรับ:</span> <span class="font-medium">${t.receivedAt}</span></div>
+        <div class="grid grid-cols-2 gap-3 mt-2">
+          <div class="border rounded-lg p-3 text-center">
+            <p class="text-[10px] text-gray-400 mb-1">ลายเซ็น ผู้ส่ง</p>
+            <svg viewBox="0 0 100 30" class="w-full h-8"><path d="M5 25Q15 5 25 20Q30 10 35 15Q40 5 50 25Q55 10 60 20Q70 5 80 15Q85 25 95 10" stroke="#666" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="border rounded-lg p-3 text-center">
+            <p class="text-[10px] text-gray-400 mb-1">ลายเซ็น ผู้รับ</p>
+            <svg viewBox="0 0 100 30" class="w-full h-8"><path d="M8 22Q18 8 28 18Q33 12 38 20Q48 5 58 22Q63 8 73 18Q78 25 88 12Q92 8 95 15" stroke="#666" stroke-width="1.5" fill="none"/></svg>
+          </div>
+        </div>
+      </div>` : ''}
+
+      ${t.repairCost != null ? `
+      <!-- Cost Info -->
+      <div class="bg-white border rounded-xl p-4 space-y-2">
+        <h3 class="text-sm font-semibold text-gray-700">รายละเอียดค่าใช้จ่าย</h3>
+        <div class="grid grid-cols-3 gap-4 text-sm">
+          <div><span class="text-gray-500">ค่าอะไหล่:</span><br><span class="font-bold">${t.repairCost.toLocaleString()} ฿</span></div>
+          <div><span class="text-gray-500">ค่าแรง:</span><br><span class="font-bold">${t.laborCost.toLocaleString()} ฿</span></div>
+          <div><span class="text-gray-500">รวม:</span><br><span class="font-bold text-lg text-emerald-700">${t.totalCost.toLocaleString()} ฿</span></div>
+        </div>
+      </div>` : ''}
+
+      ${t.returnedBy ? `
+      <!-- Return Info -->
+      <div class="bg-white border rounded-xl p-4 space-y-2">
+        <h3 class="text-sm font-semibold text-gray-700">ข้อมูลส่งคืน</h3>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div><span class="text-gray-500">วิธีส่งคืน:</span> <span class="font-medium">${t.returnMethod}</span></div>
+          <div><span class="text-gray-500">ผู้ส่งคืน:</span> <span class="font-medium">${t.returnedBy}</span></div>
+          <div><span class="text-gray-500">วันส่งคืน:</span> <span class="font-medium">${t.returnedAt}</span></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mt-2">
+          <div class="border rounded-lg p-3 text-center">
+            <p class="text-[10px] text-gray-400 mb-1">ลายเซ็น ผู้ส่งคืน</p>
+            <svg viewBox="0 0 100 30" class="w-full h-8"><path d="M5 20Q15 5 25 18Q30 10 40 22Q50 5 60 20Q70 10 80 18Q85 25 95 8" stroke="#666" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="border rounded-lg p-3 text-center">
+            <p class="text-[10px] text-gray-400 mb-1">ลายเซ็น ผู้รับคืน</p>
+            <svg viewBox="0 0 100 30" class="w-full h-8"><path d="M10 18Q20 8 30 22Q35 12 45 20Q55 5 65 18Q75 10 85 22Q90 15 95 20" stroke="#666" stroke-width="1.5" fill="none"/></svg>
+          </div>
+        </div>
+      </div>` : ''}
+
+      <!-- Timeline -->
+      ${timelineHTML}
+
+      <!-- Actions -->
+      ${actions ? `<div class="bg-white border rounded-xl p-4">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">การดำเนินการ</h3>
+        <div class="flex flex-col sm:flex-row gap-2">${actions}</div>
+      </div>` : ''}
+    </div>
+  `;
+  window.scrollTo(0, 0);
+}
+
+// ===== RECEIPT =====
+function sigSVG(seed) {
+  const paths = [
+    'M5 25Q15 5 25 20Q30 10 35 15Q40 5 50 25Q55 10 60 20Q70 5 80 15Q85 25 95 10',
+    'M8 22Q18 8 28 18Q33 12 38 20Q48 5 58 22Q63 8 73 18Q78 25 88 12Q92 8 95 15',
+    'M5 20Q15 5 25 18Q30 10 40 22Q50 5 60 20Q70 10 80 18Q85 25 95 8',
+    'M10 18Q20 8 30 22Q35 12 45 20Q55 5 65 18Q75 10 85 22Q90 15 95 20',
+    'M3 22Q13 6 23 20Q28 14 33 18Q43 4 53 22Q58 8 68 20Q78 6 88 16Q93 22 97 8',
+  ];
+  return `<svg viewBox="0 0 100 30" style="width:100%;height:100%"><path d="${paths[seed % paths.length]}" stroke="#333" stroke-width="1" fill="none"/></svg>`;
+}
+
+function buildReceiptHTML(t, type) {
+  const isReturn = type === 'return';
+  const sc = statusMap[t.status];
+  const now = new Date();
+  const nowStr = `${String(now.getDate()).padStart(2,'0')}/${['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][now.getMonth()]}/${(now.getFullYear()+543).toString().slice(-2)}`;
+
+  let html = `<div class="thermal-receipt">
+    <div class="receipt-cut-top"></div>
+    <div class="receipt-content">
+      <div style="text-align:center">
+        <div class="r-logo">🔧</div>
+        <div class="r-org">SURINHOS</div>
+        <div class="r-sub">REPAIR CENTER</div>
+        <div class="r-div"></div>
+        <div class="r-title">${isReturn ? 'ใบส่งคืนครุภัณฑ์' : 'ใบรับซ่อมอุปกรณ์'}</div>
+        <div class="r-div"></div>
+      </div>
+      <div class="r-num-row">
+        <div class="r-num-lbl">เลขที่</div>
+        <div class="r-num-val">${t.ticketNo}</div>
+      </div>
+      <div class="r-date">${t.createdAt}</div>
+      <div class="r-div"></div>
+      <div class="r-row r-center">
+        <span class="r-lbl">สถานะ</span>
+        <span class="r-val s-${t.status}" style="padding:.3mm 1.5mm;border-radius:1mm;font-weight:700;font-size:6.5pt">${sc.label}</span>
+      </div>
+      <div class="r-div"></div>
+      <div class="r-sect">อุปกรณ์</div>
+      <div class="r-row"><span class="r-lbl">ชื่อ</span><span class="r-val bold">${t.assetName}</span></div>
+      <div class="r-row"><span class="r-lbl">ครุภัณฑ์</span><span class="r-val">${t.assetCode}</span></div>
+      <div class="r-row"><span class="r-lbl">ประเภท</span><span class="r-val">${t.category}</span></div>
+      <div class="r-row"><span class="r-lbl">สถานที่</span><span class="r-val">${t.location}</span></div>
+      <div class="r-div"></div>
+      <div class="r-sect">รายละเอียดปัญหา</div>
+      <div class="r-desc">${t.problemDetails || '-'}</div>
+      <div class="r-div"></div>
+      <div class="r-row"><span class="r-lbl">ผู้แจ้ง</span><span class="r-val">${t.reporterName || '-'}</span></div>`;
+
+  if (!isReturn && t.receivedBy) {
+    html += `<div class="r-row"><span class="r-lbl">ผู้รับเรื่อง</span><span class="r-val">${t.receivedBy}</span></div>
+      <div class="r-row"><span class="r-lbl">วันรับ</span><span class="r-val">${t.receivedAt}</span></div>
+      <div class="r-div"></div>
+      <div class="r-sig-sec">
+        <div class="r-sig-blk"><div class="r-sig-lbl">ลายเซ็น ผู้ส่ง</div><div class="r-sig-wrap">${sigSVG(0)}</div></div>
+        <div class="r-sig-blk"><div class="r-sig-lbl">ลายเซ็น ผู้รับ</div><div class="r-sig-wrap">${sigSVG(1)}</div></div>
+      </div>
+      <div class="r-div"></div>`;
+  }
+
+  if (isReturn) {
+    if (t.returnMethod) html += `<div class="r-row"><span class="r-lbl">วิธีส่งคืน</span><span class="r-val">${t.returnMethod}</span></div>`;
+    if (t.returnedBy) html += `<div class="r-row"><span class="r-lbl">ผู้ส่งคืน</span><span class="r-val">${t.returnedBy}</span></div>`;
+    if (t.returnedAt) html += `<div class="r-row"><span class="r-lbl">วันส่งคืน</span><span class="r-val">${t.returnedAt}</span></div>`;
+    html += `<div class="r-div"></div>`;
+  }
+
+  if (t.totalCost != null) {
+    html += `<div class="r-sect">ค่าใช้จ่าย</div>
+      <div class="r-row"><span class="r-lbl">ค่าอะไหล่</span><span class="r-val">${t.repairCost?.toLocaleString() || '-'}</span></div>
+      <div class="r-row"><span class="r-lbl">ค่าแรง</span><span class="r-val">${t.laborCost?.toLocaleString() || '-'}</span></div>
+      <div class="r-row r-total-row"><span class="r-lbl">รวมทั้งหมด</span><span class="r-val">${t.totalCost.toLocaleString()} บาท</span></div>
+      <div class="r-div"></div>`;
+  }
+
+  if (isReturn && (t.returnedBy)) {
+    html += `<div class="r-sig-sec">
+        <div class="r-sig-blk"><div class="r-sig-lbl">ลายเซ็น ผู้ส่งคืน</div><div class="r-sig-wrap">${sigSVG(2)}</div></div>
+        <div class="r-sig-blk"><div class="r-sig-lbl">ลายเซ็น ผู้รับคืน</div><div class="r-sig-wrap">${sigSVG(3)}</div></div>
+      </div>
+      <div class="r-div"></div>`;
+  }
+
+  if (t.cancelReason) {
+    html += `<div class="r-sect r-danger">เหตุผลยกเลิก</div>
+      <div class="r-desc r-danger">${t.cancelReason}</div>
+      <div class="r-div"></div>`;
+  }
+
+  html += `<div class="r-footer">
+      <div class="r-foot-line">พิมพ์เมื่อ: ${nowStr}</div>
+      <div class="r-foot-line">Surinhos Asset Management</div>
+      <div class="r-foot-thanks">☆ ขอบคุณที่ใช้บริการ ☆</div>
+    </div>
+    </div>
+    <div class="receipt-cut-bottom"></div>
+  </div>`;
+
+  return html;
+}
+
+function openReceipt(id, type) {
+  const t = tickets.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('modal-title').textContent = type === 'return' ? 'พรีวิวใบส่งคืน' : 'พรีวิวใบรับซ่อม';
+  document.getElementById('receipt-render').innerHTML = buildReceiptHTML(t, type);
+  document.getElementById('receipt-modal').classList.remove('hidden');
+  // Store for printing
+  document.getElementById('print-area').innerHTML = buildReceiptHTML(t, type);
+}
+
+function closeReceiptModal() {
+  document.getElementById('receipt-modal').classList.add('hidden');
+}
+
+function doPrint() {
+  closeReceiptModal();
+  setTimeout(() => window.print(), 200);
+}
+
+function showCreateForm() {
+  document.getElementById('create-modal').classList.remove('hidden');
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('translate-x-full');
+  el.classList.add('translate-x-0');
+  setTimeout(() => {
+    el.classList.remove('translate-x-0');
+    el.classList.add('translate-x-full');
+  }, 2500);
+}
+
+// Init
+renderList();
+</script>
+</body>
+</html>
