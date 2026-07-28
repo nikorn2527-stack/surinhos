@@ -1,0 +1,1368 @@
+     1→'use client'
+     2→
+     3→import { useState, useRef, useCallback, useEffect } from 'react'
+     4→import { useMutation } from '@tanstack/react-query'
+     5→import { toast } from 'sonner'
+     6→import {
+     7→  ArrowLeft,
+     8→  Clock,
+     9→  CheckCircle,
+    10→  Wrench,
+    11→  PackageOpen,
+    12→  CheckCircle2,
+    13→  XCircle,
+    14→  Printer,
+    15→  Loader2,
+    16→  CalendarDays,
+    17→  User,
+    18→  MapPin,
+    19→  AlertTriangle,
+    20→  Banknote,
+    21→} from 'lucide-react'
+    22→
+    23→import { cn } from '@/lib/utils'
+    24→import { Button } from '@/components/ui/button'
+    25→import { Input } from '@/components/ui/input'
+    26→import { Label } from '@/components/ui/label'
+    27→import { Textarea } from '@/components/ui/textarea'
+    28→import { Badge } from '@/components/ui/badge'
+    29→import {
+    30→  Card,
+    31→  CardContent,
+    32→  CardHeader,
+    33→  CardTitle,
+    34→  CardDescription,
+    35→} from '@/components/ui/card'
+    36→import { Separator } from '@/components/ui/separator'
+    37→import { Skeleton } from '@/components/ui/skeleton'
+    38→import {
+    39→  Dialog,
+    40→  DialogContent,
+    41→  DialogHeader,
+    42→  DialogTitle,
+    43→  DialogDescription,
+    44→  DialogFooter,
+    45→} from '@/components/ui/dialog'
+    46→import {
+    47→  AlertDialog,
+    48→  AlertDialogContent,
+    49→  AlertDialogHeader,
+    50→  AlertDialogTitle,
+    51→  AlertDialogDescription,
+    52→  AlertDialogFooter,
+    53→  AlertDialogAction,
+    54→  AlertDialogCancel,
+    55→} from '@/components/ui/alert-dialog'
+    56→import {
+    57→  Select,
+    58→  SelectContent,
+    59→  SelectItem,
+    60→  SelectTrigger,
+    61→  SelectValue,
+    62→} from '@/components/ui/select'
+    63→import SignaturePad from '@/components/repair/signature-pad'
+    64→
+    65→// ==================== TYPES ====================
+    66→
+    67→interface TicketDetailProps {
+    68→  ticketId: string
+    69→  onClose: () => void
+    70→  onUpdate: () => void
+    71→}
+    72→
+    73→interface AssetInfo {
+    74→  assetCode: string | null
+    75→  name: string
+    76→  category: string
+    77→  location: {
+    78→    buildingName: string
+    79→    roomName: string
+    80→  } | null
+    81→}
+    82→
+    83→interface RepairTicket {
+    84→  id: string
+    85→  ticketNo: string
+    86→  assetId: string | null
+    87→  assetName: string
+    88→  problemDetails: string | null
+    89→  reporterName: string | null
+    90→  status: string
+    91→  receivedBy: string | null
+    92→  receivedAt: string | null
+    93→  senderSignature: string | null
+    94→  receiverSignature: string | null
+    95→  returnMethod: string | null
+    96→  returnedBy: string | null
+    97→  returnedAt: string | null
+    98→  returnSenderSignature: string | null
+    99→  returnReceiverSignature: string | null
+   100→  repairCost: number | null
+   101→  laborCost: number | null
+   102→  totalCost: number | null
+   103→  costStatus: string | null
+   104→  cancelReason: string | null
+   105→  createdAt: string
+   106→  updatedAt: string
+   107→  asset: AssetInfo | null
+   108→}
+   109→
+   110→// ==================== CONFIG ====================
+   111→
+   112→const statusConfig: Record<
+   113→  string,
+   114→  { label: string; color: string; icon: string }
+   115→> = {
+   116→  pending: {
+   117→    label: 'รอรับเรื่อง',
+   118→    color: 'bg-amber-100 text-amber-700',
+   119→    icon: 'Clock',
+   120→  },
+   121→  accepted: {
+   122→    label: 'รับเรื่องแล้ว',
+   123→    color: 'bg-blue-100 text-blue-700',
+   124→    icon: 'CheckCircle',
+   125→  },
+   126→  in_progress: {
+   127→    label: 'กำลังซ่อม',
+   128→    color: 'bg-violet-100 text-violet-700',
+   129→    icon: 'Wrench',
+   130→  },
+   131→  returned: {
+   132→    label: 'ส่งคืนแล้ว',
+   133→    color: 'bg-emerald-100 text-emerald-700',
+   134→    icon: 'PackageOpen',
+   135→  },
+   136→  closed: {
+   137→    label: 'ปิดงาน',
+   138→    color: 'bg-gray-100 text-gray-700',
+   139→    icon: 'CheckCircle2',
+   140→  },
+   141→  cancelled: {
+   142→    label: 'ยกเลิก',
+   143→    color: 'bg-red-100 text-red-700',
+   144→    icon: 'XCircle',
+   145→  },
+   146→}
+   147→
+   148→const statusTimeline = ['pending', 'accepted', 'in_progress', 'returned', 'closed']
+   149→
+   150→const iconMap: Record<string, React.ReactNode> = {
+   151→  Clock: <Clock className="size-4" />,
+   152→  CheckCircle: <CheckCircle className="size-4" />,
+   153→  Wrench: <Wrench className="size-4" />,
+   154→  PackageOpen: <PackageOpen className="size-4" />,
+   155→  CheckCircle2: <CheckCircle2 className="size-4" />,
+   156→  XCircle: <XCircle className="size-4" />,
+   157→}
+   158→
+   159→const costStatusLabel: Record<string, string> = {
+   160→  pending: 'รออนุมัติ',
+   161→  approved: 'อนุมัติแล้ว',
+   162→  rejected: 'ไม่อนุมัติ',
+   163→}
+   164→
+   165→// ==================== HELPER ====================
+   166→
+   167→function formatDate(dateStr: string | null) {
+   168→  if (!dateStr) return '-'
+   169→  const d = new Date(dateStr)
+   170→  return d.toLocaleDateString('th-TH', {
+   171→    year: 'numeric',
+   172→    month: 'short',
+   173→    day: 'numeric',
+   174→    hour: '2-digit',
+   175→    minute: '2-digit',
+   176→  })
+   177→}
+   178→
+   179→function formatCurrency(amount: number | null) {
+   180→  if (amount == null) return '-'
+   181→  return new Intl.NumberFormat('th-TH', {
+   182→    style: 'currency',
+   183→    currency: 'THB',
+   184→    minimumFractionDigits: 0,
+   185→    maximumFractionDigits: 2,
+   186→  }).format(amount)
+   187→}
+   188→
+   189→function getTimelineIndex(status: string): number {
+   190→  if (status === 'cancelled') return -1
+   191→  return statusTimeline.indexOf(status)
+   192→}
+   193→
+   194→// ==================== COMPONENT ====================
+   195→
+   196→export default function TicketDetail({
+   197→  ticketId,
+   198→  onClose,
+   199→  onUpdate,
+   200→}: TicketDetailProps) {
+   201→  // ---------- state ----------
+   202→  const [ticket, setTicket] = useState<RepairTicket | null>(null)
+   203→  const [loading, setLoading] = useState(true)
+   204→
+   205→  // accept modal
+   206→  const [showAcceptModal, setShowAcceptModal] = useState(false)
+   207→  const [acceptReceiver, setAcceptReceiver] = useState('')
+   208→  const receiverSignatureRef = useRef<{ toDataURL: () => string } | null>(null)
+   209→
+   210→  // cancel modal
+   211→  const [showCancelModal, setShowCancelModal] = useState(false)
+   212→  const [cancelReason, setCancelReason] = useState('')
+   213→
+   214→  // estimate modal
+   215→  const [showEstimateModal, setShowEstimateModal] = useState(false)
+   216→  const [estRepairCost, setEstRepairCost] = useState('')
+   217→  const [estLaborCost, setEstLaborCost] = useState('')
+   218→  const [estCostStatus, setEstCostStatus] = useState('pending')
+   219→
+   220→  // return modal
+   221→  const [showReturnModal, setShowReturnModal] = useState(false)
+   222→  const [returnMethod, setReturnMethod] = useState('')
+   223→  const [returnedBy, setReturnedBy] = useState('')
+   224→  const returnSenderSignatureRef = useRef<{ toDataURL: () => string } | null>(null)
+   225→  const returnReceiverSignatureRef = useRef<{ toDataURL: () => string } | null>(null)
+   226→
+   227→  // confirm dialogs
+   228→  const [showStartRepairConfirm, setShowStartRepairConfirm] = useState(false)
+   229→  const [showCloseConfirm, setShowCloseConfirm] = useState(false)
+   230→
+   231→  // print
+   232→  const [printType, setPrintType] = useState<'repair' | 'return'>('repair')
+   233→
+   234→  // ---------- fetch ticket ----------
+   235→  const fetchTicket = useCallback(async () => {
+   236→    setLoading(true)
+   237→    try {
+   238→      const res = await fetch(`/api/repairs/${ticketId}`)
+   239→      if (!res.ok) {
+   240→        if (res.status === 404) {
+   241→          toast.error('ไม่พบใบแจ้งซ่อมที่ต้องการ')
+   242→          onClose()
+   243→        } else {
+   244→          throw new Error('Failed to fetch')
+   245→        }
+   246→        return
+   247→      }
+   248→      const data: RepairTicket = await res.json()
+   249→      setTicket(data)
+   250→    } catch {
+   251→      toast.error('เกิดข้อผิดพลาดในการโหลดข้อมูล')
+   252→    } finally {
+   253→      setLoading(false)
+   254→    }
+   255→  }, [ticketId, onClose])
+   256→
+   257→  useEffect(() => {
+   258→    fetchTicket()
+   259→  }, [fetchTicket])
+   260→
+   261→  // ---------- mutations ----------
+   262→  const acceptMutation = useMutation({
+   263→    mutationFn: async (data: { receivedBy: string; receiverSignature?: string }) => {
+   264→      const res = await fetch(`/api/repairs/${ticketId}/accept`, {
+   265→        method: 'PUT',
+   266→        headers: { 'Content-Type': 'application/json' },
+   267→        body: JSON.stringify(data),
+   268→      })
+   269→      if (!res.ok) {
+   270→        const err = await res.json().catch(() => ({}))
+   271→        throw new Error(err.error || 'ล้มเหลว')
+   272→      }
+   273→      return res.json()
+   274→    },
+   275→    onSuccess: (updated) => {
+   276→      setTicket(updated)
+   277→      setShowAcceptModal(false)
+   278→      setAcceptReceiver('')
+   279→      toast.success('รับเรื่องเรียบร้อยแล้ว')
+   280→      onUpdate()
+   281→    },
+   282→    onError: (err: Error) => {
+   283→      toast.error(err.message)
+   284→    },
+   285→  })
+   286→
+   287→  const progressMutation = useMutation({
+   288→    mutationFn: async () => {
+   289→      const res = await fetch(`/api/repairs/${ticketId}/progress`, {
+   290→        method: 'PUT',
+   291→        headers: { 'Content-Type': 'application/json' },
+   292→        body: JSON.stringify({}),
+   293→      })
+   294→      if (!res.ok) {
+   295→        const err = await res.json().catch(() => ({}))
+   296→        throw new Error(err.error || 'ล้มเหลว')
+   297→      }
+   298→      return res.json()
+   299→    },
+   300→    onSuccess: (updated) => {
+   301→      setTicket(updated)
+   302→      setShowStartRepairConfirm(false)
+   303→      toast.success('เริ่มดำเนินการซ่อมเรียบร้อยแล้ว')
+   304→      onUpdate()
+   305→    },
+   306→    onError: (err: Error) => {
+   307→      toast.error(err.message)
+   308→    },
+   309→  })
+   310→
+   311→  const estimateMutation = useMutation({
+   312→    mutationFn: async (data: { repairCost: number; laborCost: number; costStatus: string }) => {
+   313→      const res = await fetch(`/api/repairs/${ticketId}/estimate`, {
+   314→        method: 'PUT',
+   315→        headers: { 'Content-Type': 'application/json' },
+   316→        body: JSON.stringify(data),
+   317→      })
+   318→      if (!res.ok) {
+   319→        const err = await res.json().catch(() => ({}))
+   320→        throw new Error(err.error || 'ล้มเหลว')
+   321→      }
+   322→      return res.json()
+   323→    },
+   324→    onSuccess: (updated) => {
+   325→      setTicket(updated)
+   326→      setShowEstimateModal(false)
+   327→      setEstRepairCost('')
+   328→      setEstLaborCost('')
+   329→      setEstCostStatus('pending')
+   330→      toast.success('บันทึกการเสนอราคาเรียบร้อยแล้ว')
+   331→      onUpdate()
+   332→    },
+   333→    onError: (err: Error) => {
+   334→      toast.error(err.message)
+   335→    },
+   336→  })
+   337→
+   338→  const returnMutation = useMutation({
+   339→    mutationFn: async (data: {
+   340→      returnMethod: string
+   341→      returnedBy: string
+   342→      returnSenderSignature?: string
+   343→      returnReceiverSignature?: string
+   344→    }) => {
+   345→      const res = await fetch(`/api/repairs/${ticketId}/return`, {
+   346→        method: 'PUT',
+   347→        headers: { 'Content-Type': 'application/json' },
+   348→        body: JSON.stringify(data),
+   349→      })
+   350→      if (!res.ok) {
+   351→        const err = await res.json().catch(() => ({}))
+   352→        throw new Error(err.error || 'ล้มเหลว')
+   353→      }
+   354→      return res.json()
+   355→    },
+   356→    onSuccess: (updated) => {
+   357→      setTicket(updated)
+   358→      setShowReturnModal(false)
+   359→      setReturnMethod('')
+   360→      setReturnedBy('')
+   361→      toast.success('ส่งคืนครุภัณฑ์เรียบร้อยแล้ว')
+   362→      onUpdate()
+   363→    },
+   364→    onError: (err: Error) => {
+   365→      toast.error(err.message)
+   366→    },
+   367→  })
+   368→
+   369→  const closeMutation = useMutation({
+   370→    mutationFn: async () => {
+   371→      const res = await fetch(`/api/repairs/${ticketId}/close`, {
+   372→        method: 'PUT',
+   373→        headers: { 'Content-Type': 'application/json' },
+   374→        body: JSON.stringify({}),
+   375→      })
+   376→      if (!res.ok) {
+   377→        const err = await res.json().catch(() => ({}))
+   378→        throw new Error(err.error || 'ล้มเหลว')
+   379→      }
+   380→      return res.json()
+   381→    },
+   382→    onSuccess: (updated) => {
+   383→      setTicket(updated)
+   384→      setShowCloseConfirm(false)
+   385→      toast.success('ปิดงานเรียบร้อยแล้ว')
+   386→      onUpdate()
+   387→    },
+   388→    onError: (err: Error) => {
+   389→      toast.error(err.message)
+   390→    },
+   391→  })
+   392→
+   393→  const cancelMutation = useMutation({
+   394→    mutationFn: async (data: { cancelReason: string }) => {
+   395→      const res = await fetch(`/api/repairs/${ticketId}/cancel`, {
+   396→        method: 'PUT',
+   397→        headers: { 'Content-Type': 'application/json' },
+   398→        body: JSON.stringify(data),
+   399→      })
+   400→      if (!res.ok) {
+   401→        const err = await res.json().catch(() => ({}))
+   402→        throw new Error(err.error || 'ล้มเหลว')
+   403→      }
+   404→      return res.json()
+   405→    },
+   406→    onSuccess: (updated) => {
+   407→      setTicket(updated)
+   408→      setShowCancelModal(false)
+   409→      setCancelReason('')
+   410→      toast.success('ยกเลิกใบแจ้งซ่อมเรียบร้อยแล้ว')
+   411→      onUpdate()
+   412→    },
+   413→    onError: (err: Error) => {
+   414→      toast.error(err.message)
+   415→    },
+   416→  })
+   417→
+   418→  // ---------- handlers ----------
+   419→  const handleAccept = () => {
+   420→    if (!acceptReceiver.trim()) {
+   421→      toast.error('กรุณาระบุชื่อผู้รับเรื่อง')
+   422→      return
+   423→    }
+   424→    const sig = receiverSignatureRef.current?.toDataURL() || undefined
+   425→    acceptMutation.mutate({ receivedBy: acceptReceiver.trim(), receiverSignature: sig })
+   426→  }
+   427→
+   428→  const handleEstimate = () => {
+   429→    const rc = parseFloat(estRepairCost)
+   430→    const lc = parseFloat(estLaborCost)
+   431→    if (isNaN(rc) || isNaN(lc)) {
+   432→      toast.error('กรุณาระบุค่าอะไหล่และค่าแรงงานให้ถูกต้อง')
+   433→      return
+   434→    }
+   435→    estimateMutation.mutate({
+   436→      repairCost: rc,
+   437→      laborCost: lc,
+   438→      costStatus: estCostStatus,
+   439→    })
+   440→  }
+   441→
+   442→  const handleReturn = () => {
+   443→    if (!returnMethod) {
+   444→      toast.error('กรุณาเลือกวิธีการส่งคืน')
+   445→      return
+   446→    }
+   447→    if (!returnedBy.trim()) {
+   448→      toast.error('กรุณาระบุชื่อผู้ส่งคืน')
+   449→      return
+   450→    }
+   451→    const senderSig = returnSenderSignatureRef.current?.toDataURL() || undefined
+   452→    const receiverSig = returnReceiverSignatureRef.current?.toDataURL() || undefined
+   453→    returnMutation.mutate({
+   454→      returnMethod,
+   455→      returnedBy: returnedBy.trim(),
+   456→      returnSenderSignature: senderSig,
+   457→      returnReceiverSignature: receiverSig,
+   458→    })
+   459→  }
+   460→
+   461→  const handleCancel = () => {
+   462→    if (!cancelReason.trim()) {
+   463→      toast.error('กรุณาระบุเหตุผลการยกเลิก')
+   464→      return
+   465→    }
+   466→    cancelMutation.mutate({ cancelReason: cancelReason.trim() })
+   467→  }
+   468→
+   469→  const handlePrint = (type: 'repair' | 'return') => {
+   470→    setPrintType(type)
+   471→    setTimeout(() => {
+   472→      window.print()
+   473→    }, 300)
+   474→  }
+   475→
+   476→  // ---------- computed ----------
+   477→  const isAnyMutationLoading =
+   478→    acceptMutation.isPending ||
+   479→    progressMutation.isPending ||
+   480→    estimateMutation.isPending ||
+   481→    returnMutation.isPending ||
+   482→    closeMutation.isPending ||
+   483→    cancelMutation.isPending
+   484→
+   485→  const estTotal = (parseFloat(estRepairCost) || 0) + (parseFloat(estLaborCost) || 0)
+   486→
+   487→  // ==================== RENDER ====================
+   488→
+   489→  if (loading) {
+   490→    return (
+   491→      <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
+   492→        <Skeleton className="h-8 w-64" />
+   493→        <Skeleton className="h-40 w-full" />
+   494→        <Skeleton className="h-20 w-full" />
+   495→        <Skeleton className="h-20 w-full" />
+   496→      </div>
+   497→    )
+   498→  }
+   499→
+   500→  if (!ticket) {
+   501→    return (
+   502→      <div className="mx-auto max-w-4xl p-4 text-center md:p-6">
+   503→        <p className="text-muted-foreground">ไม่พบข้อมูลใบแจ้งซ่อม</p>
+   504→        <Button variant="outline" className="mt-4" onClick={onClose}>
+   505→          <ArrowLeft className="size-4" />
+   506→          กลับ
+   507→        </Button>
+   508→      </div>
+   509→    )
+   510→  }
+   511→
+   512→  const currentConfig = statusConfig[ticket.status] || statusConfig.pending
+   513→  const timelineIndex = getTimelineIndex(ticket.status)
+   514→
+   515→  return (
+   516→    <div className="no-print">
+   517→      <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
+   518→        {/* ========== HEADER ========== */}
+   519→        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+   520→          <div className="flex items-center gap-3">
+   521→            <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0" aria-label="กลับ">
+   522→              <ArrowLeft className="size-5" />
+   523→            </Button>
+   524→            <div>
+   525→              <h1 className="text-xl font-bold md:text-2xl">{ticket.ticketNo}</h1>
+   526→              <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+   527→                <CalendarDays className="size-3.5" />
+   528→                <span>{formatDate(ticket.createdAt)}</span>
+   529→              </div>
+   530→            </div>
+   531→          </div>
+   532→          <Badge className={cn('px-3 py-1 text-sm font-medium', currentConfig.color)} variant="outline">
+   533→            {iconMap[currentConfig.icon]}
+   534→            {currentConfig.label}
+   535→          </Badge>
+   536→        </div>
+   537→
+   538→        {/* ========== CANCEL REASON (if cancelled) ========== */}
+   539→        {ticket.status === 'cancelled' && ticket.cancelReason && (
+   540→          <Card className="border-red-200 bg-red-50">
+   541→            <CardContent className="flex items-start gap-3 p-4">
+   542→              <AlertTriangle className="mt-0.5 size-5 shrink-0 text-red-600" />
+   543→              <div>
+   544→                <p className="font-semibold text-red-700">เหตุผลการยกเลิก</p>
+   545→                <p className="mt-1 text-sm text-red-600">{ticket.cancelReason}</p>
+   546→              </div>
+   547→            </CardContent>
+   548→          </Card>
+   549→        )}
+   550→
+   551→        {/* ========== INFO SECTION ========== */}
+   552→        <Card>
+   553→          <CardHeader>
+   554→            <CardTitle className="text-base">ข้อมูลใบแจ้งซ่อม</CardTitle>
+   555→          </CardHeader>
+   556→          <CardContent className="grid gap-4 sm:grid-cols-2">
+   557→            <div className="space-y-3">
+   558→              <div>
+   559→                <p className="text-xs font-medium text-muted-foreground">ชื่ออุปกรณ์ / สถานที่</p>
+   560→                <p className="mt-0.5 font-medium">{ticket.assetName}</p>
+   561→              </div>
+   562→              {ticket.asset?.assetCode && (
+   563→                <div>
+   564→                  <p className="text-xs font-medium text-muted-foreground">หมายเลขครุภัณฑ์</p>
+   565→                  <p className="mt-0.5 font-medium">{ticket.asset.assetCode}</p>
+   566→                </div>
+   567→              )}
+   568→              {ticket.asset?.category && (
+   569→                <div>
+   570→                  <p className="text-xs font-medium text-muted-foreground">หมวดหมู่</p>
+   571→                  <p className="mt-0.5 font-medium">{ticket.asset.category}</p>
+   572→                </div>
+   573→              )}
+   574→              {ticket.asset?.location && (
+   575→                <div>
+   576→                  <p className="text-xs font-medium text-muted-foreground">สถานที่ตั้ง</p>
+   577→                  <p className="mt-0.5 flex items-center gap-1 font-medium">
+   578→                    <MapPin className="size-3.5" />
+   579→                    {ticket.asset.location.buildingName} {ticket.asset.location.roomName}
+   580→                  </p>
+   581→                </div>
+   582→              )}
+   583→            </div>
+   584→            <div className="space-y-3">
+   585→              <div>
+   586→                <p className="text-xs font-medium text-muted-foreground">รายละเอียดปัญหา</p>
+   587→                <p className="mt-0.5 whitespace-pre-wrap">{ticket.problemDetails || '-'}</p>
+   588→              </div>
+   589→              <div>
+   590→                <p className="text-xs font-medium text-muted-foreground">ผู้แจ้ง</p>
+   591→                <p className="mt-0.5 flex items-center gap-1 font-medium">
+   592→                  <User className="size-3.5" />
+   593→                  {ticket.reporterName || '-'}
+   594→                </p>
+   595→              </div>
+   596→            </div>
+   597→          </CardContent>
+   598→        </Card>
+   599→
+   600→        {/* ========== ACCEPTANCE INFO ========== */}
+   601→        {ticket.receivedBy && (
+   602→          <Card>
+   603→            <CardHeader>
+   604→              <CardTitle className="text-base">ข้อมูลการรับเรื่อง</CardTitle>
+   605→              <CardDescription>รับเรื่องเมื่อ {formatDate(ticket.receivedAt)}</CardDescription>
+   606→            </CardHeader>
+   607→            <CardContent className="space-y-3">
+   608→              <div className="flex items-center gap-2">
+   609→                <User className="size-4 text-muted-foreground" />
+   610→                <span className="text-sm">
+   611→                  <span className="text-muted-foreground">ผู้รับเรื่อง: </span>
+   612→                  <span className="font-medium">{ticket.receivedBy}</span>
+   613→                </span>
+   614→              </div>
+   615→              {ticket.receiverSignature && (
+   616→                <div>
+   617→                  <p className="mb-1 text-xs font-medium text-muted-foreground">ลายเซ็นผู้รับ</p>
+   618→                  <img
+   619→                    src={ticket.receiverSignature}
+   620→                    alt="ลายเซ็นผู้รับ"
+   621→                    className="h-20 rounded border border-gray-200 bg-white object-contain p-1"
+   622→                  />
+   623→                </div>
+   624→              )}
+   625→            </CardContent>
+   626→          </Card>
+   627→        )}
+   628→
+   629→        {/* ========== COST ESTIMATE ========== */}
+   630→        {(ticket.repairCost != null || ticket.laborCost != null || ticket.costStatus) && (
+   631→          <Card>
+   632→            <CardHeader>
+   633→              <CardTitle className="flex items-center gap-2 text-base">
+   634→                <Banknote className="size-4" />
+   635→                ข้อมูลค่าใช้จ่าย
+   636→              </CardTitle>
+   637→              {ticket.costStatus && (
+   638→                <CardDescription>
+   639→                  สถานะ:{' '}
+   640→                  <span
+   641→                    className={cn(
+   642→                      'font-medium',
+   643→                      ticket.costStatus === 'approved' && 'text-emerald-600',
+   644→                      ticket.costStatus === 'rejected' && 'text-red-600',
+   645→                      ticket.costStatus === 'pending' && 'text-amber-600'
+   646→                    )}
+   647→                  >
+   648→                    {costStatusLabel[ticket.costStatus] || ticket.costStatus}
+   649→                  </span>
+   650→                </CardDescription>
+   651→              )}
+   652→            </CardHeader>
+   653→            <CardContent>
+   654→              <div className="grid grid-cols-3 gap-4">
+   655→                <div className="rounded-lg bg-muted/50 p-3 text-center">
+   656→                  <p className="text-xs text-muted-foreground">ค่าอะไหล่</p>
+   657→                  <p className="mt-1 text-lg font-bold">{formatCurrency(ticket.repairCost)}</p>
+   658→                </div>
+   659→                <div className="rounded-lg bg-muted/50 p-3 text-center">
+   660→                  <p className="text-xs text-muted-foreground">ค่าแรงงาน</p>
+   661→                  <p className="mt-1 text-lg font-bold">{formatCurrency(ticket.laborCost)}</p>
+   662→                </div>
+   663→                <div className="rounded-lg bg-primary/10 p-3 text-center">
+   664→                  <p className="text-xs text-muted-foreground">รวมทั้งหมด</p>
+   665→                  <p className="mt-1 text-lg font-bold text-primary">
+   666→                    {formatCurrency(
+   667→                      ticket.totalCost ??
+   668→                        (ticket.repairCost != null && ticket.laborCost != null
+   669→                          ? ticket.repairCost + ticket.laborCost
+   670→                          : null)
+   671→                    )}
+   672→                  </p>
+   673→                </div>
+   674→              </div>
+   675→            </CardContent>
+   676→          </Card>
+   677→        )}
+   678→
+   679→        {/* ========== RETURN INFO ========== */}
+   680→        {ticket.returnedBy && (
+   681→          <Card>
+   682→            <CardHeader>
+   683→              <CardTitle className="flex items-center gap-2 text-base">
+   684→                <PackageOpen className="size-4" />
+   685→                ข้อมูลการส่งคืน
+   686→              </CardTitle>
+   687→              <CardDescription>
+   688→                ส่งคืนเมื่อ {formatDate(ticket.returnedAt)} • วิธี: {ticket.returnMethod}
+   689→              </CardDescription>
+   690→            </CardHeader>
+   691→            <CardContent className="space-y-3">
+   692→              <div className="flex items-center gap-2">
+   693→                <User className="size-4 text-muted-foreground" />
+   694→                <span className="text-sm">
+   695→                  <span className="text-muted-foreground">ผู้ส่งคืน: </span>
+   696→                  <span className="font-medium">{ticket.returnedBy}</span>
+   697→                </span>
+   698→              </div>
+   699→              <div className="grid gap-4 sm:grid-cols-2">
+   700→                {ticket.returnSenderSignature && (
+   701→                  <div>
+   702→                    <p className="mb-1 text-xs font-medium text-muted-foreground">ลายเซ็นผู้ส่งคืน</p>
+   703→                    <img
+   704→                      src={ticket.returnSenderSignature}
+   705→                      alt="ลายเซ็นผู้ส่งคืน"
+   706→                      className="h-20 rounded border border-gray-200 bg-white object-contain p-1"
+   707→                    />
+   708→                  </div>
+   709→                )}
+   710→                {ticket.returnReceiverSignature && (
+   711→                  <div>
+   712→                    <p className="mb-1 text-xs font-medium text-muted-foreground">ลายเซ็นผู้รับคืน</p>
+   713→                    <img
+   714→                      src={ticket.returnReceiverSignature}
+   715→                      alt="ลายเซ็นผู้รับคืน"
+   716→                      className="h-20 rounded border border-gray-200 bg-white object-contain p-1"
+   717→                    />
+   718→                  </div>
+   719→                )}
+   720→              </div>
+   721→            </CardContent>
+   722→          </Card>
+   723→        )}
+   724→
+   725→        {/* ========== STATUS TIMELINE ========== */}
+   726→        <Card>
+   727→          <CardHeader>
+   728→            <CardTitle className="text-base">สถานะการดำเนินการ</CardTitle>
+   729→          </CardHeader>
+   730→          <CardContent>
+   731→            <div className="flex items-center justify-between overflow-x-auto pb-2">
+   732→              {statusTimeline.map((step, idx) => {
+   733→                const cfg = statusConfig[step]
+   734→                const isCompleted = ticket.status !== 'cancelled' && idx <= timelineIndex
+   735→                const isCurrent = ticket.status !== 'cancelled' && idx === timelineIndex
+   736→                const isCancelled = ticket.status === 'cancelled'
+   737→
+   738→                return (
+   739→                  <div key={step} className="flex flex-1 flex-col items-center">
+   740→                    <div className="flex w-full items-center">
+   741→                      {idx > 0 && (
+   742→                        <div
+   743→                          className={cn(
+   744→                            'mr-2 h-0.5 flex-1',
+   745→                            isCancelled ? 'bg-gray-200' : idx <= timelineIndex ? 'bg-emerald-400' : 'bg-gray-200'
+   746→                          )}
+   747→                        />
+   748→                      )}
+   749→                      <div
+   750→                        className={cn(
+   751→                          'flex size-10 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+   752→                          isCurrent && 'border-primary bg-primary text-primary-foreground',
+   753→                          isCompleted && !isCurrent && 'border-emerald-400 bg-emerald-50 text-emerald-600',
+   754→                          !isCompleted && !isCurrent && 'border-gray-200 bg-gray-50 text-gray-400'
+   755→                        )}
+   756→                      >
+   757→                        {iconMap[cfg.icon]}
+   758→                      </div>
+   759→                      {idx < statusTimeline.length - 1 && (
+   760→                        <div
+   761→                          className={cn(
+   762→                            'ml-2 h-0.5 flex-1',
+   763→                            isCancelled ? 'bg-gray-200' : idx < timelineIndex ? 'bg-emerald-400' : 'bg-gray-200'
+   764→                          )}
+   765→                        />
+   766→                      )}
+   767→                    </div>
+   768→                    <p
+   769→                      className={cn(
+   770→                        'mt-2 text-center text-xs font-medium',
+   771→                        isCurrent && 'text-primary',
+   772→                        isCompleted && !isCurrent && 'text-emerald-600',
+   773→                        !isCompleted && !isCurrent && 'text-gray-400'
+   774→                      )}
+   775→                    >
+   776→                      {cfg.label}
+   777→                    </p>
+   778→                  </div>
+   779→                )
+   780→              })}
+   781→            </div>
+   782→          </CardContent>
+   783→        </Card>
+   784→
+   785→        {/* ========== ACTION BUTTONS ========== */}
+   786→        {ticket.status !== 'cancelled' && (
+   787→          <Card>
+   788→            <CardHeader>
+   789→              <CardTitle className="text-base">การดำเนินการ</CardTitle>
+   790→            </CardHeader>
+   791→            <CardContent>
+   792→              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+   793→                {/* PENDING */}
+   794→                {ticket.status === 'pending' && (
+   795→                  <Button
+   796→                    onClick={() => {
+   797→                      setAcceptReceiver('')
+   798→                      setShowAcceptModal(true)
+   799→                    }}
+   800→                    className="w-full sm:w-auto"
+   801→                    disabled={isAnyMutationLoading}
+   802→                  >
+   803→                    <CheckCircle className="size-4" />
+   804→                    รับเรื่อง
+   805→                  </Button>
+   806→                )}
+   807→
+   808→                {/* ACCEPTED */}
+   809→                {ticket.status === 'accepted' && (
+   810→                  <>
+   811→                    <Button onClick={() => setShowStartRepairConfirm(true)} className="w-full sm:w-auto" disabled={isAnyMutationLoading}>
+   812→                      <Wrench className="size-4" />
+   813→                      เริ่มซ่อม
+   814→                    </Button>
+   815→                    <Button
+   816→                      variant="destructive"
+   817→                      onClick={() => {
+   818→                        setCancelReason('')
+   819→                        setShowCancelModal(true)
+   820→                      }}
+   821→                      className="w-full sm:w-auto"
+   822→                      disabled={isAnyMutationLoading}
+   823→                    >
+   824→                      <XCircle className="size-4" />
+   825→                      ยกเลิก
+   826→                    </Button>
+   827→                  </>
+   828→                )}
+   829→
+   830→                {/* IN PROGRESS */}
+   831→                {ticket.status === 'in_progress' && (
+   832→                  <>
+   833→                    <Button
+   834→                      onClick={() => {
+   835→                        setEstRepairCost('')
+   836→                        setEstLaborCost('')
+   837→                        setEstCostStatus('pending')
+   838→                        setShowEstimateModal(true)
+   839→                      }}
+   840→                      className="w-full sm:w-auto"
+   841→                      disabled={isAnyMutationLoading}
+   842→                    >
+   843→                      <Banknote className="size-4" />
+   844→                      เสนอราคา
+   845→                    </Button>
+   846→                    <Button
+   847→                      onClick={() => {
+   848→                        setReturnMethod('')
+   849→                        setReturnedBy('')
+   850→                        setShowReturnModal(true)
+   851→                      }}
+   852→                      className="w-full sm:w-auto"
+   853→                      disabled={isAnyMutationLoading}
+   854→                    >
+   855→                      <PackageOpen className="size-4" />
+   856→                      ส่งคืน
+   857→                    </Button>
+   858→                    <Button
+   859→                      variant="destructive"
+   860→                      onClick={() => {
+   861→                        setCancelReason('')
+   862→                        setShowCancelModal(true)
+   863→                      }}
+   864→                      className="w-full sm:w-auto"
+   865→                      disabled={isAnyMutationLoading}
+   866→                    >
+   867→                      <XCircle className="size-4" />
+   868→                      ยกเลิก
+   869→                    </Button>
+   870→                  </>
+   871→                )}
+   872→
+   873→                {/* RETURNED */}
+   874→                {ticket.status === 'returned' && (
+   875→                  <>
+   876→                    <Button onClick={() => setShowCloseConfirm(true)} className="w-full sm:w-auto" disabled={isAnyMutationLoading}>
+   877→                      <CheckCircle2 className="size-4" />
+   878→                      ปิดงาน
+   879→                    </Button>
+   880→                    <Button variant="outline" onClick={() => handlePrint('return')} className="w-full sm:w-auto">
+   881→                      <Printer className="size-4" />
+   882→                      ปริ้นใบส่งคืน
+   883→                    </Button>
+   884→                  </>
+   885→                )}
+   886→
+   887→                {/* CLOSED */}
+   888→                {ticket.status === 'closed' && (
+   889→                  <Button variant="outline" onClick={() => handlePrint('repair')} className="w-full sm:w-auto">
+   890→                    <Printer className="size-4" />
+   891→                    ปริ้นใบแจ้งซ่อม
+   892→                  </Button>
+   893→                )}
+   894→              </div>
+   895→            </CardContent>
+   896→          </Card>
+   897→        )}
+   898→      </div>
+   899→
+   900→      {/* ========== ACCEPT MODAL ========== */}
+   901→      <Dialog open={showAcceptModal} onOpenChange={setShowAcceptModal}>
+   902→        <DialogContent className="sm:max-w-md">
+   903→          <DialogHeader>
+   904→            <DialogTitle>รับเรื่องแจ้งซ่อม</DialogTitle>
+   905→            <DialogDescription>กรุณากรอกข้อมูลผู้รับเรื่องและลงลายเซ็น</DialogDescription>
+   906→          </DialogHeader>
+   907→          <div className="space-y-4 py-2">
+   908→            <div className="space-y-2">
+   909→              <Label htmlFor="accept-receiver">
+   910→                ชื่อผู้รับเรื่อง <span className="text-destructive">*</span>
+   911→              </Label>
+   912→              <Input
+   913→                id="accept-receiver"
+   914→                placeholder="ระบุชื่อผู้รับเรื่อง"
+   915→                value={acceptReceiver}
+   916→                onChange={(e) => setAcceptReceiver(e.target.value)}
+   917→              />
+   918→            </div>
+   919→            <div className="space-y-2">
+   920→              <Label>ลายเซ็นผู้รับ</Label>
+   921→              <SignaturePad ref={receiverSignatureRef} />
+   922→            </div>
+   923→          </div>
+   924→          <DialogFooter>
+   925→            <Button variant="outline" onClick={() => setShowAcceptModal(false)} disabled={acceptMutation.isPending}>
+   926→              ยกเลิก
+   927→            </Button>
+   928→            <Button onClick={handleAccept} disabled={acceptMutation.isPending}>
+   929→              {acceptMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+   930→              ยืนยันรับเรื่อง
+   931→            </Button>
+   932→          </DialogFooter>
+   933→        </DialogContent>
+   934→      </Dialog>
+   935→
+   936→      {/* ========== ESTIMATE MODAL ========== */}
+   937→      <Dialog open={showEstimateModal} onOpenChange={setShowEstimateModal}>
+   938→        <DialogContent className="sm:max-w-md">
+   939→          <DialogHeader>
+   940→            <DialogTitle>เสนอราคาซ่อม</DialogTitle>
+   941→            <DialogDescription>กรุณาระบุค่าอะไหล่ ค่าแรงงาน และสถานะการอนุมัติ</DialogDescription>
+   942→          </DialogHeader>
+   943→          <div className="space-y-4 py-2">
+   944→            <div className="space-y-2">
+   945→              <Label htmlFor="est-repair-cost">
+   946→                ค่าอะไหล่ (บาท) <span className="text-destructive">*</span>
+   947→              </Label>
+   948→              <Input
+   949→                id="est-repair-cost"
+   950→                type="number"
+   951→                min="0"
+   952→                step="0.01"
+   953→                placeholder="0.00"
+   954→                value={estRepairCost}
+   955→                onChange={(e) => setEstRepairCost(e.target.value)}
+   956→              />
+   957→            </div>
+   958→            <div className="space-y-2">
+   959→              <Label htmlFor="est-labor-cost">
+   960→                ค่าแรงงาน (บาท) <span className="text-destructive">*</span>
+   961→              </Label>
+   962→              <Input
+   963→                id="est-labor-cost"
+   964→                type="number"
+   965→                min="0"
+   966→                step="0.01"
+   967→                placeholder="0.00"
+   968→                value={estLaborCost}
+   969→                onChange={(e) => setEstLaborCost(e.target.value)}
+   970→              />
+   971→            </div>
+   972→            <div className="rounded-lg bg-muted/50 p-3 text-center">
+   973→              <p className="text-xs text-muted-foreground">รวมทั้งหมด</p>
+   974→              <p className="mt-1 text-xl font-bold">{formatCurrency(estTotal || null)}</p>
+   975→            </div>
+   976→            <div className="space-y-2">
+   977→              <Label>
+   978→                สถานะการอนุมัติ <span className="text-destructive">*</span>
+   979→              </Label>
+   980→              <Select value={estCostStatus} onValueChange={setEstCostStatus}>
+   981→                <SelectTrigger className="w-full">
+   982→                  <SelectValue placeholder="เลือกสถานะ" />
+   983→                </SelectTrigger>
+   984→                <SelectContent>
+   985→                  <SelectItem value="pending">รออนุมัติ</SelectItem>
+   986→                  <SelectItem value="approved">อนุมัติ</SelectItem>
+   987→                  <SelectItem value="rejected">ไม่อนุมัติ</SelectItem>
+   988→                </SelectContent>
+   989→              </Select>
+   990→              {estCostStatus === 'rejected' && (
+   991→                <p className="text-xs text-amber-600">
+   992→                  ⚠️ เลือก &quot;ไม่อนุมัติ&quot; จะทำให้ใบแจ้งซ่อมถูกยกเลิกโดยอัตโนมัติ
+   993→                </p>
+   994→              )}
+   995→            </div>
+   996→          </div>
+   997→          <DialogFooter>
+   998→            <Button variant="outline" onClick={() => setShowEstimateModal(false)} disabled={estimateMutation.isPending}>
+   999→              ยกเลิก
+  1000→            </Button>
+  1001→            <Button onClick={handleEstimate} disabled={estimateMutation.isPending}>
+  1002→              {estimateMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+  1003→              บันทึก
+  1004→            </Button>
+  1005→          </DialogFooter>
+  1006→        </DialogContent>
+  1007→      </Dialog>
+  1008→
+  1009→      {/* ========== RETURN MODAL ========== */}
+  1010→      <Dialog open={showReturnModal} onOpenChange={setShowReturnModal}>
+  1011→        <DialogContent className="sm:max-w-lg">
+  1012→          <DialogHeader>
+  1013→            <DialogTitle>ส่งคืนครุภัณฑ์</DialogTitle>
+  1014→            <DialogDescription>กรุณากรอกข้อมูลการส่งคืนและลงลายเซ็น</DialogDescription>
+  1015→          </DialogHeader>
+  1016→          <div className="max-h-[70vh] space-y-4 overflow-y-auto py-2">
+  1017→            <div className="space-y-2">
+  1018→              <Label>
+  1019→                วิธีส่งคืน <span className="text-destructive">*</span>
+  1020→              </Label>
+  1021→              <Select value={returnMethod} onValueChange={setReturnMethod}>
+  1022→                <SelectTrigger className="w-full">
+  1023→                  <SelectValue placeholder="เลือกวิธีส่งคืน" />
+  1024→                </SelectTrigger>
+  1025→                <SelectContent>
+  1026→                  <SelectItem value="หน่วยงานมารับเอง">หน่วยงานมารับเอง</SelectItem>
+  1027→                  <SelectItem value="ช่างไปส่งคืน">ช่างไปส่งคืน</SelectItem>
+  1028→                </SelectContent>
+  1029→              </Select>
+  1030→            </div>
+  1031→            <div className="space-y-2">
+  1032→              <Label htmlFor="return-by">
+  1033→                ชื่อผู้ส่งคืน <span className="text-destructive">*</span>
+  1034→              </Label>
+  1035→              <Input
+  1036→                id="return-by"
+  1037→                placeholder="ระบุชื่อผู้ส่งคืน"
+  1038→                value={returnedBy}
+  1039→                onChange={(e) => setReturnedBy(e.target.value)}
+  1040→              />
+  1041→            </div>
+  1042→            <Separator />
+  1043→            <div className="space-y-2">
+  1044→              <Label>ลายเซ็นผู้ส่ง</Label>
+  1045→              <SignaturePad ref={returnSenderSignatureRef} />
+  1046→            </div>
+  1047→            <div className="space-y-2">
+  1048→              <Label>ลายเซ็นผู้รับคืน</Label>
+  1049→              <SignaturePad ref={returnReceiverSignatureRef} />
+  1050→            </div>
+  1051→          </div>
+  1052→          <DialogFooter>
+  1053→            <Button variant="outline" onClick={() => setShowReturnModal(false)} disabled={returnMutation.isPending}>
+  1054→              ยกเลิก
+  1055→            </Button>
+  1056→            <Button onClick={handleReturn} disabled={returnMutation.isPending}>
+  1057→              {returnMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+  1058→              ยืนยันส่งคืน
+  1059→            </Button>
+  1060→          </DialogFooter>
+  1061→        </DialogContent>
+  1062→      </Dialog>
+  1063→
+  1064→      {/* ========== CANCEL MODAL ========== */}
+  1065→      <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
+  1066→        <DialogContent className="sm:max-w-md">
+  1067→          <DialogHeader>
+  1068→            <DialogTitle>ยกเลิกใบแจ้งซ่อม</DialogTitle>
+  1069→            <DialogDescription>การยกเลิกจะไม่สามารถกู้คืนได้ กรุณาระบุเหตุผล</DialogDescription>
+  1070→          </DialogHeader>
+  1071→          <div className="space-y-4 py-2">
+  1072→            <div className="space-y-2">
+  1073→              <Label htmlFor="cancel-reason">
+  1074→                เหตุผลการยกเลิก <span className="text-destructive">*</span>
+  1075→              </Label>
+  1076→              <Textarea
+  1077→                id="cancel-reason"
+  1078→                placeholder="ระบุเหตุผล เช่น อะไหล่หายาก, ค่าซ่อมสูงกว่าราคาเครื่อง"
+  1079→                rows={3}
+  1080→                value={cancelReason}
+  1081→                onChange={(e) => setCancelReason(e.target.value)}
+  1082→              />
+  1083→            </div>
+  1084→          </div>
+  1085→          <DialogFooter>
+  1086→            <Button variant="outline" onClick={() => setShowCancelModal(false)} disabled={cancelMutation.isPending}>
+  1087→              ยกเลิก
+  1088→            </Button>
+  1089→            <Button variant="destructive" onClick={handleCancel} disabled={cancelMutation.isPending}>
+  1090→              {cancelMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+  1091→              ยืนยันยกเลิก
+  1092→            </Button>
+  1093→          </DialogFooter>
+  1094→        </DialogContent>
+  1095→      </Dialog>
+  1096→
+  1097→      {/* ========== START REPAIR CONFIRM ========== */}
+  1098→      <AlertDialog open={showStartRepairConfirm} onOpenChange={setShowStartRepairConfirm}>
+  1099→        <AlertDialogContent>
+  1100→          <AlertDialogHeader>
+  1101→            <AlertDialogTitle>ยืนยันการเริ่มซ่อม</AlertDialogTitle>
+  1102→            <AlertDialogDescription>ต้องการเริ่มดำเนินการซ่อม {ticket.assetName} หรือไม่?</AlertDialogDescription>
+  1103→          </AlertDialogHeader>
+  1104→          <AlertDialogFooter>
+  1105→            <AlertDialogCancel disabled={progressMutation.isPending}>ยกเลิก</AlertDialogCancel>
+  1106→            <AlertDialogAction onClick={() => progressMutation.mutate()} disabled={progressMutation.isPending}>
+  1107→              {progressMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+  1108→              ยืนยัน
+  1109→            </AlertDialogAction>
+  1110→          </AlertDialogFooter>
+  1111→        </AlertDialogContent>
+  1112→      </AlertDialog>
+  1113→
+  1114→      {/* ========== CLOSE CONFIRM ========== */}
+  1115→      <AlertDialog open={showCloseConfirm} onOpenChange={setShowCloseConfirm}>
+  1116→        <AlertDialogContent>
+  1117→          <AlertDialogHeader>
+  1118→            <AlertDialogTitle>ยืนยันการปิดงาน</AlertDialogTitle>
+  1119→            <AlertDialogDescription>
+  1120→              ต้องการปิดงานซ่อม {ticket.assetName} ({ticket.ticketNo}) หรือไม่? การปิดงานจะไม่สามารถกู้คืนได้
+  1121→            </AlertDialogDescription>
+  1122→          </AlertDialogHeader>
+  1123→          <AlertDialogFooter>
+  1124→            <AlertDialogCancel disabled={closeMutation.isPending}>ยกเลิก</AlertDialogCancel>
+  1125→            <AlertDialogAction onClick={() => closeMutation.mutate()} disabled={closeMutation.isPending}>
+  1126→              {closeMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+  1127→              ยืนยันปิดงาน
+  1128→            </AlertDialogAction>
+  1129→          </AlertDialogFooter>
+  1130→        </AlertDialogContent>
+  1131→      </AlertDialog>
+  1132→
+  1133→      {/* ========== PRINT CONTENT (hidden, shown only during print) ========== */}
+  1134→      <PrintContent ticket={ticket} printType={printType} />
+  1135→
+  1136→      {/* ========== PRINT STYLES ========== */}
+  1137→      <style jsx global>{`
+  1138→        @media print {
+  1139→          .no-print {
+  1140→            display: none !important;
+  1141→          }
+  1142→          .print-only {
+  1143→            display: block !important;
+  1144→            position: fixed !important;
+  1145→            top: 0 !important;
+  1146→            left: 0 !important;
+  1147→            width: 100% !important;
+  1148→            background: white !important;
+  1149→            z-index: 99999 !important;
+  1150→            padding: 24px !important;
+  1151→          }
+  1152→        }
+  1153→      `}</style>
+  1154→    </div>
+  1155→  )
+  1156→}
+  1157→
+  1158→// ==================== PRINT CONTENT SUB-COMPONENT ====================
+  1159→
+  1160→function PrintContent({
+  1161→  ticket,
+  1162→  printType,
+  1163→}: {
+  1164→  ticket: RepairTicket
+  1165→  printType: 'repair' | 'return'
+  1166→}) {
+  1167→  return (
+  1168→    <div className="print-only hidden" aria-hidden="true">
+  1169→      <div className="space-y-6">
+  1170→        {/* Print Header */}
+  1171→        <div className="text-center">
+  1172→          <h1 className="text-xl font-bold">
+  1173→            {printType === 'return'
+  1174→              ? 'ใบส่งคืนครุภัณฑ์ / Return Receipt'
+  1175→              : 'ใบแจ้งซ่อมอุปกรณ์ / Repair Ticket'}
+  1176→          </h1>
+  1177→          <Separator className="mx-auto mt-3 max-w-xs" />
+  1178→        </div>
+  1179→
+  1180→        {/* Ticket Info */}
+  1181→        <div className="grid grid-cols-2 gap-4 text-sm">
+  1182→          <div>
+  1183→            <span className="text-muted-foreground">เลขที่: </span>
+  1184→            <span className="font-medium">{ticket.ticketNo}</span>
+  1185→          </div>
+  1186→          <div>
+  1187→            <span className="text-muted-foreground">สถานะ: </span>
+  1188→            <span className="font-medium">{statusConfig[ticket.status]?.label || ticket.status}</span>
+  1189→          </div>
+  1190→          <div>
+  1191→            <span className="text-muted-foreground">วันที่แจ้ง: </span>
+  1192→            <span className="font-medium">{formatDate(ticket.createdAt)}</span>
+  1193→          </div>
+  1194→          {ticket.receivedAt && (
+  1195→            <div>
+  1196→              <span className="text-muted-foreground">วันที่รับ: </span>
+  1197→              <span className="font-medium">{formatDate(ticket.receivedAt)}</span>
+  1198→            </div>
+  1199→          )}
+  1200→          {ticket.returnedAt && (
+  1201→            <div>
+  1202→              <span className="text-muted-foreground">วันที่ส่งคืน: </span>
+  1203→              <span className="font-medium">{formatDate(ticket.returnedAt)}</span>
+  1204→            </div>
+  1205→          )}
+  1206→        </div>
+  1207→
+  1208→        <Separator />
+  1209→
+  1210→        {/* Asset Info */}
+  1211→        <div className="space-y-2 text-sm">
+  1212→          <h2 className="font-semibold">ข้อมูลอุปกรณ์</h2>
+  1213→          <div className="grid grid-cols-2 gap-2">
+  1214→            <div>
+  1215→              <span className="text-muted-foreground">ชื่ออุปกรณ์: </span>
+  1216→              <span className="font-medium">{ticket.assetName}</span>
+  1217→            </div>
+  1218→            {ticket.asset?.assetCode && (
+  1219→              <div>
+  1220→                <span className="text-muted-foreground">หมายเลขครุภัณฑ์: </span>
+  1221→                <span className="font-medium">{ticket.asset.assetCode}</span>
+  1222→              </div>
+  1223→            )}
+  1224→            {ticket.asset?.category && (
+  1225→              <div>
+  1226→                <span className="text-muted-foreground">หมวดหมู่: </span>
+  1227→                <span className="font-medium">{ticket.asset.category}</span>
+  1228→              </div>
+  1229→            )}
+  1230→            {ticket.asset?.location && (
+  1231→              <div>
+  1232→                <span className="text-muted-foreground">สถานที่: </span>
+  1233→                <span className="font-medium">
+  1234→                  {ticket.asset.location.buildingName} {ticket.asset.location.roomName}
+  1235→                </span>
+  1236→              </div>
+  1237→            )}
+  1238→          </div>
+  1239→          <div>
+  1240→            <span className="text-muted-foreground">รายละเอียดปัญหา: </span>
+  1241→            <span className="font-medium">{ticket.problemDetails || '-'}</span>
+  1242→          </div>
+  1243→          <div>
+  1244→            <span className="text-muted-foreground">ผู้แจ้ง: </span>
+  1245→            <span className="font-medium">{ticket.reporterName || '-'}</span>
+  1246→          </div>
+  1247→        </div>
+  1248→
+  1249→        {/* Acceptance Info */}
+  1250→        {ticket.receivedBy && (
+  1251→          <>
+  1252→            <Separator />
+  1253→            <div className="space-y-2 text-sm">
+  1254→              <h2 className="font-semibold">ข้อมูลการรับเรื่อง</h2>
+  1255→              <div>
+  1256→                <span className="text-muted-foreground">ผู้รับเรื่อง: </span>
+  1257→                <span className="font-medium">{ticket.receivedBy}</span>
+  1258→              </div>
+  1259→              {ticket.receiverSignature && (
+  1260→                <div>
+  1261→                  <p className="mb-1 text-muted-foreground">ลายเซ็นผู้รับ:</p>
+  1262→                  <img
+  1263→                    src={ticket.receiverSignature}
+  1264→                    alt="ลายเซ็นผู้รับ"
+  1265→                    className="h-16 rounded border bg-white object-contain p-1"
+  1266→                  />
+  1267→                </div>
+  1268→              )}
+  1269→            </div>
+  1270→          </>
+  1271→        )}
+  1272→
+  1273→        {/* Cost Info */}
+  1274→        {(ticket.repairCost != null || ticket.laborCost != null) && (
+  1275→          <>
+  1276→            <Separator />
+  1277→            <div className="space-y-2 text-sm">
+  1278→              <h2 className="font-semibold">รายละเอียดค่าใช้จ่าย</h2>
+  1279→              <div className="grid grid-cols-3 gap-4">
+  1280→                <div>
+  1281→                  <span className="text-muted-foreground">ค่าอะไหล่: </span>
+  1282→                  <span className="font-medium">{formatCurrency(ticket.repairCost)}</span>
+  1283→                </div>
+  1284→                <div>
+  1285→                  <span className="text-muted-foreground">ค่าแรงงาน: </span>
+  1286→                  <span className="font-medium">{formatCurrency(ticket.laborCost)}</span>
+  1287→                </div>
+  1288→                <div>
+  1289→                  <span className="text-muted-foreground">รวมทั้งหมด: </span>
+  1290→                  <span className="font-bold">
+  1291→                    {formatCurrency(
+  1292→                      ticket.totalCost ??
+  1293→                        (ticket.repairCost != null && ticket.laborCost != null
+  1294→                          ? ticket.repairCost + ticket.laborCost
+  1295→                          : null)
+  1296→                    )}
+  1297→                  </span>
+  1298→                </div>
+  1299→              </div>
+  1300→              {ticket.costStatus && (
+  1301→                <div>
+  1302→                  <span className="text-muted-foreground">สถานะอนุมัติ: </span>
+  1303→                  <span className="font-medium">
+  1304→                    {costStatusLabel[ticket.costStatus] || ticket.costStatus}
+  1305→                  </span>
+  1306→                </div>
+  1307→              )}
+  1308→            </div>
+  1309→          </>
+  1310→        )}
+  1311→
+  1312→        {/* Return Info */}
+  1313→        {ticket.returnedBy && (
+  1314→          <>
+  1315→            <Separator />
+  1316→            <div className="space-y-2 text-sm">
+  1317→              <h2 className="font-semibold">ข้อมูลการส่งคืน</h2>
+  1318→              <div className="grid grid-cols-2 gap-2">
+  1319→                <div>
+  1320→                  <span className="text-muted-foreground">วิธีส่งคืน: </span>
+  1321→                  <span className="font-medium">{ticket.returnMethod}</span>
+  1322→                </div>
+  1323→                <div>
+  1324→                  <span className="text-muted-foreground">ผู้ส่งคืน: </span>
+  1325→                  <span className="font-medium">{ticket.returnedBy}</span>
+  1326→                </div>
+  1327→              </div>
+  1328→              <div className="grid grid-cols-2 gap-4">
+  1329→                {ticket.returnSenderSignature && (
+  1330→                  <div>
+  1331→                    <p className="mb-1 text-muted-foreground">ลายเซ็นผู้ส่งคืน:</p>
+  1332→                    <img
+  1333→                      src={ticket.returnSenderSignature}
+  1334→                      alt="ลายเซ็นผู้ส่งคืน"
+  1335→                      className="h-16 rounded border bg-white object-contain p-1"
+  1336→                    />
+  1337→                  </div>
+  1338→                )}
+  1339→                {ticket.returnReceiverSignature && (
+  1340→                  <div>
+  1341→                    <p className="mb-1 text-muted-foreground">ลายเซ็นผู้รับคืน:</p>
+  1342→                    <img
+  1343→                      src={ticket.returnReceiverSignature}
+  1344→                      alt="ลายเซ็นผู้รับคืน"
+  1345→                      className="h-16 rounded border bg-white object-contain p-1"
+  1346→                    />
+  1347→                  </div>
+  1348→                )}
+  1349→              </div>
+  1350→            </div>
+  1351→          </>
+  1352→        )}
+  1353→
+  1354→        {/* Cancel Reason */}
+  1355→        {ticket.cancelReason && (
+  1356→          <>
+  1357→            <Separator />
+  1358→            <div className="text-sm">
+  1359→              <span className="text-muted-foreground">เหตุผลการยกเลิก: </span>
+  1360→              <span className="font-medium text-red-600">{ticket.cancelReason}</span>
+  1361→            </div>
+  1362→          </>
+  1363→        )}
+  1364→      </div>
+  1365→    </div>
+  1366→  )
+  1367→}
+  1368→

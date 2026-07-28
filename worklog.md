@@ -89,3 +89,35 @@ Stage Summary:
 - ไฟล์: src/components/repair/repair-list.tsx, src/app/page.tsx
 - หน้า list: responsive stats + รายการ 6 tickets ทุกสถานะ
 - หน้า detail: click เข้าดูรายละเอียดพร้อม action buttons
+
+---
+Task ID: 2
+Agent: Main Orchestrator
+Task: ออกแบบใบปริ้นแบบ Thermal Receipt 50mm (บัตรคิว style)
+
+Work Log:
+- อ่านและวิเคราะห์ print system เดิมใน ticket-detail.tsx (PrintContent component + @media print CSS)
+- สร้าง component ใหม่ `src/components/repair/thermal-receipt.tsx` — Thermal Receipt ขนาด 50mm
+  - ฟอนต์ monospace (Noto Sans Thai / Courier New) เหมาะกับ thermal printer
+  - เส้นแบ่ง dashed line เลียนแบบขอบกระดาษซอย
+  - เลขที่ใบแจ้งซ่อมแสดงขนาดใหญ่ตรงกลาง (เหมือนบัตรคิวร้านอาหาร)
+  - รองรับ 2 แบบ: ใบรับซ่อมอุปกรณ์ (repair) และ ใบส่งคืนครุภัณฑ์ (return)
+  - รองรับลายเซ็นจริงจาก signature pad (base64 PNG)
+  - รองรับข้อมูลค่าใช้จ่าย, สถานะ 6 แบบ (สีต่างกัน), ข้อมูลการยกเลิก
+  - Print CSS: @page { size: 50mm auto } พิมพ์ตรงตามขนาดกระดาษ
+  - Preview mode: ขยาย 2.2x พร้อม shadow เพื่อให้เห็นชัดบนหน้าจอ
+- อัพเดท `ticket-detail.tsx`:
+  - เปลี่ยน handlePrint ให้เปิด Preview Dialog แทน window.print ตรง
+  - เพิ่ม Receipt Preview Dialog (พรีวิวใบรับซ่อม/ส่งคืน ก่อนปริ้น)
+  - เพิ่มปุ่มปริ้นในหลายสถานะ (accepted, returned, closed)
+  - ลบ PrintContent component เดิมออก
+- สร้าง `public/receipt-preview.html` — standalone demo page แสดงตัวอย่างทั้ง 2 แบบ
+- ทดสอบผ่าน agent-browser: เปิด file:// receipt-preview.html สำเร็จ
+  - ตรวจสอบ accessibility tree: receipt content แสดงครบ (เลขที่, ชื่อ, ปัญหา, ลายเซ็น, ค่าใช้จ่าย)
+  - Screenshot ทั้ง desktop (1920px) และ mobile (375px) viewport
+
+Stage Summary:
+- Thermal Receipt component พร้อมใช้งาน: `src/components/repair/thermal-receipt.tsx`
+- อัพเดท ticket-detail.tsx พร้อม receipt preview dialog
+- Standalone demo: `public/receipt-preview.html` (ดูได้โดยตรงไม่ต้องรัน server)
+- Screenshot: screenshot-receipt.png (desktop), screenshot-receipt-mobile.png (mobile)

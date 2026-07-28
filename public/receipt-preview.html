@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thermal Receipt Preview — ใบรับซ่อม / ใบส่งคืน (50mm)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .demo-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .demo-header p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .demo-header .badge {
+      display: inline-block;
+      background: #10b981;
+      color: white;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .receipts-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .receipt-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .receipt-column h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .receipt-column h2 span {
+      font-size: 12px;
+      color: #9ca3af;
+      font-weight: 400;
+    }
+
+    /* ==================== RECEIPT WRAPPER (scaled preview) ==================== */
+    .thermal-receipt-wrapper {
+      background: #e8e8e8;
+      padding: 20px 24px;
+      border-radius: 12px;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+      border: 1px solid #d1d5db;
+    }
+
+    .thermal-receipt-wrapper .thermal-receipt {
+      transform: scale(2.2);
+      transform-origin: top center;
+      box-shadow: 2px 4px 16px rgba(0,0,0,0.18);
+      border-radius: 2px;
+    }
+
+    /* ==================== THERMAL RECEIPT STYLES (50mm) ==================== */
+    .thermal-receipt {
+      font-family: 'Noto Sans Thai', 'Courier New', monospace;
+      width: 50mm;
+      min-width: 50mm;
+      max-width: 50mm;
+      margin: 0 auto;
+      background: #ffffff;
+      color: #1a1a1a;
+      font-size: 7pt;
+      line-height: 1.4;
+      position: relative;
+      padding: 0;
+    }
+
+    .receipt-cut-top,
+    .receipt-cut-bottom {
+      width: 50mm;
+      height: 4mm;
+      background: repeating-linear-gradient(
+        135deg,
+        #fff 0px, #fff 2px,
+        #ddd 2px, #ddd 4px,
+        #fff 4px, #fff 6px
+      );
+    }
+
+    .receipt-cut-bottom { margin-top: 2mm; }
+
+    .receipt-content { padding: 2mm 3mm; }
+
+    .receipt-logo { font-size: 16pt; line-height: 1; margin-bottom: 1mm; text-align: center; }
+
+    .receipt-org-name {
+      font-size: 9pt;
+      font-weight: 700;
+      letter-spacing: 3px;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .receipt-org-sub {
+      font-size: 6pt;
+      letter-spacing: 2px;
+      opacity: 0.7;
+      margin-bottom: 1mm;
+      text-align: center;
+    }
+
+    .receipt-title {
+      font-size: 8pt;
+      font-weight: 700;
+      margin: 1.5mm 0;
+      text-align: center;
+    }
+
+    .receipt-divider {
+      border: none;
+      border-top: 1px dashed #999;
+      margin: 1.5mm 0;
+    }
+
+    .ticket-number-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 2mm;
+      margin: 1mm 0;
+    }
+
+    .ticket-number-label {
+      font-size: 6pt;
+      opacity: 0.6;
+    }
+
+    .ticket-number-value {
+      font-size: 11pt;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .ticket-date-row {
+      text-align: center;
+      font-size: 6.5pt;
+      opacity: 0.7;
+      margin-bottom: 1mm;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin: 0.5mm 0;
+      gap: 1mm;
+    }
+
+    .info-label {
+      font-size: 6.5pt;
+      opacity: 0.5;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .info-value {
+      font-size: 6.5pt;
+      font-weight: 500;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .info-value.text-bold { font-weight: 700; }
+
+    .status-row { justify-content: center; }
+
+    .status-badge {
+      font-weight: 700;
+      padding: 0.3mm 1.5mm;
+      border-radius: 1mm;
+      font-size: 6.5pt;
+    }
+
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-accepted { background: #d1ecf1; color: #0c5460; }
+    .status-in_progress { background: #e2d5f1; color: #4a1d8e; }
+    .status-returned { background: #d4edda; color: #155724; }
+    .status-closed { background: #e2e3e5; color: #383d41; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+
+    .section-header {
+      font-size: 6.5pt;
+      font-weight: 700;
+      opacity: 0.5;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5mm;
+      padding-bottom: 0.3mm;
+      border-bottom: 0.5px solid #ccc;
+    }
+
+    .section-header.text-danger {
+      color: #dc3545;
+      opacity: 1;
+    }
+
+    .description-text {
+      font-size: 6.5pt;
+      line-height: 1.4;
+      margin: 0.5mm 0;
+      word-break: break-word;
+    }
+
+    .description-text.text-danger { color: #dc3545; }
+
+    .signature-section {
+      display: flex;
+      gap: 2mm;
+      margin: 1mm 0;
+    }
+
+    .signature-block { flex: 1; text-align: center; }
+
+    .signature-label {
+      font-size: 5.5pt;
+      opacity: 0.5;
+      margin-bottom: 0.5mm;
+    }
+
+    .signature-img-wrap {
+      border: 0.5px solid #ccc;
+      height: 8mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5mm;
+      background: #fafafa;
+    }
+
+    .signature-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    /* SVG placeholder signature */
+    .signature-placeholder {
+      width: 100%;
+      height: 100%;
+    }
+
+    .signature-placeholder svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .receipt-footer { text-align: center; margin-top: 2mm; padding-top: 1mm; }
+
+    .receipt-footer-line {
+      font-size: 5pt;
+      opacity: 0.4;
+      margin: 0.3mm 0;
+    }
+
+    .receipt-footer-thanks {
+      font-size: 6pt;
+      margin-top: 1mm;
+      opacity: 0.6;
+    }
+
+    .total-row {
+      border-top: 1px solid #333;
+      padding-top: 0.5mm;
+      margin-top: 0.5mm;
+    }
+
+    .total-row .info-label { font-weight: 700; opacity: 1; }
+    .total-row .info-value { font-size: 8pt; font-weight: 900; }
+
+    /* ==================== INFO CARD ==================== */
+    .info-card {
+      max-width: 900px;
+      margin: 32px auto 0;
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .info-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 12px;
+    }
+
+    .info-card ul {
+      list-style: disc;
+      padding-left: 20px;
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .info-card ul li strong {
+      color: #1f2937;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .spec-item {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .spec-item .spec-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #10b981;
+    }
+
+    .spec-item .spec-label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .receipts-container { flex-direction: column; align-items: center; gap: 32px; }
+      .thermal-receipt-wrapper .thermal-receipt { transform: scale(1.8); }
+    }
+
+    @media print {
+      .demo-header, .receipt-column h2, .info-card { display: none !important; }
+      .receipts-container { gap: 0 !important; }
+      .thermal-receipt-wrapper {
+        background: none !important;
+        padding: 0 !important;
+        border: none !important;
+      }
+      .thermal-receipt-wrapper .thermal-receipt {
+        transform: none !important;
+        box-shadow: none !important;
+        page-break-after: always;
+      }
+      @page { size: 50mm auto; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo-header">
+    <h1>🔧 ใบรับซ่อม / ใบส่งคืน แบบ Thermal Receipt</h1>
+    <p>ระบบแจ้งซ่อมอุปกรณ์ — Surinhos Asset Management</p>
+    <span class="badge">ขนาดกระดาษ 50mm (58mm thermal paper)</span>
+  </div>
+
+  <div class="receipts-container">
+
+    <!-- ========== ใบรับซ่อม (Repair Ticket) ========== -->
+    <div class="receipt-column">
+      <h2>ใบรับซ่อมอุปกรณ์ <span>/ Repair Ticket</span></h2>
+      <div class="thermal-receipt-wrapper">
+        <div class="thermal-receipt">
+          <div class="receipt-cut-top"></div>
+          <div class="receipt-content">
+            <!-- Header -->
+            <div style="text-align:center">
+              <div class="receipt-logo">🔧</div>
+              <div class="receipt-org-name">SURINHOS</div>
+              <div class="receipt-org-sub">REPAIR CENTER</div>
+              <div class="receipt-divider"></div>
+              <div class="receipt-title">ใบรับซ่อมอุปกรณ์</div>
+              <div class="receipt-divider"></div>
+            </div>
+
+            <!-- Ticket Number -->
+            <div class="ticket-number-row">
+              <div class="ticket-number-label">เลขที่</div>
+              <div class="ticket-number-value">RPR-260710-001</div>
+            </div>
+            <div class="ticket-date-row">10/ก.ค./68 08:30</div>
+            <div class="receipt-divider"></div>
+
+            <!-- Status -->
+            <div class="info-row status-row">
+              <span class="info-label">สถานะ</span>
+              <span class="info-value status-badge status-closed">ปิดงาน</span>
+            </div>
+            <div class="receipt-divider"></div>
+
+            <!-- Equipment -->
+            <div class="section-header">อุปกรณ์</div>
+            <div class="info-row">
+              <span class="info-label">ชื่อ</span>
+              <span class="info-value text-bold">โปรเจกเตอร์ Epson EB-L260F</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ครุภัณฑ์</span>
+              <span class="info-value">PRJ-69-001</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ประเภท</span>
+              <span class="info-value">เครื่องฉาย</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">สถานที่</span>
+              <span class="info-value">อาคารเรียนรวม ห้องประชุม A</span>
+            </div>
+            <div class="receipt-divider"></div>
+
+            <!-- Problem -->
+            <div class="section-header">รายละเอียดปัญหา</div>
+            <div class="description-text">ภาพเบลอ สีเพี้ยน ตัวเลือนไม่ทำงาน</div>
+            <div class="receipt-divider"></div>
+
+            <!-- Reporter & Receiver -->
+            <div class="info-row">
+              <span class="info-label">ผู้แจ้ง</span>
+              <span class="info-value">วรรณา สอนดี</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ผู้รับเรื่อง</span>
+              <span class="info-value">วิชัย ซ่อมดี</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">วันรับเรื่อง</span>
+              <span class="info-value">10/ก.ค./68 08:30</span>
+            </div>
+            <div class="receipt-divider"></div>
+
+            <!-- Signatures -->
+            <div class="signature-section">
+              <div class="signature-block">
+                <div class="signature-label">ลายเซ็น ผู้ส่ง</div>
+                <div class="signature-img-wrap">
+                  <div class="signature-placeholder">
+                    <svg viewBox="0 0 100 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 25 Q15 5 25 20 Q30 10 35 15 Q40 5 50 25 Q55 10 60 20 Q70 5 80 15 Q85 25 95 10" stroke="#333" stroke-width="1" fill="none"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="signature-block">
+                <div class="signature-label">ลายเซ็น ผู้รับ</div>
+                <div class="signature-img-wrap">
+                  <div class="signature-placeholder">
+                    <svg viewBox="0 0 100 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 22 Q18 8 28 18 Q33 12 38 20 Q48 5 58 22 Q63 8 73 18 Q78 25 88 12 Q92 8 95 15" stroke="#333" stroke-width="1" fill="none"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="receipt-divider"></div>
+
+            <!-- Cost -->
+            <div class="section-header">ค่าใช้จ่าย</div>
+            <div class="info-row">
+              <span class="info-label">ค่าอะไหล่</span>
+              <span class="info-value">12,000</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ค่าแรง</span>
+              <span class="info-value">3,000</span>
+            </div>
+            <div class="info-row total-row">
+              <span class="info-label">รวมทั้งหมด</span>
+              <span class="info-value">15,000 บาท</span>
+            </div>
+            <div class="receipt-divider"></div>
+
+            <!-- Footer -->
+            <div class="receipt-footer">
+              <div class="receipt-footer-line">พิมพ์เมื่อ: 28/ก.ค./69 12:30</div>
+              <div class="receipt-footer-line">Surinhos Asset Management</div>
+              <div class="receipt-footer-thanks">☆ ขอบคุณที่ใช้บริการ ☆</div>
+            </div>
+          </div>
+          <div class="receipt-cut-bottom"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== ใบส่งคืน (Return Receipt) ========== -->
+    <div class="receipt-column">
+      <h2>ใบส่งคืนครุภัณฑ์ <span>/ Return Receipt</span></h2>
+      <div class="thermal-receipt-wrapper">
+        <div class="thermal-receipt">
+          <div class="receipt-cut-top"></div>
+          <div class="receipt-content">
+            <!-- Header -->
+            <div style="text-align:center">
+              <div class="receipt-logo">🔧</div>
+              <div class="receipt-org-name">SURINHOS</div>
+              <div class="receipt-org-sub">REPAIR CENTER</div>
+              <div class="receipt-divider"></div>
+              <div class="receipt-title">ใบส่งคืนครุภัณฑ์</div>
+              <div class="receipt-divider"></div>
+            </div>
+
+            <!-- Ticket Number -->
+            <div class="ticket-number-row">
+              <div class="ticket-number-label">เลขที่</div>
+              <div class="ticket-number-value">RPR-260710-001</div>
+            </div>
+            <div class="ticket-date-row">10/ก.ค./68 08:30</div>
+            <div class="receipt-divider"></div>
+
+            <!-- Status -->
+            <div class="info-row status-row">
+              <span class="info-label">สถานะ</span>
+              <span class="info-value status-badge status-closed">ปิดงาน</span>
+            </div>
+            <div class="receipt-divider"></div>
+
+            <!-- Equipment -->
+            <div class="section-header">อุปกรณ์</div>
+            <div class="info-row">
+              <span class="info-label">ชื่อ</span>
+              <span class="info-value text-bold">โปรเจกเตอร์ Epson EB-L260F</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ครุภัณฑ์</span>
+              <span class="info-value">PRJ-69-001</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">สถานที่</span>
+              <span class="info-value">อาคารเรียนรวม ห้องประชุม A</span>
+            </div>
+            <div class="receipt-divider"></div>
+
+            <!-- Problem -->
+            <div class="section-header">รายละเอียดปัญหา</div>
+            <div class="description-text">ภาพเบลอ สีเพี้ยน ตัวเลือนไม่ทำงาน</div>
+            <div class="receipt-divider"></div>
+
+            <!-- Reporter -->
+            <div class="info-row">
+              <span class="info-label">ผู้แจ้ง</span>
+              <span class="info-value">วรรณา สอนดี</span>
+            </div>
+
+            <!-- Return Info -->
+            <div class="info-row">
+              <span class="info-label">วิธีส่งคืน</span>
+              <span class="info-value">ส่งมอบถึงห้อง</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ผู้ส่งคืน</span>
+              <span class="info-value">วิชัย ซ่อมดี</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">วันส่งคืน</span>
+              <span class="info-value">14/ก.ค./68 16:00</span>
+            </div>
+            <div class="receipt-divider"></div>
+
+            <!-- Cost -->
+            <div class="section-header">ค่าใช้จ่าย</div>
+            <div class="info-row">
+              <span class="info-label">ค่าอะไหล่</span>
+              <span class="info-value">12,000</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ค่าแรง</span>
+              <span class="info-value">3,000</span>
+            </div>
+            <div class="info-row total-row">
+              <span class="info-label">รวมทั้งหมด</span>
+              <span class="info-value">15,000 บาท</span>
+            </div>
+            <div class="receipt-divider"></div>
+
+            <!-- Return Signatures -->
+            <div class="signature-section">
+              <div class="signature-block">
+                <div class="signature-label">ลายเซ็น ผู้ส่งคืน</div>
+                <div class="signature-img-wrap">
+                  <div class="signature-placeholder">
+                    <svg viewBox="0 0 100 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 20 Q15 5 25 18 Q30 10 40 22 Q50 5 60 20 Q70 10 80 18 Q85 25 95 8" stroke="#333" stroke-width="1" fill="none"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="signature-block">
+                <div class="signature-label">ลายเซ็น ผู้รับคืน</div>
+                <div class="signature-img-wrap">
+                  <div class="signature-placeholder">
+                    <svg viewBox="0 0 100 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 18 Q20 8 30 22 Q35 12 45 20 Q55 5 65 18 Q75 10 85 22 Q90 15 95 20" stroke="#333" stroke-width="1" fill="none"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="receipt-divider"></div>
+
+            <!-- Footer -->
+            <div class="receipt-footer">
+              <div class="receipt-footer-line">พิมพ์เมื่อ: 28/ก.ค./69 12:30</div>
+              <div class="receipt-footer-line">Surinhos Asset Management</div>
+              <div class="receipt-footer-thanks">☆ ขอบคุณที่ใช้บริการ ☆</div>
+            </div>
+          </div>
+          <div class="receipt-cut-bottom"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========== INFO CARD ========== -->
+  <div class="info-card">
+    <h3>📋 รายละเอียดการออกแบบ Thermal Receipt</h3>
+    <ul>
+      <li><strong>ขนาดกระดาษ:</strong> 50mm width (รองรับกระดาษ thermal 58mm standard)</li>
+      <li><strong>ฟอนต์:</strong> Monospace / Noto Sans Thai (เหมาะกับ thermal printer)</li>
+      <li><strong>เส้นแบ่ง:</strong> Dashed line (เลียนแบบขอบกระดาษซอย)</li>
+      <li><strong>เลขที่ใบแจ้งซ่อม:</strong> แสดงขนาดใหญ่ตรงกลาง (เหมือนบัตรคิวร้านอาหาร)</li>
+      <li><strong>สถานะ:</strong> แสดงเป็น badge สีตามสถานะ (6 สถานะ)</li>
+      <li><strong>ลายเซ็น:</strong> รองรับลายเซ็นจริงจาก signature pad (base64 image)</li>
+      <li><strong>2 แบบ:</strong> ใบรับซ่อม (ตอนรับเข้าซ่อม) และ ใบส่งคืน (ตอนส่งคืน)</li>
+      <li><strong>Preview:</strong> แสดง preview ก่อนปริ้น ขยาย 2.2x เพื่อให้เห็นชัด</li>
+      <li><strong>Print CSS:</strong> @page size: 50mm auto (พิมพ์ตรงตามขนาดกระดาษ)</li>
+    </ul>
+
+    <div class="specs-grid">
+      <div class="spec-item">
+        <div class="spec-value">50mm</div>
+        <div class="spec-label">ความกว้างกระดาษ</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-value">7pt</div>
+        <div class="spec-label">ขนาดฟอนต์หลัก</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-value">11pt</div>
+        <div class="spec-label">ขนาดเลขที่ใบ</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-value">6</div>
+        <div class="spec-label">สถานะที่รองรับ</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -61,6 +61,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import SignaturePad from '@/components/repair/signature-pad'
+import ThermalReceipt, { ThermalReceiptStyles, type RepairTicketForReceipt } from '@/components/repair/thermal-receipt'
 
 // ==================== TYPES ====================
 
@@ -228,8 +229,9 @@ export default function TicketDetail({
   const [showStartRepairConfirm, setShowStartRepairConfirm] = useState(false)
   const [showCloseConfirm, setShowCloseConfirm] = useState(false)
 
-  // print
+  // print / receipt preview
   const [printType, setPrintType] = useState<'repair' | 'return'>('repair')
+  const [showReceiptPreview, setShowReceiptPreview] = useState(false)
 
   // ---------- fetch ticket ----------
   const fetchTicket = useCallback(async () => {
@@ -468,6 +470,11 @@ export default function TicketDetail({
 
   const handlePrint = (type: 'repair' | 'return') => {
     setPrintType(type)
+    setShowReceiptPreview(true)
+  }
+
+  const handlePrintFromPreview = () => {
+    setShowReceiptPreview(false)
     setTimeout(() => {
       window.print()
     }, 300)
@@ -812,6 +819,10 @@ export default function TicketDetail({
                       <Wrench className="size-4" />
                       เริ่มซ่อม
                     </Button>
+                    <Button variant="outline" onClick={() => handlePrint('repair')} className="w-full sm:w-auto">
+                      <Printer className="size-4" />
+                      ปริ้นใบรับซ่อม
+                    </Button>
                     <Button
                       variant="destructive"
                       onClick={() => {
@@ -881,15 +892,25 @@ export default function TicketDetail({
                       <Printer className="size-4" />
                       ปริ้นใบส่งคืน
                     </Button>
+                    <Button variant="outline" onClick={() => handlePrint('repair')} className="w-full sm:w-auto">
+                      <Printer className="size-4" />
+                      ปริ้นใบรับซ่อม
+                    </Button>
                   </>
                 )}
 
                 {/* CLOSED */}
                 {ticket.status === 'closed' && (
-                  <Button variant="outline" onClick={() => handlePrint('repair')} className="w-full sm:w-auto">
-                    <Printer className="size-4" />
-                    ปริ้นใบแจ้งซ่อม
-                  </Button>
+                  <>
+                    <Button variant="outline" onClick={() => handlePrint('repair')} className="w-full sm:w-auto">
+                      <Printer className="size-4" />
+                      ปริ้นใบรับซ่อม
+                    </Button>
+                    <Button variant="outline" onClick={() => handlePrint('return')} className="w-full sm:w-auto">
+                      <Printer className="size-4" />
+                      ปริ้นใบส่งคืน
+                    </Button>
+                  </>
                 )}
               </div>
             </CardContent>
@@ -1130,24 +1151,58 @@ export default function TicketDetail({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* ========== PRINT CONTENT (hidden, shown only during print) ========== */}
-      <PrintContent ticket={ticket} printType={printType} />
+      {/* ========== RECEIPT PREVIEW DIALOG ========== */}
+      <Dialog open={showReceiptPreview} onOpenChange={setShowReceiptPreview}>
+        <DialogContent className="sm:max-w-sm p-0 overflow-hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle>
+              {printType === 'return' ? 'พรีวิวใบส่งคืน' : 'พรีวิวใบรับซ่อม'}
+            </DialogTitle>
+            <DialogDescription>ตัวอย่างใบรับซ่อม/ส่งคืน ขนาด 50mm (thermal receipt)</DialogDescription>
+          </DialogHeader>
+          {/* Dialog Title Bar */}
+          <div className="no-print flex items-center justify-between px-4 pt-4 pb-2">
+            <div className="flex items-center gap-2">
+              <Printer className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">
+                {printType === 'return' ? 'พรีวิวใบส่งคืน' : 'พรีวิวใบรับซ่อม'}
+              </span>
+            </div>
+            <span className="text-xs text-muted-foreground">ขนาดกระดาษ 50mm</span>
+          </div>
+          {/* Receipt Preview Area */}
+          <div className="thermal-receipt-wrapper px-4 pb-4">
+            <ThermalReceipt ticket={ticket as RepairTicketForReceipt} type={printType} />
+          </div>
+          {/* Actions */}
+          <div className="no-print flex items-center justify-end gap-2 border-t px-4 py-3">
+            <Button variant="outline" size="sm" onClick={() => setShowReceiptPreview(false)}>
+              ปิด
+            </Button>
+            <Button size="sm" onClick={handlePrintFromPreview}>
+              <Printer className="h-4 w-4" />
+              ปริ้น
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-      {/* ========== PRINT STYLES ========== */}
+      {/* ========== PRINT CONTENT (hidden, shown only during print) ========== */}
+      <div className="print-receipt-area hidden" aria-hidden="true">
+        <ThermalReceiptStyles />
+        <div className="thermal-receipt-wrapper">
+          <ThermalReceipt ticket={ticket as RepairTicketForReceipt} type={printType} />
+        </div>
+      </div>
+
+      {/* ========== GLOBAL PRINT STYLES ========== */}
       <style jsx global>{`
         @media print {
+          .print-receipt-area {
+            display: block !important;
+          }
           .no-print {
             display: none !important;
-          }
-          .print-only {
-            display: block !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            background: white !important;
-            z-index: 99999 !important;
-            padding: 24px !important;
           }
         }
       `}</style>
@@ -1155,213 +1210,3 @@ export default function TicketDetail({
   )
 }
 
-// ==================== PRINT CONTENT SUB-COMPONENT ====================
-
-function PrintContent({
-  ticket,
-  printType,
-}: {
-  ticket: RepairTicket
-  printType: 'repair' | 'return'
-}) {
-  return (
-    <div className="print-only hidden" aria-hidden="true">
-      <div className="space-y-6">
-        {/* Print Header */}
-        <div className="text-center">
-          <h1 className="text-xl font-bold">
-            {printType === 'return'
-              ? 'ใบส่งคืนครุภัณฑ์ / Return Receipt'
-              : 'ใบแจ้งซ่อมอุปกรณ์ / Repair Ticket'}
-          </h1>
-          <Separator className="mx-auto mt-3 max-w-xs" />
-        </div>
-
-        {/* Ticket Info */}
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">เลขที่: </span>
-            <span className="font-medium">{ticket.ticketNo}</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">สถานะ: </span>
-            <span className="font-medium">{statusConfig[ticket.status]?.label || ticket.status}</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">วันที่แจ้ง: </span>
-            <span className="font-medium">{formatDate(ticket.createdAt)}</span>
-          </div>
-          {ticket.receivedAt && (
-            <div>
-              <span className="text-muted-foreground">วันที่รับ: </span>
-              <span className="font-medium">{formatDate(ticket.receivedAt)}</span>
-            </div>
-          )}
-          {ticket.returnedAt && (
-            <div>
-              <span className="text-muted-foreground">วันที่ส่งคืน: </span>
-              <span className="font-medium">{formatDate(ticket.returnedAt)}</span>
-            </div>
-          )}
-        </div>
-
-        <Separator />
-
-        {/* Asset Info */}
-        <div className="space-y-2 text-sm">
-          <h2 className="font-semibold">ข้อมูลอุปกรณ์</h2>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <span className="text-muted-foreground">ชื่ออุปกรณ์: </span>
-              <span className="font-medium">{ticket.assetName}</span>
-            </div>
-            {ticket.asset?.assetCode && (
-              <div>
-                <span className="text-muted-foreground">หมายเลขครุภัณฑ์: </span>
-                <span className="font-medium">{ticket.asset.assetCode}</span>
-              </div>
-            )}
-            {ticket.asset?.category && (
-              <div>
-                <span className="text-muted-foreground">หมวดหมู่: </span>
-                <span className="font-medium">{ticket.asset.category}</span>
-              </div>
-            )}
-            {ticket.asset?.location && (
-              <div>
-                <span className="text-muted-foreground">สถานที่: </span>
-                <span className="font-medium">
-                  {ticket.asset.location.buildingName} {ticket.asset.location.roomName}
-                </span>
-              </div>
-            )}
-          </div>
-          <div>
-            <span className="text-muted-foreground">รายละเอียดปัญหา: </span>
-            <span className="font-medium">{ticket.problemDetails || '-'}</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">ผู้แจ้ง: </span>
-            <span className="font-medium">{ticket.reporterName || '-'}</span>
-          </div>
-        </div>
-
-        {/* Acceptance Info */}
-        {ticket.receivedBy && (
-          <>
-            <Separator />
-            <div className="space-y-2 text-sm">
-              <h2 className="font-semibold">ข้อมูลการรับเรื่อง</h2>
-              <div>
-                <span className="text-muted-foreground">ผู้รับเรื่อง: </span>
-                <span className="font-medium">{ticket.receivedBy}</span>
-              </div>
-              {ticket.receiverSignature && (
-                <div>
-                  <p className="mb-1 text-muted-foreground">ลายเซ็นผู้รับ:</p>
-                  <img
-                    src={ticket.receiverSignature}
-                    alt="ลายเซ็นผู้รับ"
-                    className="h-16 rounded border bg-white object-contain p-1"
-                  />
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Cost Info */}
-        {(ticket.repairCost != null || ticket.laborCost != null) && (
-          <>
-            <Separator />
-            <div className="space-y-2 text-sm">
-              <h2 className="font-semibold">รายละเอียดค่าใช้จ่าย</h2>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <span className="text-muted-foreground">ค่าอะไหล่: </span>
-                  <span className="font-medium">{formatCurrency(ticket.repairCost)}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">ค่าแรงงาน: </span>
-                  <span className="font-medium">{formatCurrency(ticket.laborCost)}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">รวมทั้งหมด: </span>
-                  <span className="font-bold">
-                    {formatCurrency(
-                      ticket.totalCost ??
-                        (ticket.repairCost != null && ticket.laborCost != null
-                          ? ticket.repairCost + ticket.laborCost
-                          : null)
-                    )}
-                  </span>
-                </div>
-              </div>
-              {ticket.costStatus && (
-                <div>
-                  <span className="text-muted-foreground">สถานะอนุมัติ: </span>
-                  <span className="font-medium">
-                    {costStatusLabel[ticket.costStatus] || ticket.costStatus}
-                  </span>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Return Info */}
-        {ticket.returnedBy && (
-          <>
-            <Separator />
-            <div className="space-y-2 text-sm">
-              <h2 className="font-semibold">ข้อมูลการส่งคืน</h2>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-muted-foreground">วิธีส่งคืน: </span>
-                  <span className="font-medium">{ticket.returnMethod}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">ผู้ส่งคืน: </span>
-                  <span className="font-medium">{ticket.returnedBy}</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {ticket.returnSenderSignature && (
-                  <div>
-                    <p className="mb-1 text-muted-foreground">ลายเซ็นผู้ส่งคืน:</p>
-                    <img
-                      src={ticket.returnSenderSignature}
-                      alt="ลายเซ็นผู้ส่งคืน"
-                      className="h-16 rounded border bg-white object-contain p-1"
-                    />
-                  </div>
-                )}
-                {ticket.returnReceiverSignature && (
-                  <div>
-                    <p className="mb-1 text-muted-foreground">ลายเซ็นผู้รับคืน:</p>
-                    <img
-                      src={ticket.returnReceiverSignature}
-                      alt="ลายเซ็นผู้รับคืน"
-                      className="h-16 rounded border bg-white object-contain p-1"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Cancel Reason */}
-        {ticket.cancelReason && (
-          <>
-            <Separator />
-            <div className="text-sm">
-              <span className="text-muted-foreground">เหตุผลการยกเลิก: </span>
-              <span className="font-medium text-red-600">{ticket.cancelReason}</span>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
