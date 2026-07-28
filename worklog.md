@@ -161,3 +161,26 @@ Stage Summary:
 - Customer view: งานของคุณ + ติดตามสถานะ + status message
 - Admin view: จัดการทุกรายการ + action buttons + signatures
 - Verified: 0 JS errors, toggle works, detail renders correctly on both views
+
+---
+Task ID: 5
+Agent: Main Orchestrator
+Task: เพิ่มฟีเจอร์แนบรูป + ตีแทงจำหน่ายครุภัณฑ์
+
+Work Log:
+- เพิ่มช่องแนบรูปในฟอร์มแจ้งซ่อม (Camera icon, drag & drop, FileReader API)
+- แสดงรูปประกอบในหน้า detail view (ทั้ง Customer + Admin)
+- เพิ่ม Photo lightbox modal สำหรับดูรูปขยาย
+- เพิ่ม ticket #7 (จอ LG) เป็น demo ที่มีรูปประกอบ 2 รูป
+- เพิ่มสถานะ 'disposed' + disposal sub-status (pending_review/approved/disposed)
+- Admin action: 🗑️ ตีแทงจำหน่าย แสดงที่ pending/in_progress
+- Disposal modal: เหตุผล, วิธีจำหน่าย (3 ทางเลือก), ราคาประเมิน, ผู้อนุมัติ, หนังสือ ครม.
+- อัพเดท prisma/schema.prisma: เพิ่ม fields photos, disposalStatus, disposalReason, disposalMethod, disposalValue, disposalApprovedBy, disposalComRef
+- สร้าง API: src/app/api/repairs/[id]/disposal/route.ts (PUT + PATCH)
+- รัน bun run db:push สำเร็จ, lint ผ่าน
+
+Stage Summary:
+- ไฟล์ที่เปลี่ยน: prisma/schema.prisma, public/demo.html, src/app/api/repairs/[id]/disposal/route.ts
+- Photo upload: FileReader API, preview grid, lightbox
+- Disposal: เป็นไปตาม workflow งานภาครัฐ (ตีแทงจำหน่าย)
+- Verified via agent-browser: ทุก feature ทำงานได้ (photos, disposal modal, create form)
