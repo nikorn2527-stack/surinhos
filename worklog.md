@@ -139,3 +139,25 @@ Stage Summary:
 - Thermal receipt 2 แบบ: ใบรับซ่อม + ใบส่งคืน (50mm, zoomed 2.2x preview)
 - ตรวจสอบผ่าน agent-browser: เข้าได้, คลิก ticket แสดง detail, กดปริ้นแสดง receipt modal
 - Screenshot ทั้งหมด: screenshot-demo-main.png, screenshot-demo-detail.png, screenshot-demo-receipt.png, screenshot-demo-return-receipt.png, screenshot-demo-mobile.png
+
+---
+Task ID: 4
+Agent: Main Orchestrator
+Task: Redesign demo.html — 2 มุมมอง (ผู้แจ้งซ่อม + ผู้ดูแล) + ไม่ต้องเลื่อน
+
+Work Log:
+- Redesign `public/demo.html` ทั้งหมด — full viewport layout, no page scroll
+- เพิ่ม view toggle: 👤 ผู้แจ้งซ่อม (Customer) / ⚙️ ผู้ดูแล (Admin)
+- ออกแบบ compact ticket rows (grid layout, ~50px each) — 6 tickets แสดงในหน้าเดียวไม่ต้องเลื่อน
+- ออกแบบ compact detail view — 3-column info grid, inline timeline, inline actions — รายละเอียดทั้งหมดแสดงในหน้าเดียว
+- Customer view: แสดงสถานะติดตาม, ไม่แสดง admin actions, มี status message สรุป
+- Admin view: แสดงทุกข้อมูล + action buttons (รับเรื่อง, เริ่มซ่อม, เสนอราคา, ส่งคืน, ปิดงาน, ยกเลิก)
+- รักษา thermal receipt preview modal และ create form modal จากเวอร์ชันเดิม
+- เพิ่ม responsive: mobile (stack layout), tablet (280px sidebar), desktop (300px sidebar)
+- ทดสอบผ่าน agent-browser: ✅ ไม่มี errors, ทั้ง 2 views ทำงาน, detail แสดงครบ
+
+Stage Summary:
+- Demo page redesign: `public/demo.html` — 2 views, no scroll, clean & compact
+- Customer view: งานของคุณ + ติดตามสถานะ + status message
+- Admin view: จัดการทุกรายการ + action buttons + signatures
+- Verified: 0 JS errors, toggle works, detail renders correctly on both views
