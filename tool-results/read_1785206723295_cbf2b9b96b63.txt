@@ -1,0 +1,500 @@
+     1→▲ Next.js 16.1.3 (Turbopack)
+     2→- Local:         http://localhost:3000
+     3→- Network:       http://21.0.9.54:3000
+     4→- Environments: .env
+     5→
+     6→✓ Starting...
+     7→✓ Ready in 603ms
+     8→○ Compiling / ...
+     9→⨯ ./src/components/repair/ticket-detail.tsx:6:1
+    10→Export PackageReturn doesn't exist in target module
+    11→[0m [90m  4 |[39m [36mimport[39m { useMutation } [36mfrom[39m [32m'@tanstack/react-query'[39m
+    12→ [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m'sonner'[39m
+    13→[31m[1m>[22m[39m[90m  6 |[39m [36mimport[39m {
+    14→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    15→[31m[1m>[22m[39m[90m  7 |[39m   [33mArrowLeft[39m[33m,[39m
+    16→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    17→[31m[1m>[22m[39m[90m  8 |[39m   [33mClock[39m[33m,[39m
+    18→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    19→[31m[1m>[22m[39m[90m  9 |[39m   [33mCheckCircle[39m[33m,[39m
+    20→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    21→[31m[1m>[22m[39m[90m 10 |[39m   [33mWrench[39m[33m,[39m
+    22→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    23→[31m[1m>[22m[39m[90m 11 |[39m   [33mPackageReturn[39m[33m,[39m
+    24→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    25→[31m[1m>[22m[39m[90m 12 |[39m   [33mCheckCircle2[39m[33m,[39m
+    26→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    27→[31m[1m>[22m[39m[90m 13 |[39m   [33mXCircle[39m[33m,[39m
+    28→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    29→[31m[1m>[22m[39m[90m 14 |[39m   [33mPrinter[39m[33m,[39m
+    30→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    31→[31m[1m>[22m[39m[90m 15 |[39m   [33mLoader2[39m[33m,[39m
+    32→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    33→[31m[1m>[22m[39m[90m 16 |[39m   [33mCalendarDays[39m[33m,[39m
+    34→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    35→[31m[1m>[22m[39m[90m 17 |[39m   [33mUser[39m[33m,[39m
+    36→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    37→[31m[1m>[22m[39m[90m 18 |[39m   [33mMapPin[39m[33m,[39m
+    38→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    39→[31m[1m>[22m[39m[90m 19 |[39m   [33mAlertTriangle[39m[33m,[39m
+    40→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    41→[31m[1m>[22m[39m[90m 20 |[39m   [33mBanknote[39m[33m,[39m
+    42→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    43→[31m[1m>[22m[39m[90m 21 |[39m } [36mfrom[39m [32m'lucide-react'[39m
+    44→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    45→ [90m 22 |[39m
+    46→ [90m 23 |[39m [36mimport[39m { cn } [36mfrom[39m [32m'@/lib/utils'[39m
+    47→ [90m 24 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[0m
+    48→
+    49→The export PackageReturn was not found in module [project]/node_modules/lucide-react/dist/esm/lucide-react.js [app-client] (ecmascript).
+    50→Did you mean to import Package?
+    51→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+    52→
+    53→Import traces:
+    54→  Client Component Browser:
+    55→    ./src/components/repair/ticket-detail.tsx [Client Component Browser]
+    56→    ./src/app/page.tsx [Client Component Browser]
+    57→    ./src/app/page.tsx [Server Component]
+    58→
+    59→  Client Component SSR:
+    60→    ./src/components/repair/ticket-detail.tsx [Client Component SSR]
+    61→    ./src/app/page.tsx [Client Component SSR]
+    62→    ./src/app/page.tsx [Server Component]
+    63→
+    64→
+    65→
+    66→./src/components/repair/ticket-detail.tsx:6:1
+    67→Export PackageReturn doesn't exist in target module
+    68→[0m [90m  4 |[39m [36mimport[39m { useMutation } [36mfrom[39m [32m'@tanstack/react-query'[39m
+    69→ [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m'sonner'[39m
+    70→[31m[1m>[22m[39m[90m  6 |[39m [36mimport[39m {
+    71→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    72→[31m[1m>[22m[39m[90m  7 |[39m   [33mArrowLeft[39m[33m,[39m
+    73→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    74→[31m[1m>[22m[39m[90m  8 |[39m   [33mClock[39m[33m,[39m
+    75→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    76→[31m[1m>[22m[39m[90m  9 |[39m   [33mCheckCircle[39m[33m,[39m
+    77→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    78→[31m[1m>[22m[39m[90m 10 |[39m   [33mWrench[39m[33m,[39m
+    79→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    80→[31m[1m>[22m[39m[90m 11 |[39m   [33mPackageReturn[39m[33m,[39m
+    81→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    82→[31m[1m>[22m[39m[90m 12 |[39m   [33mCheckCircle2[39m[33m,[39m
+    83→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    84→[31m[1m>[22m[39m[90m 13 |[39m   [33mXCircle[39m[33m,[39m
+    85→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    86→[31m[1m>[22m[39m[90m 14 |[39m   [33mPrinter[39m[33m,[39m
+    87→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    88→[31m[1m>[22m[39m[90m 15 |[39m   [33mLoader2[39m[33m,[39m
+    89→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    90→[31m[1m>[22m[39m[90m 16 |[39m   [33mCalendarDays[39m[33m,[39m
+    91→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    92→[31m[1m>[22m[39m[90m 17 |[39m   [33mUser[39m[33m,[39m
+    93→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    94→[31m[1m>[22m[39m[90m 18 |[39m   [33mMapPin[39m[33m,[39m
+    95→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    96→[31m[1m>[22m[39m[90m 19 |[39m   [33mAlertTriangle[39m[33m,[39m
+    97→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+    98→[31m[1m>[22m[39m[90m 20 |[39m   [33mBanknote[39m[33m,[39m
+    99→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   100→[31m[1m>[22m[39m[90m 21 |[39m } [36mfrom[39m [32m'lucide-react'[39m
+   101→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   102→ [90m 22 |[39m
+   103→ [90m 23 |[39m [36mimport[39m { cn } [36mfrom[39m [32m'@/lib/utils'[39m
+   104→ [90m 24 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[0m
+   105→
+   106→The export PackageReturn was not found in module [project]/node_modules/lucide-react/dist/esm/lucide-react.js [app-ssr] (ecmascript).
+   107→Did you mean to import Package?
+   108→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   109→
+   110→Import traces:
+   111→  Client Component Browser:
+   112→    ./src/components/repair/ticket-detail.tsx [Client Component Browser]
+   113→    ./src/app/page.tsx [Client Component Browser]
+   114→    ./src/app/page.tsx [Server Component]
+   115→
+   116→  Client Component SSR:
+   117→    ./src/components/repair/ticket-detail.tsx [Client Component SSR]
+   118→    ./src/app/page.tsx [Client Component SSR]
+   119→    ./src/app/page.tsx [Server Component]
+   120→
+   121→
+   122→
+   123→./src/app/page.tsx:11:1
+   124→Export TicketDetail doesn't exist in target module
+   125→[0m [90m  9 |[39m [36mimport[39m { [33mRepairForm[39m } [36mfrom[39m [32m'@/components/repair/repair-form'[39m
+   126→ [90m 10 |[39m [36mimport[39m { [33mRepairList[39m } [36mfrom[39m [32m'@/components/repair/repair-list'[39m
+   127→[31m[1m>[22m[39m[90m 11 |[39m [36mimport[39m { [33mTicketDetail[39m } [36mfrom[39m [32m'@/components/repair/ticket-detail'[39m
+   128→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   129→ [90m 12 |[39m
+   130→ [90m 13 |[39m [36minterface[39m [33mRepair[39m {
+   131→ [90m 14 |[39m   id[33m:[39m string[0m
+   132→
+   133→The export TicketDetail was not found in module [project]/src/components/repair/ticket-detail.tsx [app-client] (ecmascript).
+   134→Did you mean to import default?
+   135→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   136→
+   137→Import traces:
+   138→  Client Component Browser:
+   139→    ./src/app/page.tsx [Client Component Browser]
+   140→    ./src/app/page.tsx [Server Component]
+   141→
+   142→  Client Component SSR:
+   143→    ./src/app/page.tsx [Client Component SSR]
+   144→    ./src/app/page.tsx [Server Component]
+   145→
+   146→
+   147→
+   148→./src/app/page.tsx:11:1
+   149→Export TicketDetail doesn't exist in target module
+   150→[0m [90m  9 |[39m [36mimport[39m { [33mRepairForm[39m } [36mfrom[39m [32m'@/components/repair/repair-form'[39m
+   151→ [90m 10 |[39m [36mimport[39m { [33mRepairList[39m } [36mfrom[39m [32m'@/components/repair/repair-list'[39m
+   152→[31m[1m>[22m[39m[90m 11 |[39m [36mimport[39m { [33mTicketDetail[39m } [36mfrom[39m [32m'@/components/repair/ticket-detail'[39m
+   153→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   154→ [90m 12 |[39m
+   155→ [90m 13 |[39m [36minterface[39m [33mRepair[39m {
+   156→ [90m 14 |[39m   id[33m:[39m string[0m
+   157→
+   158→The export TicketDetail was not found in module [project]/src/components/repair/ticket-detail.tsx [app-ssr] (ecmascript).
+   159→Did you mean to import default?
+   160→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   161→
+   162→Import traces:
+   163→  Client Component Browser:
+   164→    ./src/app/page.tsx [Client Component Browser]
+   165→    ./src/app/page.tsx [Server Component]
+   166→
+   167→  Client Component SSR:
+   168→    ./src/app/page.tsx [Client Component SSR]
+   169→    ./src/app/page.tsx [Server Component]
+   170→
+   171→
+   172→⨯ ./src/components/repair/ticket-detail.tsx:6:1
+   173→Export PackageReturn doesn't exist in target module
+   174→[0m [90m  4 |[39m [36mimport[39m { useMutation } [36mfrom[39m [32m'@tanstack/react-query'[39m
+   175→ [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m'sonner'[39m
+   176→[31m[1m>[22m[39m[90m  6 |[39m [36mimport[39m {
+   177→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   178→[31m[1m>[22m[39m[90m  7 |[39m   [33mArrowLeft[39m[33m,[39m
+   179→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   180→[31m[1m>[22m[39m[90m  8 |[39m   [33mClock[39m[33m,[39m
+   181→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   182→[31m[1m>[22m[39m[90m  9 |[39m   [33mCheckCircle[39m[33m,[39m
+   183→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   184→[31m[1m>[22m[39m[90m 10 |[39m   [33mWrench[39m[33m,[39m
+   185→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   186→[31m[1m>[22m[39m[90m 11 |[39m   [33mPackageReturn[39m[33m,[39m
+   187→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   188→[31m[1m>[22m[39m[90m 12 |[39m   [33mCheckCircle2[39m[33m,[39m
+   189→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   190→[31m[1m>[22m[39m[90m 13 |[39m   [33mXCircle[39m[33m,[39m
+   191→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   192→[31m[1m>[22m[39m[90m 14 |[39m   [33mPrinter[39m[33m,[39m
+   193→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   194→[31m[1m>[22m[39m[90m 15 |[39m   [33mLoader2[39m[33m,[39m
+   195→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   196→[31m[1m>[22m[39m[90m 16 |[39m   [33mCalendarDays[39m[33m,[39m
+   197→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   198→[31m[1m>[22m[39m[90m 17 |[39m   [33mUser[39m[33m,[39m
+   199→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   200→[31m[1m>[22m[39m[90m 18 |[39m   [33mMapPin[39m[33m,[39m
+   201→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   202→[31m[1m>[22m[39m[90m 19 |[39m   [33mAlertTriangle[39m[33m,[39m
+   203→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   204→[31m[1m>[22m[39m[90m 20 |[39m   [33mBanknote[39m[33m,[39m
+   205→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   206→[31m[1m>[22m[39m[90m 21 |[39m } [36mfrom[39m [32m'lucide-react'[39m
+   207→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   208→ [90m 22 |[39m
+   209→ [90m 23 |[39m [36mimport[39m { cn } [36mfrom[39m [32m'@/lib/utils'[39m
+   210→ [90m 24 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[0m
+   211→
+   212→The export PackageReturn was not found in module [project]/node_modules/lucide-react/dist/esm/lucide-react.js [app-client] (ecmascript).
+   213→Did you mean to import Package?
+   214→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   215→
+   216→Import traces:
+   217→  Client Component Browser:
+   218→    ./src/components/repair/ticket-detail.tsx [Client Component Browser]
+   219→    ./src/app/page.tsx [Client Component Browser]
+   220→    ./src/app/page.tsx [Server Component]
+   221→
+   222→  Client Component SSR:
+   223→    ./src/components/repair/ticket-detail.tsx [Client Component SSR]
+   224→    ./src/app/page.tsx [Client Component SSR]
+   225→    ./src/app/page.tsx [Server Component]
+   226→
+   227→
+   228→
+   229→./src/components/repair/ticket-detail.tsx:6:1
+   230→Export PackageReturn doesn't exist in target module
+   231→[0m [90m  4 |[39m [36mimport[39m { useMutation } [36mfrom[39m [32m'@tanstack/react-query'[39m
+   232→ [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m'sonner'[39m
+   233→[31m[1m>[22m[39m[90m  6 |[39m [36mimport[39m {
+   234→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   235→[31m[1m>[22m[39m[90m  7 |[39m   [33mArrowLeft[39m[33m,[39m
+   236→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   237→[31m[1m>[22m[39m[90m  8 |[39m   [33mClock[39m[33m,[39m
+   238→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   239→[31m[1m>[22m[39m[90m  9 |[39m   [33mCheckCircle[39m[33m,[39m
+   240→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   241→[31m[1m>[22m[39m[90m 10 |[39m   [33mWrench[39m[33m,[39m
+   242→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   243→[31m[1m>[22m[39m[90m 11 |[39m   [33mPackageReturn[39m[33m,[39m
+   244→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   245→[31m[1m>[22m[39m[90m 12 |[39m   [33mCheckCircle2[39m[33m,[39m
+   246→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   247→[31m[1m>[22m[39m[90m 13 |[39m   [33mXCircle[39m[33m,[39m
+   248→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   249→[31m[1m>[22m[39m[90m 14 |[39m   [33mPrinter[39m[33m,[39m
+   250→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   251→[31m[1m>[22m[39m[90m 15 |[39m   [33mLoader2[39m[33m,[39m
+   252→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   253→[31m[1m>[22m[39m[90m 16 |[39m   [33mCalendarDays[39m[33m,[39m
+   254→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   255→[31m[1m>[22m[39m[90m 17 |[39m   [33mUser[39m[33m,[39m
+   256→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   257→[31m[1m>[22m[39m[90m 18 |[39m   [33mMapPin[39m[33m,[39m
+   258→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   259→[31m[1m>[22m[39m[90m 19 |[39m   [33mAlertTriangle[39m[33m,[39m
+   260→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   261→[31m[1m>[22m[39m[90m 20 |[39m   [33mBanknote[39m[33m,[39m
+   262→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   263→[31m[1m>[22m[39m[90m 21 |[39m } [36mfrom[39m [32m'lucide-react'[39m
+   264→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   265→ [90m 22 |[39m
+   266→ [90m 23 |[39m [36mimport[39m { cn } [36mfrom[39m [32m'@/lib/utils'[39m
+   267→ [90m 24 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[0m
+   268→
+   269→The export PackageReturn was not found in module [project]/node_modules/lucide-react/dist/esm/lucide-react.js [app-ssr] (ecmascript).
+   270→Did you mean to import Package?
+   271→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   272→
+   273→Import traces:
+   274→  Client Component Browser:
+   275→    ./src/components/repair/ticket-detail.tsx [Client Component Browser]
+   276→    ./src/app/page.tsx [Client Component Browser]
+   277→    ./src/app/page.tsx [Server Component]
+   278→
+   279→  Client Component SSR:
+   280→    ./src/components/repair/ticket-detail.tsx [Client Component SSR]
+   281→    ./src/app/page.tsx [Client Component SSR]
+   282→    ./src/app/page.tsx [Server Component]
+   283→
+   284→
+   285→
+   286→./src/app/page.tsx:11:1
+   287→Export TicketDetail doesn't exist in target module
+   288→[0m [90m  9 |[39m [36mimport[39m { [33mRepairForm[39m } [36mfrom[39m [32m'@/components/repair/repair-form'[39m
+   289→ [90m 10 |[39m [36mimport[39m { [33mRepairList[39m } [36mfrom[39m [32m'@/components/repair/repair-list'[39m
+   290→[31m[1m>[22m[39m[90m 11 |[39m [36mimport[39m { [33mTicketDetail[39m } [36mfrom[39m [32m'@/components/repair/ticket-detail'[39m
+   291→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   292→ [90m 12 |[39m
+   293→ [90m 13 |[39m [36minterface[39m [33mRepair[39m {
+   294→ [90m 14 |[39m   id[33m:[39m string[0m
+   295→
+   296→The export TicketDetail was not found in module [project]/src/components/repair/ticket-detail.tsx [app-client] (ecmascript).
+   297→Did you mean to import default?
+   298→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   299→
+   300→Import traces:
+   301→  Client Component Browser:
+   302→    ./src/app/page.tsx [Client Component Browser]
+   303→    ./src/app/page.tsx [Server Component]
+   304→
+   305→  Client Component SSR:
+   306→    ./src/app/page.tsx [Client Component SSR]
+   307→    ./src/app/page.tsx [Server Component]
+   308→
+   309→
+   310→
+   311→./src/app/page.tsx:11:1
+   312→Export TicketDetail doesn't exist in target module
+   313→[0m [90m  9 |[39m [36mimport[39m { [33mRepairForm[39m } [36mfrom[39m [32m'@/components/repair/repair-form'[39m
+   314→ [90m 10 |[39m [36mimport[39m { [33mRepairList[39m } [36mfrom[39m [32m'@/components/repair/repair-list'[39m
+   315→[31m[1m>[22m[39m[90m 11 |[39m [36mimport[39m { [33mTicketDetail[39m } [36mfrom[39m [32m'@/components/repair/ticket-detail'[39m
+   316→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   317→ [90m 12 |[39m
+   318→ [90m 13 |[39m [36minterface[39m [33mRepair[39m {
+   319→ [90m 14 |[39m   id[33m:[39m string[0m
+   320→
+   321→The export TicketDetail was not found in module [project]/src/components/repair/ticket-detail.tsx [app-ssr] (ecmascript).
+   322→Did you mean to import default?
+   323→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   324→
+   325→Import traces:
+   326→  Client Component Browser:
+   327→    ./src/app/page.tsx [Client Component Browser]
+   328→    ./src/app/page.tsx [Server Component]
+   329→
+   330→  Client Component SSR:
+   331→    ./src/app/page.tsx [Client Component SSR]
+   332→    ./src/app/page.tsx [Server Component]
+   333→
+   334→
+   335→⨯ ./src/components/repair/ticket-detail.tsx:6:1
+   336→Export PackageReturn doesn't exist in target module
+   337→[0m [90m  4 |[39m [36mimport[39m { useMutation } [36mfrom[39m [32m'@tanstack/react-query'[39m
+   338→ [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m'sonner'[39m
+   339→[31m[1m>[22m[39m[90m  6 |[39m [36mimport[39m {
+   340→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   341→[31m[1m>[22m[39m[90m  7 |[39m   [33mArrowLeft[39m[33m,[39m
+   342→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   343→[31m[1m>[22m[39m[90m  8 |[39m   [33mClock[39m[33m,[39m
+   344→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   345→[31m[1m>[22m[39m[90m  9 |[39m   [33mCheckCircle[39m[33m,[39m
+   346→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   347→[31m[1m>[22m[39m[90m 10 |[39m   [33mWrench[39m[33m,[39m
+   348→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   349→[31m[1m>[22m[39m[90m 11 |[39m   [33mPackageReturn[39m[33m,[39m
+   350→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   351→[31m[1m>[22m[39m[90m 12 |[39m   [33mCheckCircle2[39m[33m,[39m
+   352→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   353→[31m[1m>[22m[39m[90m 13 |[39m   [33mXCircle[39m[33m,[39m
+   354→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   355→[31m[1m>[22m[39m[90m 14 |[39m   [33mPrinter[39m[33m,[39m
+   356→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   357→[31m[1m>[22m[39m[90m 15 |[39m   [33mLoader2[39m[33m,[39m
+   358→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   359→[31m[1m>[22m[39m[90m 16 |[39m   [33mCalendarDays[39m[33m,[39m
+   360→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   361→[31m[1m>[22m[39m[90m 17 |[39m   [33mUser[39m[33m,[39m
+   362→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   363→[31m[1m>[22m[39m[90m 18 |[39m   [33mMapPin[39m[33m,[39m
+   364→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   365→[31m[1m>[22m[39m[90m 19 |[39m   [33mAlertTriangle[39m[33m,[39m
+   366→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   367→[31m[1m>[22m[39m[90m 20 |[39m   [33mBanknote[39m[33m,[39m
+   368→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   369→[31m[1m>[22m[39m[90m 21 |[39m } [36mfrom[39m [32m'lucide-react'[39m
+   370→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   371→ [90m 22 |[39m
+   372→ [90m 23 |[39m [36mimport[39m { cn } [36mfrom[39m [32m'@/lib/utils'[39m
+   373→ [90m 24 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[0m
+   374→
+   375→The export PackageReturn was not found in module [project]/node_modules/lucide-react/dist/esm/lucide-react.js [app-client] (ecmascript).
+   376→Did you mean to import Package?
+   377→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   378→
+   379→Import traces:
+   380→  Client Component Browser:
+   381→    ./src/components/repair/ticket-detail.tsx [Client Component Browser]
+   382→    ./src/app/page.tsx [Client Component Browser]
+   383→    ./src/app/page.tsx [Server Component]
+   384→
+   385→  Client Component SSR:
+   386→    ./src/components/repair/ticket-detail.tsx [Client Component SSR]
+   387→    ./src/app/page.tsx [Client Component SSR]
+   388→    ./src/app/page.tsx [Server Component]
+   389→
+   390→
+   391→
+   392→./src/components/repair/ticket-detail.tsx:6:1
+   393→Export PackageReturn doesn't exist in target module
+   394→[0m [90m  4 |[39m [36mimport[39m { useMutation } [36mfrom[39m [32m'@tanstack/react-query'[39m
+   395→ [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m'sonner'[39m
+   396→[31m[1m>[22m[39m[90m  6 |[39m [36mimport[39m {
+   397→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   398→[31m[1m>[22m[39m[90m  7 |[39m   [33mArrowLeft[39m[33m,[39m
+   399→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   400→[31m[1m>[22m[39m[90m  8 |[39m   [33mClock[39m[33m,[39m
+   401→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   402→[31m[1m>[22m[39m[90m  9 |[39m   [33mCheckCircle[39m[33m,[39m
+   403→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   404→[31m[1m>[22m[39m[90m 10 |[39m   [33mWrench[39m[33m,[39m
+   405→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   406→[31m[1m>[22m[39m[90m 11 |[39m   [33mPackageReturn[39m[33m,[39m
+   407→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   408→[31m[1m>[22m[39m[90m 12 |[39m   [33mCheckCircle2[39m[33m,[39m
+   409→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   410→[31m[1m>[22m[39m[90m 13 |[39m   [33mXCircle[39m[33m,[39m
+   411→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   412→[31m[1m>[22m[39m[90m 14 |[39m   [33mPrinter[39m[33m,[39m
+   413→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   414→[31m[1m>[22m[39m[90m 15 |[39m   [33mLoader2[39m[33m,[39m
+   415→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   416→[31m[1m>[22m[39m[90m 16 |[39m   [33mCalendarDays[39m[33m,[39m
+   417→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   418→[31m[1m>[22m[39m[90m 17 |[39m   [33mUser[39m[33m,[39m
+   419→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   420→[31m[1m>[22m[39m[90m 18 |[39m   [33mMapPin[39m[33m,[39m
+   421→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   422→[31m[1m>[22m[39m[90m 19 |[39m   [33mAlertTriangle[39m[33m,[39m
+   423→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   424→[31m[1m>[22m[39m[90m 20 |[39m   [33mBanknote[39m[33m,[39m
+   425→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   426→[31m[1m>[22m[39m[90m 21 |[39m } [36mfrom[39m [32m'lucide-react'[39m
+   427→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   428→ [90m 22 |[39m
+   429→ [90m 23 |[39m [36mimport[39m { cn } [36mfrom[39m [32m'@/lib/utils'[39m
+   430→ [90m 24 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[0m
+   431→
+   432→The export PackageReturn was not found in module [project]/node_modules/lucide-react/dist/esm/lucide-react.js [app-ssr] (ecmascript).
+   433→Did you mean to import Package?
+   434→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   435→
+   436→Import traces:
+   437→  Client Component Browser:
+   438→    ./src/components/repair/ticket-detail.tsx [Client Component Browser]
+   439→    ./src/app/page.tsx [Client Component Browser]
+   440→    ./src/app/page.tsx [Server Component]
+   441→
+   442→  Client Component SSR:
+   443→    ./src/components/repair/ticket-detail.tsx [Client Component SSR]
+   444→    ./src/app/page.tsx [Client Component SSR]
+   445→    ./src/app/page.tsx [Server Component]
+   446→
+   447→
+   448→
+   449→./src/app/page.tsx:11:1
+   450→Export TicketDetail doesn't exist in target module
+   451→[0m [90m  9 |[39m [36mimport[39m { [33mRepairForm[39m } [36mfrom[39m [32m'@/components/repair/repair-form'[39m
+   452→ [90m 10 |[39m [36mimport[39m { [33mRepairList[39m } [36mfrom[39m [32m'@/components/repair/repair-list'[39m
+   453→[31m[1m>[22m[39m[90m 11 |[39m [36mimport[39m { [33mTicketDetail[39m } [36mfrom[39m [32m'@/components/repair/ticket-detail'[39m
+   454→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   455→ [90m 12 |[39m
+   456→ [90m 13 |[39m [36minterface[39m [33mRepair[39m {
+   457→ [90m 14 |[39m   id[33m:[39m string[0m
+   458→
+   459→The export TicketDetail was not found in module [project]/src/components/repair/ticket-detail.tsx [app-client] (ecmascript).
+   460→Did you mean to import default?
+   461→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   462→
+   463→Import traces:
+   464→  Client Component Browser:
+   465→    ./src/app/page.tsx [Client Component Browser]
+   466→    ./src/app/page.tsx [Server Component]
+   467→
+   468→  Client Component SSR:
+   469→    ./src/app/page.tsx [Client Component SSR]
+   470→    ./src/app/page.tsx [Server Component]
+   471→
+   472→
+   473→
+   474→./src/app/page.tsx:11:1
+   475→Export TicketDetail doesn't exist in target module
+   476→[0m [90m  9 |[39m [36mimport[39m { [33mRepairForm[39m } [36mfrom[39m [32m'@/components/repair/repair-form'[39m
+   477→ [90m 10 |[39m [36mimport[39m { [33mRepairList[39m } [36mfrom[39m [32m'@/components/repair/repair-list'[39m
+   478→[31m[1m>[22m[39m[90m 11 |[39m [36mimport[39m { [33mTicketDetail[39m } [36mfrom[39m [32m'@/components/repair/ticket-detail'[39m
+   479→ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   480→ [90m 12 |[39m
+   481→ [90m 13 |[39m [36minterface[39m [33mRepair[39m {
+   482→ [90m 14 |[39m   id[33m:[39m string[0m
+   483→
+   484→The export TicketDetail was not found in module [project]/src/components/repair/ticket-detail.tsx [app-ssr] (ecmascript).
+   485→Did you mean to import default?
+   486→All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+   487→
+   488→Import traces:
+   489→  Client Component Browser:
+   490→    ./src/app/page.tsx [Client Component Browser]
+   491→    ./src/app/page.tsx [Server Component]
+   492→
+   493→  Client Component SSR:
+   494→    ./src/app/page.tsx [Client Component SSR]
+   495→    ./src/app/page.tsx [Server Component]
+   496→
+   497→
+   498→ GET / 500 in 4.3s (compile: 4.2s, render: 102ms)
+   499→n 4.3s (compile: 4.2s, render: 102ms)
+   500→

@@ -1,6 +1,7 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-// โครงสร้างอ้างอิงจาก surinhos_asset database
+// โครงสร้างอ้างอิงจาก surinhos_asset database (MySQL)
+// Dev ใช้ SQLite + Prisma ORM แต่ column name ตรงกับ surinhos เดิมทุก field
 
 generator client {
   provider = "prisma-client-js"
@@ -11,25 +12,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
+// ==========================================
 // ตารางสถานที่ (อ้างอิงจาก surinhos locations)
+// ==========================================
 model Location {
   id            String   @id @default(cuid())
   buildingName  String                      // ชื่ออาคาร เช่น อาคารอำนวยการ
@@ -40,16 +25,18 @@ model Location {
   assets Asset[]
 }
 
+// ==========================================
 // ตารางครุภัณฑ์ (อ้างอิงจาก surinhos assets)
+// ==========================================
 model Asset {
   id            String    @id @default(cuid())
-  assetCode     String    @unique               // หมายเลขครุภัณฑ์ เช่น COM-69-001
-  name          String                           // ชื่ออุปกรณ์ เช่น คอมพิวเตอร์แม่ข่าย (Server)
-  category      String                           // หมวดหมู่ เช่น อุปกรณ์คอมพิวเตอร์
-  locationId    String?                          // FK -> Location.id
-  status        String    @default("ปกติ")      // ปกติ, ชำรุด, รอจำหน่าย
+  assetCode     String    @unique               // หมายเลขครุภัณฑ์ เช่น COM-69-001 (surinhos: asset_code)
+  name          String                           // ชื่ออุปกรณ์ (surinhos: name)
+  category      String                           // หมวดหมู่ (surinhos: category)
+  locationId    String?                          // FK -> Location.id (surinhos: location_id)
+  status        String    @default("ปกติ")      // surinhos: status ENUM
   acquiredDate  String?                          // วันที่ได้มา
-  price         Float?                           // ราคา
+  price         Float?                           // ราคา (surinhos: price DECIMAL)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -57,17 +44,52 @@ model Asset {
   repairTickets RepairTicket[]
 }
 
+// ==========================================
 // ตารางแจ้งซ่อม (อ้างอิงจาก surinhos repair_tickets)
+// สถานะ 6 ขั้น: pending → accepted → in_progress → returned → closed | cancelled
+// ==========================================
 model RepairTicket {
   id             String    @id @default(cuid())
-  ticketNo       String    @unique               // เลขที่ใบแจ้งซ่อม เช่น RPR-260728-001
-  assetId        String?                          // FK -> Asset.id (ถ้ามี)
-  assetName      String                           // ชื่ออุปกรณ์ / สถานที่
-  problemDetails String?                          // รายละเอียดปัญหา
-  reporterName   String?                          // ชื่อผู้แจ้ง
-  status         String    @default("pending")   // pending, accepted, in_progress, returned, closed
+
+  // --- ข้อมูลพื้นฐาน (surinhos เดิมมีแล้ว) ---
+  ticketNo       String    @unique               // เลขที่ใบแจ้งซ่อม RPR-YYMMDD-NNN (surinhos: ticket_no)
+  assetId        String?                          // FK -> Asset.id (surinhos: asset_id)
+  assetName      String                           // ชื่ออุปกรณ์/สถานที่ (surinhos: asset_name)
+  problemDetails String?                          // รายละเอียดปัญหา (surinhos: problem_details)
+  reporterName   String?                          // ชื่อผู้แจ้ง (surinhos: reporter_name)
+
+  // --- สถานะ (เพิ่ม cancelled จากเดิม 5 → 6) ---
+  // pending, accepted, in_progress, returned, closed, cancelled
+  status         String    @default("pending")   // surinhos: status ENUM
+
+  // --- ข้อมูลรับเรื่อง (surinhos เดิมมี) ---
+  receivedBy     String?                          // ช่างที่รับเรื่อง (surinhos: received_by)
+  receivedAt     DateTime?                         // เวลารับเรื่อง (surinhos: received_at)
+
+  // --- ลายเซ็นตอนรับ (surinhos เดิมมี) ---
+  senderSignature    String?                       // ลายเซ็นผู้ส่ง (Base64 PNG) (surinhos: sender_signature)
+  receiverSignature  String?                       // ลายเซ็นผู้รับ (Base64 PNG) (surinhos: receiver_signature)
+
+  // --- ข้อมูลส่งคืน (surinhos เดิมมี) ---
+  returnMethod          String?                    // หน่วยงานมารับเอง / ช่างไปส่งคืน (surinhos: return_method)
+  returnedBy            String?                    // ผู้ที่ส่งคืน/รับคืน (surinhos: returned_by)
+  returnedAt            DateTime?                   // เวลาส่งคืน (surinhos: returned_at)
+  returnSenderSignature    String?                // ลายเซ็นผู้ส่งคืน (Base64 PNG) (surinhos: return_sender_signature)
+  returnReceiverSignature  String?                 // ลายเซ็นผู้รับคืน (Base64 PNG) (surinhos: return_receiver_signature)
+
+  // --- เสนอราคาซ่อม (ใหม่ — surinhos ไม่มี) ---
+  repairCost     Float?                           // ค่าอะไหล่ (THB)
+  laborCost      Float?                           // ค่าแรงงาน (THB)
+  totalCost      Float?                           // รวมทั้งหมด (computed: repairCost + laborCost)
+  costStatus     String?                          // pending / approved / rejected — สถานะอนุมัติค่าใช้จ่าย
+
+  // --- ยกเลิก/ไม่คุ้มซ่อม (ใหม่ — surinhos ไม่มี) ---
+  cancelReason   String?                          // เหตุผลการยกเลิก (เช่น อะไหล่หายาก, ค่าซ่อมสูงกว่าราคาเครื่อง)
+
+  // --- timestamps ---
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  // --- relations ---
   asset Asset? @relation(fields: [assetId], references: [id])
 }

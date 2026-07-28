@@ -1,0 +1,741 @@
+     1→     1→"use client";
+     2→     2→import React, { useState, useEffect, useRef } from 'react';
+     3→     3→import { useRouter } from 'next/navigation';
+     4→     4→import SignaturePad from '../../components/SignaturePad';
+     5→     5→
+     6→     6→// ================= Helper: ดึง Token จาก localStorage/sessionStorage =================
+     7→     7→const getToken = () => {
+     8→     8→    if (typeof window === 'undefined') return null;
+     9→     9→    return localStorage.getItem('token') || sessionStorage.getItem('token');
+    10→    10→};
+    11→    11→
+    12→    12→const API_BASE = 'http://192.168.1.120:5000';
+    13→    13→
+    14→    14→// ================= Helper: สี/ป้ายสถานะ =================
+    15→    15→const statusConfig = {
+    16→    16→    pending:    { label: 'รอรับเรื่อง',   color: '#f59e0b', bg: '#fef3c7' },
+    17→    17→    accepted:   { label: 'รับเรื่องแล้ว', color: '#3b82f6', bg: '#dbeafe' },
+    18→    18→    in_progress:{ label: 'กำลังซ่อม',    color: '#8b5cf6', bg: '#ede9fe' },
+    19→    19→    returned:   { label: 'ส่งคืนแล้ว',   color: '#10b981', bg: '#d1fae5' },
+    20→    20→    closed:     { label: 'ปิดงาน',       color: '#6b7280', bg: '#f3f4f6' },
+    21→    21→};
+    22→    22→
+    23→    23→const StatusBadge = ({ status }) => {
+    24→    24→    const cfg = statusConfig[status] || { label: status, color: '#6b7280', bg: '#f3f4f6' };
+    25→    25→    return (
+    26→    26→        <span style={{
+    27→    27→            backgroundColor: cfg.bg, color: cfg.color,
+    28→    28→            padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold',
+    29→    29→            border: `1px solid ${cfg.color}30`
+    30→    30→        }}>
+    31→    31→            {cfg.label}
+    32→    32→        </span>
+    33→    33→    );
+    34→    34→};
+    35→    35→
+    36→    36→export default function RepairPage() {
+    37→    37→    const router = useRouter();
+    38→    38→    const [repairs, setRepairs] = useState([]);
+    39→    39→    const [isLoading, setIsLoading] = useState(true);
+    40→    40→
+    41→    41→    // ================= State สำหรับฟอร์มแจ้งซ่อมใหม่ =================
+    42→    42→    const [showNewRepairForm, setShowNewRepairForm] = useState(false);
+    43→    43→    const [newRepair, setNewRepair] = useState({
+    44→    44→        asset_name: '',
+    45→    45→        problem_details: '',
+    46→    46→        reporter_name: ''
+    47→    47→    });
+    48→    48→
+    49→    49→    // ================= State สำหรับ Modal ต่างๆ =================
+    50→    50→    const [showAcceptModal, setShowAcceptModal] = useState(false);    // รับเรื่อง
+    51→    51→    const [showReturnModal, setShowReturnModal] = useState(false);    // ส่งคืน
+    52→    52→    const [showPrintModal, setShowPrintModal] = useState(false);      // ปริ้น
+    53→    53→    const [selectedTicket, setSelectedTicket] = useState(null);       // รายการที่เลือก
+    54→    54→    const [selectedTicketId, setSelectedTicketId] = useState(null);
+    55→    55→
+    56→    56→    // ================= State สำหรับรับเรื่อง (Accept) =================
+    57→    57→    const [technicianName, setTechnicianName] = useState('');
+    58→    58→
+    59→    59→    // ================= State สำหรับส่งคืน (Return) =================
+    60→    60→    const [returnMethod, setReturnMethod] = useState('self_pickup');  // self_pickup | delivery
+    61→    61→    const [returnPersonName, setReturnPersonName] = useState('');
+    62→    62→
+    63→    63→    // ================= State สำหรับปริ้น =================
+    64→    64→    const [printTicket, setPrintTicket] = useState(null);
+    65→    65→
+    66→    66→    // ================= ดึง Token จากระบบ =================
+    67→    67→    const getAuthHeaders = () => {
+    68→    68→        const token = getToken();
+    69→    69→        if (!token) {
+    70→    70→            router.push('/login');
+    71→    71→            return null;
+    72→    72→        }
+    73→    73→        return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+    74→    74→    };
+    75→    75→
+    76→    76→    // ================= ดึงข้อมูลแจ้งซ่อมทั้งหมด =================
+    77→    77→    const fetchRepairs = async () => {
+    78→    78→        const headers = getAuthHeaders();
+    79→    79→        if (!headers) return;
+    80→    80→
+    81→    81→        try {
+    82→    82→            const res = await fetch(`${API_BASE}/api/repairs`, { headers });
+    83→    83→            if (res.status === 401 || res.status === 403) {
+    84→    84→                router.push('/login');
+    85→    85→                return;
+    86→    86→            }
+    87→    87→            if (res.ok) {
+    88→    88→                const data = await res.json();
+    89→    89→                setRepairs(data);
+    90→    90→            }
+    91→    91→        } catch (error) {
+    92→    92→            console.error("Error fetching repairs:", error);
+    93→    93→        } finally {
+    94→    94→            setIsLoading(false);
+    95→    95→        }
+    96→    96→    };
+    97→    97→
+    98→    98→    useEffect(() => {
+    99→    99→        const token = getToken();
+   100→   100→        if (!token) {
+   101→   101→            router.push('/login');
+   102→   102→            return;
+   103→   103→        }
+   104→   104→        fetchRepairs();
+   105→   105→    }, []);
+   106→   106→
+   107→   107→    // ================= 1. แจ้งซ่อมใหม่ (POST) =================
+   108→   108→    const handleSubmitRepair = async (e) => {
+   109→   109→        e.preventDefault();
+   110→   110→        const headers = getAuthHeaders();
+   111→   111→        if (!headers) return;
+   112→   112→
+   113→   113→        try {
+   114→   114→            const res = await fetch(`${API_BASE}/api/repairs`, {
+   115→   115→                method: 'POST',
+   116→   116→                headers,
+   117→   117→                body: JSON.stringify(newRepair)
+   118→   118→            });
+   119→   119→
+   120→   120→            if (res.ok) {
+   121→   121→                alert("✅ สร้างใบแจ้งซ่อมสำเร็จ!");
+   122→   122→                setShowNewRepairForm(false);
+   123→   123→                setNewRepair({ asset_name: '', problem_details: '', reporter_name: '' });
+   124→   124→                fetchRepairs();
+   125→   125→            } else {
+   126→   126→                const errData = await res.json();
+   127→   127→                alert("❌ เกิดข้อผิดพลาด: " + (errData.error || 'ไม่ทราบสาเหตุ'));
+   128→   128→            }
+   129→   129→        } catch (error) {
+   130→   130→            console.error("Error submitting repair:", error);
+   131→   131→            alert("❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+   132→   132→        }
+   133→   133→    };
+   134→   134→
+   135→   135→    // ================= 2. รับเรื่อง + เซ็นชื่อ (PUT /accept) =================
+   136→   136→    const handleAcceptRepair = async (base64Signature) => {
+   137→   137→        if (!technicianName.trim()) {
+   138→   138→            alert("⚠️ กรุณากรอกชื่อช่างผู้รับเรื่อง");
+   139→   139→            return;
+   140→   140→        }
+   141→   141→
+   142→   142→        const headers = getAuthHeaders();
+   143→   143→        if (!headers) return;
+   144→   144→
+   145→   145→        try {
+   146→   146→            const res = await fetch(`${API_BASE}/api/repairs/${selectedTicketId}/accept`, {
+   147→   147→                method: 'PUT',
+   148→   148→                headers,
+   149→   149→                body: JSON.stringify({
+   150→   150→                    received_by: technicianName,
+   151→   151→                    receiver_signature: base64Signature,
+   152→   152→                    sender_signature: null
+   153→   153→                })
+   154→   154→            });
+   155→   155→
+   156→   156→            if (res.ok) {
+   157→   157→                alert("✅ บันทึกการรับเรื่องและลายเซ็นสำเร็จ!");
+   158→   158→                setShowAcceptModal(false);
+   159→   159→                setTechnicianName('');
+   160→   160→                fetchRepairs();
+   161→   161→            } else {
+   162→   162→                const errData = await res.json();
+   163→   163→                alert("❌ เกิดข้อผิดพลาด: " + (errData.error || 'ไม่ทราบสาเหตุ'));
+   164→   164→            }
+   165→   165→        } catch (error) {
+   166→   166→            console.error("Error accepting repair:", error);
+   167→   167→        }
+   168→   168→    };
+   169→   169→
+   170→   170→    // ================= 3. เริ่มซ่อม (PUT /in-progress) =================
+   171→   171→    const handleStartRepair = async (ticketId) => {
+   172→   172→        if (!confirm("ยืนยันเริ่มซ่อมอุปกรณ์นี้?")) return;
+   173→   173→
+   174→   174→        const headers = getAuthHeaders();
+   175→   175→        if (!headers) return;
+   176→   176→
+   177→   177→        try {
+   178→   178→            const res = await fetch(`${API_BASE}/api/repairs/${ticketId}/in-progress`, {
+   179→   179→                method: 'PUT',
+   180→   180→                headers
+   181→   181→            });
+   182→   182→
+   183→   183→            if (res.ok) {
+   184→   184→                alert("✅ อัปเดตสถานะเป็น 'กำลังซ่อม' เรียบร้อย!");
+   185→   185→                fetchRepairs();
+   186→   186→            }
+   187→   187→        } catch (error) {
+   188→   188→            console.error("Error starting repair:", error);
+   189→   189→        }
+   190→   190→    };
+   191→   191→
+   192→   192→    // ================= 4. ส่งคืนอุปกรณ์ (PUT /return) =================
+   193→   193→    const handleReturnRepair = async (base64Signature) => {
+   194→   194→        if (!returnPersonName.trim()) {
+   195→   195→            alert("⚠️ กรุณากรอกชื่อผู้ส่งคืน/ผู้รับคืน");
+   196→   196→            return;
+   197→   197→        }
+   198→   198→
+   199→   199→        const headers = getAuthHeaders();
+   200→   200→        if (!headers) return;
+   201→   201→
+   202→   202→        try {
+   203→   203→            const res = await fetch(`${API_BASE}/api/repairs/${selectedTicketId}/return`, {
+   204→   204→                method: 'PUT',
+   205→   205→                headers,
+   206→   206→                body: JSON.stringify({
+   207→   207→                    return_method: returnMethod === 'self_pickup' ? 'หน่วยงานมารับเอง' : 'ช่างไปส่งคืน',
+   208→   208→                    returned_by: returnPersonName,
+   209→   209→                    return_sender_signature: base64Signature,
+   210→   210→                    return_receiver_signature: base64Signature
+   211→   211→                })
+   212→   212→            });
+   213→   213→
+   214→   214→            if (res.ok) {
+   215→   215→                alert("✅ บันทึกการส่งคืนและลายเซ็นสำเร็จ!");
+   216→   216→                setShowReturnModal(false);
+   217→   217→                setReturnPersonName('');
+   218→   218→                setReturnMethod('self_pickup');
+   219→   219→                fetchRepairs();
+   220→   220→            } else {
+   221→   221→                const errData = await res.json();
+   222→   222→                alert("❌ เกิดข้อผิดพลาด: " + (errData.error || 'ไม่ทราบสาเหตุ'));
+   223→   223→            }
+   224→   224→        } catch (error) {
+   225→   225→            console.error("Error returning repair:", error);
+   226→   226→        }
+   227→   227→    };
+   228→   228→
+   229→   229→    // ================= 5. ปิดงาน (PUT /close) =================
+   230→   230→    const handleCloseRepair = async (ticketId) => {
+   231→   231→        if (!confirm("ยืนยันปิดงานซ่อมนี้?")) return;
+   232→   232→
+   233→   233→        const headers = getAuthHeaders();
+   234→   234→        if (!headers) return;
+   235→   235→
+   236→   236→        try {
+   237→   237→            const res = await fetch(`${API_BASE}/api/repairs/${ticketId}/close`, {
+   238→   238→                method: 'PUT',
+   239→   239→                headers
+   240→   240→            });
+   241→   241→
+   242→   242→            if (res.ok) {
+   243→   243→                alert("✅ ปิดงานซ่อมสำเร็จ!");
+   244→   244→                fetchRepairs();
+   245→   245→            }
+   246→   246→        } catch (error) {
+   247→   247→            console.error("Error closing repair:", error);
+   248→   248→        }
+   249→   249→    };
+   250→   250→
+   251→   251→    // ================= 6. ปริ้นเอกสาร (Print) =================
+   252→   252→    const handleOpenPrint = async (ticketId) => {
+   253→   253→        const headers = getAuthHeaders();
+   254→   254→        if (!headers) return;
+   255→   255→
+   256→   256→        try {
+   257→   257→            const res = await fetch(`${API_BASE}/api/repairs/${ticketId}`, { headers });
+   258→   258→            if (res.ok) {
+   259→   259→                const data = await res.json();
+   260→   260→                setPrintTicket(data);
+   261→   261→                setShowPrintModal(true);
+   262→   262→            }
+   263→   263→        } catch (error) {
+   264→   264→            console.error("Error fetching ticket for print:", error);
+   265→   265→        }
+   266→   266→    };
+   267→   267→
+   268→   268→    const handlePrint = () => {
+   269→   269→        window.print();
+   270→   270→    };
+   271→   271→
+   272→   272→    // ================= Helper: แสดงปุ่มตามสถานะ =================
+   273→   273→    const renderActionButtons = (ticket) => {
+   274→   274→        switch (ticket.status) {
+   275→   275→            case 'pending':
+   276→   276→                return (
+   277→   277→                    <button
+   278→   278→                        onClick={() => {
+   279→   279→                            setSelectedTicketId(ticket.id);
+   280→   280→                            setShowAcceptModal(true);
+   281→   281→                        }}
+   282→   282→                        style={{ padding: '8px 14px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+   283→   283→                    >
+   284→   284→                        🔧 ช่างกดรับเรื่อง (เซ็นชื่อ)
+   285→   285→                    </button>
+   286→   286→                );
+   287→   287→
+   288→   288→            case 'accepted':
+   289→   289→                return (
+   290→   290→                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+   291→   291→                        <button
+   292→   292→                            onClick={() => handleStartRepair(ticket.id)}
+   293→   293→                            style={{ padding: '8px 14px', backgroundColor: '#8b5cf6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+   294→   294→                        >
+   295→   295→                            🔨 เริ่มซ่อม
+   296→   296→                        </button>
+   297→   297→                        <button
+   298→   298→                            onClick={() => handleOpenPrint(ticket.id)}
+   299→   299→                            style={{ padding: '8px 14px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+   300→   300→                        >
+   301→   301→                            🖨️ พิมพ์
+   302→   302→                        </button>
+   303→   303→                    </div>
+   304→   304→                );
+   305→   305→
+   306→   306→            case 'in_progress':
+   307→   307→                return (
+   308→   308→                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+   309→   309→                        <button
+   310→   310→                            onClick={() => {
+   311→   311→                                setSelectedTicketId(ticket.id);
+   312→   312→                                setShowReturnModal(true);
+   313→   313→                            }}
+   314→   314→                            style={{ padding: '8px 14px', backgroundColor: '#f59e0b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+   315→   315→                        >
+   316→   316→                            📦 ส่งคืนอุปกรณ์ (เซ็นชื่อ)
+   317→   317→                        </button>
+   318→   318→                        <button
+   319→   319→                            onClick={() => handleOpenPrint(ticket.id)}
+   320→   320→                            style={{ padding: '8px 14px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+   321→   321→                        >
+   322→   322→                            🖨️ พิมพ์
+   323→   323→                        </button>
+   324→   324→                    </div>
+   325→   325→                );
+   326→   326→
+   327→   327→            case 'returned':
+   328→   328→                return (
+   329→   329→                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+   330→   330→                        <button
+   331→   331→                            onClick={() => handleCloseRepair(ticket.id)}
+   332→   332→                            style={{ padding: '8px 14px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+   333→   333→                        >
+   334→   334→                            ✅ ปิดงาน
+   335→   335→                        </button>
+   336→   336→                        <button
+   337→   337→                            onClick={() => handleOpenPrint(ticket.id)}
+   338→   338→                            style={{ padding: '8px 14px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+   339→   339→                        >
+   340→   340→                            🖨️ พิมพ์
+   341→   341→                        </button>
+   342→   342→                    </div>
+   343→   343→                );
+   344→   344→
+   345→   345→            case 'closed':
+   346→   346→                return (
+   347→   347→                    <button
+   348→   348→                        onClick={() => handleOpenPrint(ticket.id)}
+   349→   349→                        style={{ marginTop: '10px', padding: '8px 14px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+   350→   350→                    >
+   351→   351→                        🖨️ พิมพ์เอกสาร
+   352→   352→                    </button>
+   353→   353→                );
+   354→   354→
+   355→   355→            default:
+   356→   356→                return null;
+   357→   357→        }
+   358→   358→    };
+   359→   359→
+   360→   360→    // ================= RENDER =================
+   361→   361→    return (
+   362→   362→        <>
+   363→   363→            {/* ================= CSS สำหรับ Print ================= */}
+   364→   364→            <style jsx global>{`
+   365→   365→                @media print {
+   366→   366→                    /* ซ่อนทุกอย่าง ยกเว้นส่วนปริ้น */
+   367→   367→                    body * { visibility: hidden; }
+   368→   368→                    .print-area, .print-area * { visibility: visible; }
+   369→   369→                    .print-area {
+   370→   370→                        position: absolute;
+   371→   371→                        left: 0;
+   372→   372→                        top: 0;
+   373→   373→                        width: 100%;
+   374→   374→                        padding: 20px;
+   375→   375→                    }
+   376→   376→                    .no-print { display: none !important; }
+   377→   377→                }
+   378→   378→
+   379→   379→                .print-area {
+   380→   380→                    font-family: 'Sarabun', sans-serif;
+   381→   381→                }
+   382→   382→                .print-area table {
+   383→   383→                    width: 100%;
+   384→   384→                    border-collapse: collapse;
+   385→   385→                }
+   386→   386→                .print-area table th,
+   387→   387→                .print-area table td {
+   388→   388→                    border: 1px solid #333;
+   389→   389→                    padding: 8px 12px;
+   390→   390→                    text-align: left;
+   391→   391→                }
+   392→   392→                .print-area table th {
+   393→   393→                    background-color: #f0f0f0;
+   394→   394→                    font-weight: bold;
+   395→   395→                }
+   396→   396→                .signature-img {
+   397→   397→                    max-width: 200px;
+   398→   398→                    max-height: 80px;
+   399→   399→                    border: 1px solid #ccc;
+   400→   400→                }
+   401→   401→            `}</style>
+   402→   402→
+   403→   403→            <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+   404→   404→
+   405→   405→                {/* ================= ส่วนหัว ================= */}
+   406→   406→                <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+   407→   407→                    <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>🔧 ระบบแจ้งซ่อม (Repair Tracking)</h1>
+   408→   408→                    <button
+   409→   409→                        onClick={() => setShowNewRepairForm(true)}
+   410→   410→                        style={{ padding: '10px 15px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+   411→   411→                    >
+   412→   412→                        + แจ้งซ่อมใหม่
+   413→   413→                    </button>
+   414→   414→                </div>
+   415→   415→
+   416→   416→                {/* ================= Loading ================= */}
+   417→   417→                {isLoading && <p style={{ textAlign: 'center', color: '#888' }}>⏳ กำลังโหลดข้อมูล...</p>}
+   418→   418→
+   419→   419→                {/* ================= รายการแจ้งซ่อม ================= */}
+   420→   420→                <div className="no-print" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+   421→   421→                    {!isLoading && repairs.length === 0 && (
+   422→   422→                        <p style={{ textAlign: 'center', color: '#888', padding: '40px' }}>📋 ยังไม่มีรายการแจ้งซ่อม</p>
+   423→   423→                    )}
+   424→   424→
+   425→   425→                    {repairs.map((ticket) => (
+   426→   426→                        <div key={ticket.id} style={{ border: '1px solid #e5e7eb', padding: '18px', borderRadius: '10px', backgroundColor: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+   427→   427→                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+   428→   428→                                <h3 style={{ margin: 0, fontWeight: 'bold', fontSize: '16px' }}>{ticket.ticket_no}</h3>
+   429→   429→                                <StatusBadge status={ticket.status} />
+   430→   430→                            </div>
+   431→   431→
+   432→   432→                            <p style={{ margin: '10px 0 4px' }}><strong>📦 อุปกรณ์:</strong> {ticket.asset_name}</p>
+   433→   433→                            <p style={{ margin: '4px 0' }}><strong>⚠️ ปัญหา:</strong> {ticket.problem_details}</p>
+   434→   434→                            <p style={{ margin: '4px 0', fontSize: '14px', color: '#666' }}>👤 ผู้แจ้ง: {ticket.reporter_name}</p>
+   435→   435→
+   436→   436→                            {/* แสดงข้อมูลเพิ่มเติมตามสถานะ */}
+   437→   437→                            {ticket.received_by && (
+   438→   438→                                <p style={{ margin: '4px 0', fontSize: '14px', color: '#3b82f6' }}>🔧 ช่างรับเรื่อง: {ticket.received_by}</p>
+   439→   439→                            )}
+   440→   440→                            {ticket.returned_by && (
+   441→   441→                                <p style={{ margin: '4px 0', fontSize: '14px', color: '#10b981' }}>📦 ผู้ส่งคืน: {ticket.returned_by} ({ticket.return_method})</p>
+   442→   442→                            )}
+   443→   443→
+   444→   444→                            {/* ปุ่มดำเนินการตามสถานะ */}
+   445→   445→                            {renderActionButtons(ticket)}
+   446→   446→                        </div>
+   447→   447→                    ))}
+   448→   448→                </div>
+   449→   449→
+   450→   450→                {/* ============================================================= */}
+   451→   451→                {/* ================= MODAL: แจ้งซ่อมใหม่ ================= */}
+   452→   452→                {/* ============================================================= */}
+   453→   453→                {showNewRepairForm && (
+   454→   454→                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+   455→   455→                        <form onSubmit={handleSubmitRepair} style={{ backgroundColor: 'white', padding: '25px', borderRadius: '10px', width: '90%', maxWidth: '500px' }}>
+   456→   456→                            <h2 style={{ marginBottom: '15px', fontSize: '18px', fontWeight: 'bold' }}>📝 ฟอร์มแจ้งซ่อมอุปกรณ์</h2>
+   457→   457→
+   458→   458→                            <label style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px', display: 'block' }}>ชื่ออุปกรณ์ / สถานที่</label>
+   459→   459→                            <input
+   460→   460→                                type="text" required placeholder="เช่น คอมพิวเตอร์ห้อง 301..."
+   461→   461→                                value={newRepair.asset_name} onChange={(e) => setNewRepair({...newRepair, asset_name: e.target.value})}
+   462→   462→                                style={{ width: '100%', padding: '10px', marginBottom: '12px', border: '1px solid #ccc', borderRadius: '6px', boxSizing: 'border-box' }}
+   463→   463→                            />
+   464→   464→
+   465→   465→                            <label style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px', display: 'block' }}>รายละเอียดปัญหา</label>
+   466→   466→                            <textarea
+   467→   467→                                required placeholder="อธิบายปัญหาที่พบ..." rows="3"
+   468→   468→                                value={newRepair.problem_details} onChange={(e) => setNewRepair({...newRepair, problem_details: e.target.value})}
+   469→   469→                                style={{ width: '100%', padding: '10px', marginBottom: '12px', border: '1px solid #ccc', borderRadius: '6px', boxSizing: 'border-box', resize: 'vertical' }}
+   470→   470→                            />
+   471→   471→
+   472→   472→                            <label style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px', display: 'block' }}>ชื่อผู้แจ้งซ่อม</label>
+   473→   473→                            <input
+   474→   474→                                type="text" required placeholder="ชื่อ-นามสกุล..."
+   475→   475→                                value={newRepair.reporter_name} onChange={(e) => setNewRepair({...newRepair, reporter_name: e.target.value})}
+   476→   476→                                style={{ width: '100%', padding: '10px', marginBottom: '15px', border: '1px solid #ccc', borderRadius: '6px', boxSizing: 'border-box' }}
+   477→   477→                            />
+   478→   478→
+   479→   479→                            <div style={{ display: 'flex', gap: '10px' }}>
+   480→   480→                                <button type="submit" style={{ flex: 1, padding: '12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>💾 บันทึกแจ้งซ่อม</button>
+   481→   481→                                <button type="button" onClick={() => setShowNewRepairForm(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#f3f4f6', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer' }}>ยกเลิก</button>
+   482→   482→                            </div>
+   483→   483→                        </form>
+   484→   484→                    </div>
+   485→   485→                )}
+   486→   486→
+   487→   487→                {/* ============================================================= */}
+   488→   488→                {/* ================= MODAL: รับเรื่อง + เซ็นชื่อ ================= */}
+   489→   489→                {/* ============================================================= */}
+   490→   490→                {showAcceptModal && (
+   491→   491→                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+   492→   492→                        <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '10px', width: '90%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
+   493→   493→                            <h2 style={{ marginBottom: '15px', fontSize: '18px', fontWeight: 'bold' }}>🔧 รับเรื่องแจ้งซ่อม</h2>
+   494→   494→
+   495→   495→                            <label style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px', display: 'block' }}>ชื่อช่างผู้รับเรื่อง</label>
+   496→   496→                            <input
+   497→   497→                                type="text"
+   498→   498→                                placeholder="กรอกชื่อช่าง..."
+   499→   499→                                value={technicianName}
+   500→   500→                                onChange={(e) => setTechnicianName(e.target.value)}
+   501→   501→                                style={{ width: '100%', padding: '10px', marginBottom: '15px', border: '1px solid #ccc', borderRadius: '6px', boxSizing: 'border-box' }}
+   502→   502→                            />
+   503→   503→
+   504→   504→                            <SignaturePad
+   505→   505→                                title="ลายเซ็นช่างผู้รับเรื่อง"
+   506→   506→                                onSave={handleAcceptRepair}
+   507→   507→                                onClear={() => console.log("ล้างลายเซ็นแล้ว")}
+   508→   508→                            />
+   509→   509→
+   510→   510→                            <button
+   511→   511→                                onClick={() => { setShowAcceptModal(false); setTechnicianName(''); }}
+   512→   512→                                style={{ marginTop: '15px', width: '100%', padding: '10px', backgroundColor: '#f3f4f6', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer' }}
+   513→   513→                            >
+   514→   514→                                ยกเลิก
+   515→   515→                            </button>
+   516→   516→                        </div>
+   517→   517→                    </div>
+   518→   518→                )}
+   519→   519→
+   520→   520→                {/* ============================================================= */}
+   521→   521→                {/* ================= MODAL: ส่งคืนอุปกรณ์ ================= */}
+   522→   522→                {/* ============================================================= */}
+   523→   523→                {showReturnModal && (
+   524→   524→                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+   525→   525→                        <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '10px', width: '90%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
+   526→   526→                            <h2 style={{ marginBottom: '15px', fontSize: '18px', fontWeight: 'bold' }}>📦 ส่งคืนอุปกรณ์</h2>
+   527→   527→
+   528→   528→                            {/* เลือกวิธีส่งคืน */}
+   529→   529→                            <label style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '8px', display: 'block' }}>วิธีการส่งคืน</label>
+   530→   530→                            <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+   531→   531→                                <button
+   532→   532→                                    type="button"
+   533→   533→                                    onClick={() => setReturnMethod('self_pickup')}
+   534→   534→                                    style={{
+   535→   535→                                        flex: 1, padding: '12px',
+   536→   536→                                        backgroundColor: returnMethod === 'self_pickup' ? '#3b82f6' : '#f3f4f6',
+   537→   537→                                        color: returnMethod === 'self_pickup' ? 'white' : '#333',
+   538→   538→                                        border: returnMethod === 'self_pickup' ? '2px solid #3b82f6' : '1px solid #ccc',
+   539→   539→                                        borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold'
+   540→   540→                                    }}
+   541→   541→                                >
+   542→   542→                                    🏢 หน่วยงานมารับเอง
+   543→   543→                                </button>
+   544→   544→                                <button
+   545→   545→                                    type="button"
+   546→   546→                                    onClick={() => setReturnMethod('delivery')}
+   547→   547→                                    style={{
+   548→   548→                                        flex: 1, padding: '12px',
+   549→   549→                                        backgroundColor: returnMethod === 'delivery' ? '#3b82f6' : '#f3f4f6',
+   550→   550→                                        color: returnMethod === 'delivery' ? 'white' : '#333',
+   551→   551→                                        border: returnMethod === 'delivery' ? '2px solid #3b82f6' : '1px solid #ccc',
+   552→   552→                                        borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold'
+   553→   553→                                    }}
+   554→   554→                                >
+   555→   555→                                    🚗 ช่างไปส่งคืน
+   556→   556→                                </button>
+   557→   557→                            </div>
+   558→   558→
+   559→   559→                            {/* ชื่อผู้ส่งคืน/ผู้รับคืน */}
+   560→   560→                            <label style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px', display: 'block' }}>
+   561→   561→                                {returnMethod === 'self_pickup' ? 'ชื่อผู้มารับคืน' : 'ชื่อช่างผู้ส่งคืน'}
+   562→   562→                            </label>
+   563→   563→                            <input
+   564→   564→                                type="text"
+   565→   565→                                placeholder={returnMethod === 'self_pickup' ? 'ชื่อผู้มารับคืน...' : 'ชื่อช่างผู้ส่งคืน...'}
+   566→   566→                                value={returnPersonName}
+   567→   567→                                onChange={(e) => setReturnPersonName(e.target.value)}
+   568→   568→                                style={{ width: '100%', padding: '10px', marginBottom: '15px', border: '1px solid #ccc', borderRadius: '6px', boxSizing: 'border-box' }}
+   569→   569→                            />
+   570→   570→
+   571→   571→                            {/* ลายเซ็น */}
+   572→   572→                            <SignaturePad
+   573→   573→                                title={returnMethod === 'self_pickup' ? 'ลายเซ็นผู้รับคืน' : 'ลายเซ็นช่างผู้ส่งคืน'}
+   574→   574→                                onSave={handleReturnRepair}
+   575→   575→                                onClear={() => console.log("ล้างลายเซ็นแล้ว")}
+   576→   576→                            />
+   577→   577→
+   578→   578→                            <button
+   579→   579→                                onClick={() => { setShowReturnModal(false); setReturnPersonName(''); setReturnMethod('self_pickup'); }}
+   580→   580→                                style={{ marginTop: '15px', width: '100%', padding: '10px', backgroundColor: '#f3f4f6', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer' }}
+   581→   581→                            >
+   582→   582→                                ยกเลิก
+   583→   583→                            </button>
+   584→   584→                        </div>
+   585→   585→                    </div>
+   586→   586→                )}
+   587→   587→
+   588→   588→                {/* ============================================================= */}
+   589→   589→                {/* ================= MODAL: ปริ้นเอกสาร ================= */}
+   590→   590→                {/* ============================================================= */}
+   591→   591→                {showPrintModal && printTicket && (
+   592→   592→                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+   593→   593→                        <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '10px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
+   594→   594→
+   595→   595→                            {/* ปุ่มปิด/ปริ้น (ซ่อนตอนพิมพ์) */}
+   596→   596→                            <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+   597→   597→                                <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>🖨️ เอกสารแจ้งซ่อม</h2>
+   598→   598→                                <div style={{ display: 'flex', gap: '8px' }}>
+   599→   599→                                    <button onClick={handlePrint} style={{ padding: '8px 16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+   600→   600→                                        🖨️ พิมพ์
+   601→   601→                                    </button>
+   602→   602→                                    <button onClick={() => { setShowPrintModal(false); setPrintTicket(null); }} style={{ padding: '8px 16px', backgroundColor: '#f3f4f6', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer' }}>
+   603→   603→                                        ✖ ปิด
+   604→   604→                                    </button>
+   605→   605→                                </div>
+   606→   606→                            </div>
+   607→   607→
+   608→   608→                            {/* ================= เนื้อหาเอกสาร (ส่วนที่จะถูกพิมพ์) ================= */}
+   609→   609→                            <div className="print-area">
+   610→   610→                                <div style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid #333', paddingBottom: '15px' }}>
+   611→   611→                                    <h1 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '5px' }}>ใบแจ้งซ่อมอุปกรณ์</h1>
+   612→   612→                                    <p style={{ fontSize: '16px', color: '#555' }}>Repair Ticket</p>
+   613→   613→                                </div>
+   614→   614→
+   615→   615→                                <table>
+   616→   616→                                    <tbody>
+   617→   617→                                        <tr>
+   618→   618→                                            <th style={{ width: '30%' }}>เลขที่ใบแจ้งซ่อม</th>
+   619→   619→                                            <td style={{ fontWeight: 'bold', fontSize: '16px' }}>{printTicket.ticket_no}</td>
+   620→   620→                                        </tr>
+   621→   621→                                        <tr>
+   622→   622→                                            <th>สถานะ</th>
+   623→   623→                                            <td><StatusBadge status={printTicket.status} /></td>
+   624→   624→                                        </tr>
+   625→   625→                                        <tr>
+   626→   626→                                            <th>ชื่ออุปกรณ์</th>
+   627→   627→                                            <td>{printTicket.asset_name}</td>
+   628→   628→                                        </tr>
+   629→   629→                                        <tr>
+   630→   630→                                            <th>รายละเอียดปัญหา</th>
+   631→   631→                                            <td>{printTicket.problem_details}</td>
+   632→   632→                                        </tr>
+   633→   633→                                        <tr>
+   634→   634→                                            <th>ผู้แจ้งซ่อม</th>
+   635→   635→                                            <td>{printTicket.reporter_name}</td>
+   636→   636→                                        </tr>
+   637→   637→                                        <tr>
+   638→   638→                                            <th>วันที่แจ้ง</th>
+   639→   639→                                            <td>{printTicket.created_at ? new Date(printTicket.created_at).toLocaleString('th-TH') : '-'}</td>
+   640→   640→                                        </tr>
+   641→   641→                                    </tbody>
+   642→   642→                                </table>
+   643→   643→
+   644→   644→                                {/* ส่วนรับเรื่อง (แสดงเมื่อสถานะ >= accepted) */}
+   645→   645→                                {['accepted', 'in_progress', 'returned', 'closed'].includes(printTicket.status) && (
+   646→   646→                                    <div style={{ marginTop: '20px' }}>
+   647→   647→                                        <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #ccc', paddingBottom: '5px' }}>
+   648→   648→                                            🔧 ส่วนรับเรื่อง
+   649→   649→                                        </h3>
+   650→   650→                                        <table>
+   651→   651→                                            <tbody>
+   652→   652→                                                <tr>
+   653→   653→                                                    <th style={{ width: '30%' }}>ช่างผู้รับเรื่อง</th>
+   654→   654→                                                    <td>{printTicket.received_by || '-'}</td>
+   655→   655→                                                </tr>
+   656→   656→                                                <tr>
+   657→   657→                                                    <th>วันที่รับเรื่อง</th>
+   658→   658→                                                    <td>{printTicket.received_at ? new Date(printTicket.received_at).toLocaleString('th-TH') : '-'}</td>
+   659→   659→                                                </tr>
+   660→   660→                                                <tr>
+   661→   661→                                                    <th>ลายเซ็นผู้แจ้ง</th>
+   662→   662→                                                    <td>
+   663→   663→                                                        {printTicket.sender_signature ? (
+   664→   664→                                                            <img src={printTicket.sender_signature} alt="ลายเซ็นผู้แจ้ง" className="signature-img" />
+   665→   665→                                                        ) : <span style={{ color: '#999' }}>- ไม่มี -</span>}
+   666→   666→                                                    </td>
+   667→   667→                                                </tr>
+   668→   668→                                                <tr>
+   669→   669→                                                    <th>ลายเซ็นช่าง</th>
+   670→   670→                                                    <td>
+   671→   671→                                                        {printTicket.receiver_signature ? (
+   672→   672→                                                            <img src={printTicket.receiver_signature} alt="ลายเซ็นช่าง" className="signature-img" />
+   673→   673→                                                        ) : <span style={{ color: '#999' }}>- ไม่มี -</span>}
+   674→   674→                                                    </td>
+   675→   675→                                                </tr>
+   676→   676→                                            </tbody>
+   677→   677→                                        </table>
+   678→   678→                                    </div>
+   679→   679→                                )}
+   680→   680→
+   681→   681→                                {/* ส่วนส่งคืน (แสดงเมื่อสถานะ >= returned) */}
+   682→   682→                                {['returned', 'closed'].includes(printTicket.status) && (
+   683→   683→                                    <div style={{ marginTop: '20px' }}>
+   684→   684→                                        <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #ccc', paddingBottom: '5px' }}>
+   685→   685→                                            📦 ส่วนส่งคืน
+   686→   686→                                        </h3>
+   687→   687→                                        <table>
+   688→   688→                                            <tbody>
+   689→   689→                                                <tr>
+   690→   690→                                                    <th style={{ width: '30%' }}>วิธีการส่งคืน</th>
+   691→   691→                                                    <td>{printTicket.return_method || '-'}</td>
+   692→   692→                                                </tr>
+   693→   693→                                                <tr>
+   694→   694→                                                    <th>ผู้ส่งคืน/ผู้รับคืน</th>
+   695→   695→                                                    <td>{printTicket.returned_by || '-'}</td>
+   696→   696→                                                </tr>
+   697→   697→                                                <tr>
+   698→   698→                                                    <th>วันที่ส่งคืน</th>
+   699→   699→                                                    <td>{printTicket.returned_at ? new Date(printTicket.returned_at).toLocaleString('th-TH') : '-'}</td>
+   700→   700→                                                </tr>
+   701→   701→                                                <tr>
+   702→   702→                                                    <th>ลายเซ็นผู้ส่ง</th>
+   703→   703→                                                    <td>
+   704→   704→                                                        {printTicket.return_sender_signature ? (
+   705→   705→                                                            <img src={printTicket.return_sender_signature} alt="ลายเซ็นผู้ส่ง" className="signature-img" />
+   706→   706→                                                        ) : <span style={{ color: '#999' }}>- ไม่มี -</span>}
+   707→   707→                                                    </td>
+   708→   708→                                                </tr>
+   709→   709→                                                <tr>
+   710→   710→                                                    <th>ลายเซ็นผู้รับ</th>
+   711→   711→                                                    <td>
+   712→   712→                                                        {printTicket.return_receiver_signature ? (
+   713→   713→                                                            <img src={printTicket.return_receiver_signature} alt="ลายเซ็นผู้รับ" className="signature-img" />
+   714→   714→                                                        ) : <span style={{ color: '#999' }}>- ไม่มี -</span>}
+   715→   715→                                                    </td>
+   716→   716→                                                </tr>
+   717→   717→                                            </tbody>
+   718→   718→                                        </table>
+   719→   719→                                    </div>
+   720→   720→                                )}
+   721→   721→
+   722→   722→                                {/* ลงท้ายเอกสาร */}
+   723→   723→                                <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'space-between' }}>
+   724→   724→                                    <div style={{ textAlign: 'center', width: '45%' }}>
+   725→   725→                                        <p>ลงชื่อผู้แจ้ง ____________________</p>
+   726→   726→                                        <p style={{ marginTop: '5px', fontSize: '13px', color: '#666' }}>( {printTicket.reporter_name} )</p>
+   727→   727→                                    </div>
+   728→   728→                                    <div style={{ textAlign: 'center', width: '45%' }}>
+   729→   729→                                        <p>ลงชื่อผู้รับเรื่อง ____________________</p>
+   730→   730→                                        <p style={{ marginTop: '5px', fontSize: '13px', color: '#666' }}>( {printTicket.received_by || '........................'} )</p>
+   731→   731→                                    </div>
+   732→   732→                                </div>
+   733→   733→                            </div>
+   734→   734→                        </div>
+   735→   735→                    </div>
+   736→   736→                )}
+   737→   737→            </div>
+   738→   738→        </>
+   739→   739→    );
+   740→   740→}
+   741→   741→

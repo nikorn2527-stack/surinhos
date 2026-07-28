@@ -1,0 +1,443 @@
+    60→    99→    99→    99→                UPDATE organization_settings SET 
+    61→   100→   100→   100→                    logo = ?, prefix = ?, org_name = ?, address = ?, subdistrict = ?, 
+    62→   101→   101→   101→                    district = ?, province = ?, zipcode = ?, phone = ?, extension = ?, 
+    63→   102→   102→   102→                    email = ?, tax_id = ? 
+    64→   103→   103→   103→                WHERE id = 1
+    65→   104→   104→   104→            `;
+    66→   105→   105→   105→            db.query(sql, [logo, prefix, orgName, address, subdistrict, district, province, zipcode, phone, extension, email, taxId], (updateErr) => {
+    67→   106→   106→   106→                if (updateErr) return res.status(500).json({ error: updateErr.message });
+    68→   107→   107→   107→                res.json({ message: 'บันทึกข้อมูลหน่วยงานเรียบร้อยแล้ว' });
+    69→   108→   108→   108→            });
+    70→   109→   109→   109→        } else {
+    71→   110→   110→   110→            const sql = `
+    72→   111→   111→   111→                INSERT INTO organization_settings 
+    73→   112→   112→   112→                (id, logo, prefix, org_name, address, subdistrict, district, province, zipcode, phone, extension, email, tax_id) 
+    74→   113→   113→   113→                VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    75→   114→   114→   114→            `;
+    76→   115→   115→   115→            db.query(sql, [logo, prefix, orgName, address, subdistrict, district, province, zipcode, phone, extension, email, taxId], (insertErr) => {
+    77→   116→   116→   116→                if (insertErr) return res.status(500).json({ error: insertErr.message });
+    78→   117→   117→   117→                res.json({ message: 'บันทึกข้อมูลหน่วยงานเรียบร้อยแล้ว' });
+    79→   118→   118→   118→            });
+    80→   119→   119→   119→        }
+    81→   120→   120→   120→    });
+    82→   121→   121→   121→});
+    83→   122→   122→   122→
+    84→   123→   123→   123→// ================= API สำหรับจัดการผู้ใช้งาน (Users & Roles) ================= //
+    85→   124→   124→   124→app.get('/api/roles', (req, res) => {
+    86→   125→   125→   125→    db.query('SELECT * FROM roles ORDER BY id ASC', (err, results) => {
+    87→   126→   126→   126→        if (err) return res.status(500).json({ error: err.message });
+    88→   127→   127→   127→        res.json(results);
+    89→   128→   128→   128→    });
+    90→   129→   129→   129→});
+    91→   130→   130→   130→
+    92→   131→   131→   131→app.get('/api/users', verifyToken, (req, res) => {
+    93→   132→   132→   132→    const sql = `
+    94→   133→   133→   133→        SELECT u.id, u.username, u.name, u.role_id, r.name AS role_name 
+    95→   134→   134→   134→        FROM users u 
+    96→   135→   135→   135→        LEFT JOIN roles r ON u.role_id = r.id 
+    97→   136→   136→   136→        ORDER BY u.id DESC
+    98→   137→   137→   137→    `;
+    99→   138→   138→   138→    db.query(sql, (err, results) => {
+   100→   139→   139→   139→        if (err) return res.status(500).json({ error: err.message });
+   101→   140→   140→   140→        res.json(results);
+   102→   141→   141→   141→    });
+   103→   142→   142→   142→});
+   104→   143→   143→   143→
+   105→   144→   144→   144→app.post('/api/users', (req, res) => {
+   106→   145→   145→   145→    const { username, password, name, role_id } = req.body;
+   107→   146→   146→   146→    db.query('SELECT id FROM users WHERE username = ?', [username], (err, results) => {
+   108→   147→   147→   147→        if (err) return res.status(500).json({ error: err.message });
+   109→   148→   148→   148→        if (results.length > 0) return res.status(400).json({ error: 'ชื่อผู้ใช้งาน (Username) นี้มีในระบบแล้ว' });
+   110→   149→   149→   149→
+   111→   150→   150→   150→        db.query('INSERT INTO users (username, password, name, role_id) VALUES (?, ?, ?, ?)', 
+   112→   151→   151→   151→        [username, password, name, role_id], (insertErr) => {
+   113→   152→   152→   152→            if (insertErr) return res.status(500).json({ error: insertErr.message });
+   114→   153→   153→   153→            res.json({ message: 'เพิ่มผู้ใช้งานสำเร็จ' });
+   115→   154→   154→   154→        });
+   116→   155→   155→   155→    });
+   117→   156→   156→   156→});
+   118→   157→   157→   157→
+   119→   158→   158→   158→app.put('/api/users/:id', (req, res) => {
+   120→   159→   159→   159→    const { username, password, name, role_id } = req.body;
+   121→   160→   160→   160→    if (password) {
+   122→   161→   161→   161→        db.query('UPDATE users SET username = ?, password = ?, name = ?, role_id = ? WHERE id = ?', 
+   123→   162→   162→   162→        [username, password, name, role_id, req.params.id], (err) => {
+   124→   163→   163→   163→            if (err) return res.status(500).json({ error: err.message });
+   125→   164→   164→   164→            res.json({ message: 'อัปเดตข้อมูลสำเร็จ' });
+   126→   165→   165→   165→        });
+   127→   166→   166→   166→    } else {
+   128→   167→   167→   167→        db.query('UPDATE users SET username = ?, name = ?, role_id = ? WHERE id = ?', 
+   129→   168→   168→   168→        [username, name, role_id, req.params.id], (err) => {
+   130→   169→   169→   169→            if (err) return res.status(500).json({ error: err.message });
+   131→   170→   170→   170→            res.json({ message: 'อัปเดตข้อมูลสำเร็จ' });
+   132→   171→   171→   171→        });
+   133→   172→   172→   172→    }
+   134→   173→   173→   173→});
+   135→   174→   174→   174→
+   136→   175→   175→   175→app.delete('/api/users/:id', (req, res) => {
+   137→   176→   176→   176→    db.query('DELETE FROM users WHERE id = ?', [req.params.id], (err) => {
+   138→   177→   177→   177→        if (err) return res.status(500).json({ error: err.message });
+   139→   178→   178→   178→        res.json({ message: 'ลบผู้ใช้งานสำเร็จ' });
+   140→   179→   179→   179→    });
+   141→   180→   180→   180→});
+   142→   181→   181→   181→
+   143→   182→   182→   182→// ================= API สำหรับนำเข้าข้อมูลจาก Excel ================= //
+   144→   183→   183→   183→app.post('/api/assets/import', upload.single('file'), (req, res) => {
+   145→   184→   184→   184→    if (!req.file) return res.status(400).json({ error: 'ไม่พบไฟล์' });
+   146→   185→   185→   185→
+   147→   186→   186→   186→    try {
+   148→   187→   187→   187→        const workbook = xlsx.readFile(req.file.path, { cellDates: true });
+   149→   188→   188→   188→        const sheetName = workbook.SheetNames[0];
+   150→   189→   189→   189→        const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+   151→   190→   190→   190→
+   152→   191→   191→   191→        if (data.length === 0) {
+   153→   192→   192→   192→            fs.unlinkSync(req.file.path);
+   154→   193→   193→   193→            return res.status(400).json({ error: 'ไม่พบข้อมูลในไฟล์ Excel' });
+   155→   194→   194→   194→        }
+   156→   195→   195→   195→
+   157→   196→   196→   196→        const formatSafeDate = (dateVal) => {
+   158→   197→   197→   197→            if (!dateVal) return null;
+   159→   198→   198→   198→            try {
+   160→   199→   199→   199→                if (typeof dateVal === 'number') {
+   161→   200→   200→   200→                    const date = new Date(Math.round((dateVal - 25569) * 86400 * 1000));
+   162→   201→   201→   201→                    if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+   163→   202→   202→   202→                }
+   164→   203→   203→   203→                const d = new Date(dateVal);
+   165→   204→   204→   204→                if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+   166→   205→   205→   205→                return null;
+   167→   206→   206→   206→            } catch (e) {
+   168→   207→   207→   207→                return null;
+   169→   208→   208→   208→            }
+   170→   209→   209→   209→        };
+   171→   210→   210→   210→
+   172→   211→   211→   211→        db.query("SELECT * FROM system_settings WHERE setting_key IN ('asset_prefix', 'asset_digit_length', 'asset_last_number')", (err, results) => {
+   173→   212→   212→   212→            if (err) {
+   174→   213→   213→   213→                fs.unlinkSync(req.file.path);
+   175→   214→   214→   214→                return res.status(500).json({ error: err.message });
+   176→   215→   215→   215→            }
+   177→   216→   216→   216→
+   178→   217→   217→   217→            let config = {};
+   179→   218→   218→   218→            if (results && results.length > 0) {
+   180→   219→   219→   219→                results.forEach(r => config[r.setting_key] = r.setting_value);
+   181→   220→   220→   220→            }
+   182→   221→   221→   221→
+   183→   222→   222→   222→            let prefix = config.asset_prefix || 'SR-';
+   184→   223→   223→   223→            let digitLength = parseInt(config.asset_digit_length || 7);
+   185→   224→   224→   224→            let lastNumber = parseInt(config.asset_last_number || 0);
+   186→   225→   225→   225→            
+   187→   226→   226→   226→            let currentLastNumber = lastNumber; 
+   188→   227→   227→   227→
+   189→   228→   228→   228→            const values = data.map((row) => {
+   190→   229→   229→   229→                let assetCode = row['หมายเลขควบคุม'];
+   191→   230→   230→   230→                if (!assetCode || assetCode.toString().trim() === '') {
+   192→   231→   231→   231→                    currentLastNumber += 1;
+   193→   232→   232→   232→                    let paddedNumber = String(currentLastNumber).padStart(digitLength, '0');
+   194→   233→   233→   233→                    assetCode = `${prefix}${paddedNumber}`;
+   195→   234→   234→   234→                }
+   196→   235→   235→   235→
+   197→   236→   236→   236→                return [
+   198→   237→   237→   237→                    assetCode,
+   199→   238→   238→   238→                    row['หมายเลขครุภัณฑ์ 1'] || null,
+   200→   239→   239→   239→                    row['หมายเลขครุภัณฑ์ 2'] || null,
+   201→   240→   240→   240→                    row['รายการ'] || 'ไม่มีชื่อรายการ',
+   202→   241→   241→   241→                    row['ยี่ห้อ'] || null,
+   203→   242→   242→   242→                    row['Serial Number'] || null,
+   204→   243→   243→   243→                    row['ประเภทครุภัณฑ์'] || 'อื่นๆ',
+   205→   244→   244→   244→                    parseFloat(row['ราคา']) || 0,
+   206→   245→   245→   245→                    formatSafeDate(row['วันที่ได้มา']), 
+   207→   246→   246→   246→                    row['วิธีการได้มา'] || null,
+   208→   247→   247→   247→                    row['ผู้ขาย'] || null,
+   209→   248→   248→   248→                    parseInt(row['อายุการใช้งาน']) || 5,
+   210→   249→   249→   249→                    row['สถานที่ตั้ง'] || null,
+   211→   250→   250→   250→                    'ใช้งานปกติ', 
+   212→   251→   251→   251→                    1 
+   213→   252→   252→   252→                ];
+   214→   253→   253→   253→            });
+   215→   254→   254→   254→
+   216→   255→   255→   255→            const sql = `
+   217→   256→   256→   256→                INSERT INTO assets (
+   218→   257→   257→   257→                    asset_code, asset_number_1, asset_number_2, name, brand, serial_number, 
+   219→   258→   258→   258→                    category, price, acquired_date, acquired_method, vendor, 
+   220→   259→   259→   259→                    lifespan_years, department, status, location_id
+   221→   260→   260→   260→                ) VALUES ?
+   222→   261→   261→   261→            `;
+   223→   262→   262→   262→
+   224→   263→   263→   263→            db.query(sql, [values], (insertErr, result) => {
+   225→   264→   264→   264→                fs.unlinkSync(req.file.path); 
+   226→   265→   265→   265→                if (insertErr) return res.status(500).json({ error: insertErr.message });
+   227→   266→   266→   266→
+   228→   267→   267→   267→                if (currentLastNumber > lastNumber) {
+   229→   268→   268→   268→                    db.query("UPDATE system_settings SET setting_value = ? WHERE setting_key = 'asset_last_number'", [currentLastNumber.toString()]);
+   230→   269→   269→   269→                }
+   231→   270→   270→   270→                res.json({ message: `นำเข้าข้อมูลและสร้างหมายเลขควบคุมอัตโนมัติเรียบร้อยแล้ว จำนวน ${result.affectedRows} รายการ` });
+   232→   271→   271→   271→            });
+   233→   272→   272→   272→        });
+   234→   273→   273→   273→    } catch (error) {
+   235→   274→   274→   274→        if (req.file) fs.unlinkSync(req.file.path);
+   236→   275→   275→   275→        res.status(500).json({ error: 'รูปแบบไฟล์ไม่ถูกต้อง หรือเกิดข้อผิดพลาด: ' + error.message });
+   237→   276→   276→   276→    }
+   238→   277→   277→   277→});
+   239→   278→   278→   278→
+   240→   279→   279→   279→// ================= API สำหรับ ครุภัณฑ์ (Assets) ================= //
+   241→   280→   280→   280→app.get('/api/assets', verifyToken, (req, res) => {
+   242→   281→   281→   281→    db.query('SELECT * FROM assets ORDER BY id DESC', (err, results) => {
+   243→   282→   282→   282→        if (err) return res.status(500).json({ error: err.message });
+   244→   283→   283→   283→        res.json(results);
+   245→   284→   284→   284→    });
+   246→   285→   285→   285→});
+   247→   286→   286→   286→
+   248→   287→   287→   287→// 💡 สร้างครุภัณฑ์ใหม่ (รองรับการเซฟรูปภาพสูงสุด 5 รูป)
+   249→   288→   288→   288→app.post('/api/assets', (req, res) => {
+   250→   289→   289→   289→    const { 
+   251→   290→   290→   290→        asset_code, asset_number_1, asset_number_2, name, brand, serial_number, category, 
+   252→   291→   291→   291→        quantity, unit, remarks, acquired_date, acquired_method, funding_type, 
+   253→   292→   292→   292→        document_no, po_number, gfmis, price, lifespan_years, warranty_end, 
+   254→   293→   293→   293→        vendor, vendor_address, vendor_phone, building, floor, department, status, images // 💡 รับตัวแปร images มาด้วย
+   255→   294→   294→   294→    } = req.body;
+   256→   295→   295→   295→
+   257→   296→   296→   296→    const sql = `
+   258→   297→   297→   297→        INSERT INTO assets (
+   259→   298→   298→   298→            asset_code, asset_number_1, asset_number_2, name, brand, serial_number, category, 
+   260→   299→   299→   299→            quantity, unit, remarks, acquired_date, acquired_method, funding_type, 
+   261→   300→   300→   300→            document_no, po_number, gfmis, price, lifespan_years, warranty_end, 
+   262→   301→   301→   301→            vendor, vendor_address, vendor_phone, building, floor, department, status, location_id
+   263→   302→   302→   302→        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+   264→   303→   303→   303→    `;
+   265→   304→   304→   304→    
+   266→   305→   305→   305→    const formattedWarrantyEnd = warranty_end ? warranty_end : null;
+   267→   306→   306→   306→
+   268→   307→   307→   307→    db.query(sql, [
+   269→   308→   308→   308→        asset_code, asset_number_1, asset_number_2, name, brand, serial_number, category, 
+   270→   309→   309→   309→        quantity || 1, unit || 'เครื่อง', remarks || null, acquired_date, acquired_method, funding_type || 'เงินงบประมาณ', 
+   271→   310→   310→   310→        document_no || null, po_number || null, gfmis || null, price || 0, lifespan_years || 5, formattedWarrantyEnd, 
+   272→   311→   311→   311→        vendor || null, vendor_address || null, vendor_phone || null, building || null, floor || null, department, status || 'ใช้งานปกติ'
+   273→   312→   312→   312→    ], (err, result) => {
+   274→   313→   313→   313→        if (err) return res.status(500).json({ error: err.message });
+   275→   314→   314→   314→        
+   276→   315→   315→   315→        const newAssetId = result.insertId;
+   277→   316→   316→   316→        db.query("UPDATE system_settings SET setting_value = setting_value + 1 WHERE setting_key = 'asset_last_number'");
+   278→   317→   317→   317→
+   279→   318→   318→   318→        // 💡 บันทึกรูปภาพลงตาราง asset_images
+   280→   319→   319→   319→        if (images && Array.isArray(images) && images.length > 0) {
+   281→   320→   320→   320→            const imageValues = images.slice(0, 5).map(img => [newAssetId, img]);
+   282→   321→   321→   321→            db.query('INSERT INTO asset_images (asset_id, image_data) VALUES ?', [imageValues], (imgErr) => {
+   283→   322→   322→   322→                // ถ้ามี Error ตอนเซฟรูป ให้เด้งบอกหน้าเว็บ
+   284→   323→   323→   323→                if (imgErr) return res.status(500).json({ error: 'บันทึกข้อมูลหลักสำเร็จ แต่บันทึกรูปภาพล้มเหลว: ' + imgErr.message });
+   285→   324→   324→   324→                res.json({ message: 'บันทึกข้อมูลและรูปภาพสำเร็จ', id: newAssetId });
+   286→   325→   325→   325→            });
+   287→   326→   326→   326→        } else {
+   288→   327→   327→   327→            res.json({ message: 'บันทึกข้อมูลสำเร็จ', id: newAssetId });
+   289→   328→   328→   328→        }
+   290→   329→   329→   329→    });
+   291→   330→   330→   330→});
+   292→   331→   331→   331→
+   293→   332→   332→   332→app.get('/api/assets/next-code', (req, res) => {
+   294→   333→   333→   333→    db.query("SELECT * FROM system_settings WHERE setting_key IN ('asset_prefix', 'asset_digit_length', 'asset_last_number')", (err, results) => {
+   295→   334→   334→   334→        if (err) return res.status(500).json({ error: err.message });
+   296→   335→   335→   335→        
+   297→   336→   336→   336→        let config = {};
+   298→   337→   337→   337→        if (results && results.length > 0) {
+   299→   338→   338→   338→            results.forEach(r => config[r.setting_key] = r.setting_value);
+   300→   339→   339→   339→        }
+   301→   340→   340→   340→
+   302→   341→   341→   341→        let prefix = config.asset_prefix || 'SR-';
+   303→   342→   342→   342→        let digitLength = parseInt(config.asset_digit_length || 7);
+   304→   343→   343→   343→        let lastNumber = parseInt(config.asset_last_number || 0);
+   305→   344→   344→   344→
+   306→   345→   345→   345→        let nextNumber = lastNumber + 1;
+   307→   346→   346→   346→        let paddedNumber = String(nextNumber).padStart(digitLength, '0');
+   308→   347→   347→   347→        
+   309→   348→   348→   348→        res.json({ next_code: `${prefix}${paddedNumber}` });
+   310→   349→   349→   349→    });
+   311→   350→   350→   350→});
+   312→   351→   351→   351→
+   313→   352→   352→   352→app.get('/api/assets/next-category-code', (req, res) => {
+   314→   353→   353→   353→    const { prefix } = req.query; 
+   315→   354→   354→   354→    if (!prefix) return res.status(400).json({ error: 'ไม่ได้ระบุหมวดหมู่' });
+   316→   355→   355→   355→
+   317→   356→   356→   356→    const today = new Date();
+   318→   357→   357→   357→    let thaiYear = today.getFullYear() + 543;
+   319→   358→   358→   358→    if (today.getMonth() >= 9) { 
+   320→   359→   359→   359→        thaiYear += 1;
+   321→   360→   360→   360→    }
+   322→   361→   361→   361→    const shortYear = String(thaiYear).slice(-2); 
+   323→   362→   362→   362→
+   324→   363→   363→   363→    const sql = `SELECT asset_number_1 FROM assets WHERE asset_number_1 LIKE ? ORDER BY id DESC LIMIT 1`;
+   325→   364→   364→   364→    
+   326→   365→   365→   365→    db.query(sql, [`${prefix}-%`], (err, results) => {
+   327→   366→   366→   366→        if (err) return res.status(500).json({ error: err.message });
+   328→   367→   367→   367→
+   329→   368→   368→   368→        let nextSeq = 1;
+   330→   369→   369→   369→
+   331→   370→   370→   370→        if (results.length > 0 && results[0].asset_number_1) {
+   332→   371→   371→   371→            const parts = results[0].asset_number_1.split('-');
+   333→   372→   372→   372→            if (parts.length >= 3) {
+   334→   373→   373→   373→                const seqAndYear = parts[2]; 
+   335→   374→   374→   374→                const [seqStr, yearStr] = seqAndYear.split('/');
+   336→   375→   375→   375→                
+   337→   376→   376→   376→                if (yearStr === shortYear) {
+   338→   377→   377→   377→                    const seqNum = parseInt(seqStr, 10);
+   339→   378→   378→   378→                    if (!isNaN(seqNum)) nextSeq = seqNum + 1;
+   340→   379→   379→   379→                }
+   341→   380→   380→   380→            }
+   342→   381→   381→   381→        }
+   343→   382→   382→   382→
+   344→   383→   383→   383→        const paddedSeq = String(nextSeq).padStart(4, '0');
+   345→   384→   384→   384→        const runningNum = `${paddedSeq}/${shortYear}`;
+   346→   385→   385→   385→        
+   347→   386→   386→   386→        res.json({ runningNum });
+   348→   387→   387→   387→    });
+   349→   388→   388→   388→});
+   350→   389→   389→   389→
+   351→   390→   390→   390→// 💡 ดึงข้อมูลครุภัณฑ์ 1 รายการ (พร้อมแนบรูปภาพไปด้วยสำหรับหน้า Edit)
+   352→   391→   391→   391→app.get('/api/assets/:id', (req, res) => {
+   353→   392→   392→   392→    db.query('SELECT * FROM assets WHERE id = ?', [req.params.id], (err, results) => {
+   354→   393→   393→   393→        if (err) return res.status(500).json({ error: err.message });
+   355→   394→   394→   394→        if (results.length === 0) return res.status(404).json({ message: 'ไม่พบข้อมูล' });
+   356→   395→   395→   395→        
+   357→   396→   396→   396→        const asset = results[0];
+   358→   397→   397→   397→        // 💡 ดึงรูปภาพจากตาราง asset_images
+   359→   398→   398→   398→        db.query('SELECT id, image_data FROM asset_images WHERE asset_id = ? ORDER BY id ASC', [asset.id], (imgErr, imgResults) => {
+   360→   399→   399→   399→            if (imgErr) return res.status(500).json({ error: imgErr.message });
+   361→   400→   400→   400→            asset.images = imgResults || [];
+   362→   401→   401→   401→            res.json(asset);
+   363→   402→   402→   402→        });
+   364→   403→   403→   403→    });
+   365→   404→   404→   404→});
+   366→   405→   405→   405→
+   367→   406→   406→   406→// 💡 แก้ไขครุภัณฑ์ (อัปเดตข้อมูล และแก้ไขรูปภาพ)
+   368→   407→   407→   407→app.put('/api/assets/:id', (req, res) => {
+   369→   408→   408→   408→    const { 
+   370→   409→   409→   409→        asset_code, asset_number_1, asset_number_2, name, brand, serial_number, category, 
+   371→   410→   410→   410→        quantity, unit, remarks, acquired_date, acquired_method, funding_type, 
+   372→   411→   411→   411→        document_no, po_number, gfmis, price, lifespan_years, warranty_end, 
+   373→   412→   412→   412→        vendor, vendor_address, vendor_phone, building, floor, department, status, images // 💡 รับตัวแปร images
+   374→   413→   413→   413→    } = req.body;
+   375→   414→   414→   414→
+   376→   415→   415→   415→    const sql = `
+   377→   416→   416→   416→        UPDATE assets SET 
+   378→   417→   417→   417→            asset_code = ?, asset_number_1 = ?, asset_number_2 = ?, name = ?, brand = ?, serial_number = ?, 
+   379→   418→   418→   418→            category = ?, quantity = ?, unit = ?, remarks = ?, acquired_date = ?, acquired_method = ?, 
+   380→   419→   419→   419→            funding_type = ?, document_no = ?, po_number = ?, gfmis = ?, price = ?, lifespan_years = ?, 
+   381→   420→   420→   420→            warranty_end = ?, vendor = ?, vendor_address = ?, vendor_phone = ?, building = ?, floor = ?, department = ?, status = ? 
+   382→   421→   421→   421→        WHERE id = ?
+   383→   422→   422→   422→    `;
+   384→   423→   423→   423→    
+   385→   424→   424→   424→    const formattedWarrantyEnd = warranty_end ? warranty_end : null;
+   386→   425→   425→   425→
+   387→   426→   426→   426→    db.query(sql, [
+   388→   427→   427→   427→        asset_code, asset_number_1, asset_number_2, name, brand, serial_number, 
+   389→   428→   428→   428→        category, quantity || 1, unit || 'เครื่อง', remarks || null, acquired_date, acquired_method, 
+   390→   429→   429→   429→        funding_type || 'เงินงบประมาณ', document_no || null, po_number || null, gfmis || null, price || 0, lifespan_years || 5, 
+   391→   430→   430→   430→        formattedWarrantyEnd, vendor || null, vendor_address || null, vendor_phone || null, building || null, floor || null, department, status, 
+   392→   431→   431→   431→        req.params.id
+   393→   432→   432→   432→    ], (err, result) => {
+   394→   433→   433→   433→        if (err) return res.status(500).json({ error: err.message });
+   395→   434→   434→   434→
+   396→   435→   435→   435→        // 💡 ถ้ามีการส่งรูปภาพอัปเดตมา ให้ลบรูปเก่าทิ้งให้หมด แล้วใส่รูปใหม่เข้าไปแทน
+   397→   436→   436→   436→        if (images && Array.isArray(images)) {
+   398→   437→   437→   437→            db.query('DELETE FROM asset_images WHERE asset_id = ?', [req.params.id], (delErr) => {
+   399→   438→   438→   438→                if (images.length > 0) {
+   400→   439→   439→   439→                    const imageBase64Array = images.map(img => typeof img === 'string' ? img : img.image_data);
+   401→   440→   440→   440→                    const imageValues = imageBase64Array.slice(0, 5).map(img => [req.params.id, img]);
+   402→   441→   441→   441→                    db.query('INSERT INTO asset_images (asset_id, image_data) VALUES ?', [imageValues], (imgErr) => {
+   403→   442→   442→   442→                        // ถ้ามี Error ตอนเซฟรูป ให้เด้งบอกหน้าเว็บ
+   404→   443→   443→   443→                        if (imgErr) return res.status(500).json({ error: 'อัปเดตข้อมูลหลักสำเร็จ แต่อัปเดตรูปภาพล้มเหลว: ' + imgErr.message });
+   405→   444→   444→   444→                        return res.json({ message: 'อัปเดตข้อมูลและรูปภาพสำเร็จ' });
+   406→   445→   445→   445→                    });
+   407→   446→   446→   446→                } else {
+   408→   447→   447→   447→                    return res.json({ message: 'อัปเดตข้อมูลสำเร็จ (ไม่มีรูป)' });
+   409→   448→   448→   448→                }
+   410→   449→   449→   449→            });
+   411→   450→   450→   450→        } else {
+   412→   451→   451→   451→            res.json({ message: 'อัปเดตข้อมูลสำเร็จ' });
+   413→   452→   452→   452→        }
+   414→   453→   453→   453→    });
+   415→   454→   454→   454→});
+   416→   455→   455→   455→
+   417→   456→   456→   456→app.put('/api/assets/:id/status', (req, res) => {
+   418→   457→   457→   457→    const { status } = req.body;
+   419→   458→   458→   458→    db.query('UPDATE assets SET status = ? WHERE id = ?', [status, req.params.id], (err, result) => {
+   420→   459→   459→   459→        if (err) return res.status(500).json({ error: err.message });
+   421→   460→   460→   460→        res.json({ message: 'อัปเดตสถานะสำเร็จ' });
+   422→   461→   461→   461→    });
+   423→   462→   462→   462→});
+   424→   463→   463→   463→
+   425→   464→   464→   464→app.delete('/api/assets/:id', (req, res) => {
+   426→   465→   465→   465→    db.query('DELETE FROM assets WHERE id = ?', [req.params.id], (err, result) => {
+   427→   466→   466→   466→        if (err) return res.status(500).json({ error: err.message });
+   428→   467→   467→   467→        res.json({ message: 'ลบข้อมูลสำเร็จ' });
+   429→   468→   468→   468→    });
+   430→   469→   469→   469→});
+   431→   470→   470→   470→// ================= จบ API สำหรับ ครุภัณฑ์ ================= //
+   432→   471→   471→   471→
+   433→   472→   472→   472→// ================= API สำหรับ ล็อกอิน และ สิทธิ์ ================= //
+   434→   473→   473→   473→app.post('/api/login', (req, res) => {
+   435→   474→   474→   474→    const { username, password } = req.body;
+   436→   475→   475→   475→    const sql = `
+   437→   476→   476→   476→        SELECT u.id, u.username, u.name, u.role_id, r.name AS role_name 
+   438→   477→   477→   477→        FROM users u 
+   439→   478→   478→   478→        JOIN roles r ON u.role_id = r.id 
+   440→   479→   479→   479→        WHERE u.username = ? AND u.password = ?
+   441→   480→   480→   480→    `;
+   442→   481→   481→   481→    db.query(sql, [username, password], (err, results) => {
+   443→   482→   482→   482→        if (err) return res.status(500).json({ error: err.message });
+   444→   483→   483→   483→        
+   445→   484→   484→   484→        if (results.length > 0) {
+   446→   485→   485→   485→            const user = results[0];
+   447→   486→   486→   486→            db.query('SELECT permission_key FROM role_permissions WHERE role_id = ?', [user.role_id], (pErr, pResults) => {
+   448→   487→   487→   487→                if (pErr) return res.status(500).json({ error: pErr.message });
+   449→   488→   488→   488→                const permissions = pResults.map(p => p.permission_key);
+   450→   489→   489→   489→                
+   451→   490→   490→   490→                // สร้าง Token ใหม่
+   452→   491→   491→   491→                const token = jwt.sign({ id: user.id, username: user.username, role_id: user.role_id, permissions }, SECRET_KEY, { expiresIn: '8h' });
+   453→   492→   492→   492→                
+   454→   493→   493→   493→                // บันทึก Token ล่าสุดลงในฐานข้อมูล เพื่อใช้เปรียบเทียบตอนมีคน Login ซ้อน
+   455→   494→   494→   494→                db.query('UPDATE users SET current_token = ? WHERE id = ?', [token, user.id], (updateErr) => {
+   456→   495→   495→   495→                    if (updateErr) return res.status(500).json({ error: updateErr.message });
+   457→   496→   496→   496→                    
+   458→   497→   497→   497→                    res.json({ message: 'เข้าสู่ระบบสำเร็จ', token, user: { name: user.name, role_name: user.role_name, permissions } });
+   459→   498→   498→   498→                });
+   460→   499→   499→   499→            });
+   461→   500→   500→   500→        } else {
+   462→   501→   501→   501→            res.status(401).json({ error: 'ชื่อผู้ใช้ หรือ รหัสผ่านไม่ถูกต้อง' });
+   463→   502→   502→   502→        }
+   464→   503→   503→   503→    });
+   465→   504→   504→   504→});
+   466→   505→   505→   505→
+   467→   506→   506→   506→app.get('/api/roles/permissions', (req, res) => {
+   468→   507→   507→   507→    const sql = `SELECT r.id AS role_id, r.name AS role_name, rp.permission_key FROM roles r LEFT JOIN role_permissions rp ON r.id = rp.role_id`;
+   469→   508→   508→   508→    db.query(sql, (err, results) => {
+   470→   509→   509→   509→        if (err) return res.status(500).json({ error: err.message });
+   471→   510→   510→   510→        const rolesMap = {};
+   472→   511→   511→   511→        results.forEach(row => {
+   473→   512→   512→   512→            if (!rolesMap[row.role_id]) rolesMap[row.role_id] = { id: row.role_id, name: row.role_name, permissions: [] };
+   474→   513→   513→   513→            if (row.permission_key) rolesMap[row.role_id].permissions.push(row.permission_key);
+   475→   514→   514→   514→        });
+   476→   515→   515→   515→        res.json(Object.values(rolesMap));
+   477→   516→   516→   516→    });
+   478→   517→   517→   517→});
+   479→   518→   518→   518→
+   480→   519→   519→   519→app.post('/api/roles/permissions', (req, res) => {
+   481→   520→   520→   520→    const { role_id, permissions } = req.body;
+   482→   521→   521→   521→    db.query('DELETE FROM role_permissions WHERE role_id = ?', [role_id], (err) => {
+   483→   522→   522→   522→        if (err) return res.status(500).json({ error: err.message });
+   484→   523→   523→   523→        if (!permissions || permissions.length === 0) return res.json({ message: 'อัปเดตสิทธิ์สำเร็จ' });
+   485→   524→   524→   524→        
+   486→   525→   525→   525→        const values = permissions.map(p => [role_id, p]);
+   487→   526→   526→   526→        db.query('INSERT INTO role_permissions (role_id, permission_key) VALUES ?', [values], (iErr) => {
+   488→   527→   527→   527→            if (iErr) return res.status(500).json({ error: iErr.message });
+   489→   528→   528→   528→            res.json({ message: 'อัปเดตสิทธิ์สำเร็จ' });
+   490→   529→   529→   529→        });
+   491→   530→   530→   530→    });
+   492→   531→   531→   531→});
+   493→   532→   532→   532→
+   494→   533→   533→   533→// ================= API สำหรับ ตั้งค่าระบบเลขที่ ================= //
+   495→   534→   534→   534→app.get('/api/settings/running-number', (req, res) => {
+   496→   535→   535→   535→    db.query("SELECT * FROM system_settings WHERE setting_key IN ('asset_prefix', 'asset_digit_length', 'asset_last_number')", (err, results) => {
+   497→   536→   536→   536→        if (err) return res.status(500).json({ error: err.message });
+   498→   537→   537→   537→        let config = {};
+   499→   538→   538→   538→        results.forEach(r => config[r.setting_key] = r.setting_value);
+   500→   539→   539→   539→        res.json(config);
+   501→
+   502→[showing lines 40-539 of 773; use offset=540 with limit to continue reading]

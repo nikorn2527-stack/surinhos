@@ -40,13 +40,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // สร้างเลข Ticket (รูปแบบ: RPR-YYMMDD-001)
+    // สร้างเลข Ticket (รูปแบบ: RPR-YYMMDD-NNN)
     const today = new Date()
     const yy = String(today.getFullYear()).slice(-2)
     const mm = String(today.getMonth() + 1).padStart(2, '0')
     const dd = String(today.getDate()).padStart(2, '0')
     const dateStr = `${yy}${mm}${dd}`
-    const searchPattern = `RPR-${dateStr}-%`
 
     const countResult = await db.repairTicket.count({
       where: {
@@ -80,6 +79,7 @@ export async function POST(request: NextRequest) {
           select: {
             assetCode: true,
             name: true,
+            category: true,
             location: {
               select: { buildingName: true, roomName: true },
             },

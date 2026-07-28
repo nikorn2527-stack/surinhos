@@ -44,36 +44,143 @@ async function main() {
     console.log(`  ✅ ${asset.assetCode} - ${asset.name}`)
   }
 
-  // สร้างแจ้งซ่อมตัวอย่าง 2 รายการ
+  // ดึงข้อมูลครุภัณฑ์สำหรับแจ้งซ่อม
   const serverAsset = await db.asset.findFirst({ where: { assetCode: 'COM-69-001' } })
   const printerAsset = await db.asset.findFirst({ where: { assetCode: 'PRT-69-001' } })
+  const notebookAsset = await db.asset.findFirst({ where: { assetCode: 'COM-69-005' } })
+  const routerAsset = await db.asset.findFirst({ where: { assetCode: 'NET-69-002' } })
+  const projectorAsset = await db.asset.findFirst({ where: { assetCode: 'PRJ-69-001' } })
+  const scannerAsset = await db.asset.findFirst({ where: { assetCode: 'SCN-69-001' } })
 
-  if (serverAsset) {
-    await db.repairTicket.create({
-      data: {
-        ticketNo: 'RPR-260727-001',
-        assetId: serverAsset.id,
-        assetName: serverAsset.name,
-        problemDetails: 'เปิดเครื่องไม่ติด ไฟกระพริบที่ปุ่ม power',
-        reporterName: 'สมชาย ใจดี',
-        status: 'accepted',
-      },
-    })
-    console.log('  ✅ RPR-260727-001')
-  }
+  // สร้างแจ้งซ่อมตัวอย่าง 6 รายการ ครอบคลุมทุกสถานะ
 
+  // 1. pending — เพิ่งแจ้ง ยังไม่ได้รับเข้าซ่อม
   if (printerAsset) {
     await db.repairTicket.create({
       data: {
-        ticketNo: 'RPR-260728-001',
+        ticketNo: 'RPR-260725-001',
         assetId: printerAsset.id,
         assetName: printerAsset.name,
-        problemDetails: 'กระดาษตัน แม้เปิดปิดเครื่องใหม่แล้ว',
+        problemDetails: 'กระดาษตัน แม้เปิดปิดเครื่องใหม่แล้ว ใช้งานไม่ได้เลย',
         reporterName: 'สุภาพร รักงาน',
         status: 'pending',
       },
     })
-    console.log('  ✅ RPR-260728-001')
+    console.log('  ✅ RPR-260725-001 [pending]')
+  }
+
+  // 2. accepted — รับเข้าซ่อมแล้ว มีข้อมูลผู้รับ
+  if (serverAsset) {
+    await db.repairTicket.create({
+      data: {
+        ticketNo: 'RPR-260720-001',
+        assetId: serverAsset.id,
+        assetName: serverAsset.name,
+        problemDetails: 'เปิดเครื่องไม่ติด ไฟกระพริบที่ปุ่ม power',
+        reporterName: 'สมชาย ใจดี',
+        senderSignature: 'data:image/png;base64,fake_signature_data_1',
+        status: 'accepted',
+        receivedBy: 'วิชัย ซ่อมดี',
+        receivedAt: new Date('2025-07-20T10:30:00.000Z'),
+        receiverSignature: 'data:image/png;base64,fake_signature_data_2',
+      },
+    })
+    console.log('  ✅ RPR-260720-001 [accepted]')
+  }
+
+  // 3. in_progress — กำลังซ่อม มีราคาค่าซ่อมแล้ว
+  if (notebookAsset) {
+    await db.repairTicket.create({
+      data: {
+        ticketNo: 'RPR-260718-001',
+        assetId: notebookAsset.id,
+        assetName: notebookAsset.name,
+        problemDetails: 'จอภาพเบลอ มีจุดสว่างผิดปกติหลายจุด',
+        reporterName: 'ธนา พิมพ์ดี',
+        senderSignature: 'data:image/png;base64,fake_signature_data_3',
+        status: 'in_progress',
+        receivedBy: 'วิชัย ซ่อมดี',
+        receivedAt: new Date('2025-07-18T09:00:00.000Z'),
+        receiverSignature: 'data:image/png;base64,fake_signature_data_4',
+        repairCost: 4500.00,
+        laborCost: 1500.00,
+        totalCost: 6000.00,
+        costStatus: 'approved',
+      },
+    })
+    console.log('  ✅ RPR-260718-001 [in_progress]')
+  }
+
+  // 4. returned — ซ่อมเสร็จ ส่งคืนแล้ว ข้อมูลครบ
+  if (routerAsset) {
+    await db.repairTicket.create({
+      data: {
+        ticketNo: 'RPR-260715-001',
+        assetId: routerAsset.id,
+        assetName: routerAsset.name,
+        problemDetails: 'สัญญาณ Wi-Fi ไม่เสถียร หลุดบ่อย',
+        reporterName: 'ประยุทธ์ รักเทคโนโลยี',
+        senderSignature: 'data:image/png;base64,fake_signature_data_5',
+        status: 'returned',
+        receivedBy: 'วิชัย ซ่อมดี',
+        receivedAt: new Date('2025-07-15T14:00:00.000Z'),
+        receiverSignature: 'data:image/png;base64,fake_signature_data_6',
+        repairCost: 800.00,
+        laborCost: 500.00,
+        totalCost: 1300.00,
+        costStatus: 'approved',
+        returnMethod: 'ส่งมอบถึงห้อง',
+        returnedBy: 'วิชัย ซ่อมดี',
+        returnedAt: new Date('2025-07-17T11:00:00.000Z'),
+        returnSenderSignature: 'data:image/png;base64,fake_signature_data_7',
+        returnReceiverSignature: 'data:image/png;base64,fake_signature_data_8',
+      },
+    })
+    console.log('  ✅ RPR-260715-001 [returned]')
+  }
+
+  // 5. closed — ปิดงานแล้ว ข้อมูลครบทุกฟิลด์
+  if (projectorAsset) {
+    await db.repairTicket.create({
+      data: {
+        ticketNo: 'RPR-260710-001',
+        assetId: projectorAsset.id,
+        assetName: projectorAsset.name,
+        problemDetails: 'ภาพเบลอ สีเพี้ยน ตัวเลือนไม่ทำงาน',
+        reporterName: 'วรรณา สอนดี',
+        senderSignature: 'data:image/png;base64,fake_signature_data_9',
+        status: 'closed',
+        receivedBy: 'วิชัย ซ่อมดี',
+        receivedAt: new Date('2025-07-10T08:30:00.000Z'),
+        receiverSignature: 'data:image/png;base64,fake_signature_data_10',
+        repairCost: 12000.00,
+        laborCost: 3000.00,
+        totalCost: 15000.00,
+        costStatus: 'paid',
+        returnMethod: 'ส่งมอบถึงห้อง',
+        returnedBy: 'วิชัย ซ่อมดี',
+        returnedAt: new Date('2025-07-14T16:00:00.000Z'),
+        returnSenderSignature: 'data:image/png;base64,fake_signature_data_11',
+        returnReceiverSignature: 'data:image/png;base64,fake_signature_data_12',
+      },
+    })
+    console.log('  ✅ RPR-260710-001 [closed]')
+  }
+
+  // 6. cancelled — ยกเลิก เนื่องจากไม่คุ้มค่ากับการซ่อม
+  if (scannerAsset) {
+    await db.repairTicket.create({
+      data: {
+        ticketNo: 'RPR-260712-001',
+        assetId: scannerAsset.id,
+        assetName: scannerAsset.name,
+        problemDetails: 'กระดาษฉีกขณะสแกน แทร็คปิดไม่สนิท',
+        reporterName: 'สมหญิง รักการ์ด',
+        status: 'cancelled',
+        cancelReason: 'อะแดปเตอร์หมดสต็อก ยี่ห้อหยุดผลิตรุ่นนี้แล้ว ค่าอะไหล่เกินกว่าราคาซื้อเครื่องใหม่ (ราคาซ่อมประมาณ 15,000 บาท เทียบกับราคาเครื่องใหม่ 12,000 บาท) จึงไม่คุ้มค่ากับการซ่อม',
+      },
+    })
+    console.log('  ✅ RPR-260712-001 [cancelled]')
   }
 
   console.log('🎉 Seeding complete!')

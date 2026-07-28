@@ -2,7 +2,6 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Wrench } from 'lucide-react'
 
@@ -33,15 +32,17 @@ interface Repair {
 
 interface RepairListProps {
   refreshTrigger: number
+  onTicketClick: (ticketId: string) => void
 }
 
-// สถานะ 5 ขั้น ตามต้นฉบับ surinhos
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
-  pending:     { label: 'รอรับเรื่อง',   variant: 'secondary', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' },
-  accepted:    { label: 'รับเรื่องแล้ว', variant: 'default',   color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
-  in_progress: { label: 'กำลังซ่อม',    variant: 'default',   color: 'bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300' },
-  returned:    { label: 'ส่งคืนแล้ว',   variant: 'default',   color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' },
-  closed:      { label: 'ปิดงาน',       variant: 'outline',   color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
+// สถานะ 6 ขั้น (เพิ่ม cancelled)
+const statusConfig: Record<string, { label: string; color: string }> = {
+  pending:     { label: 'รอรับเรื่อง',   color: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' },
+  accepted:    { label: 'รับเรื่องแล้ว', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
+  in_progress: { label: 'กำลังซ่อม',    color: 'bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300' },
+  returned:    { label: 'ส่งคืนแล้ว',   color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' },
+  closed:      { label: 'ปิดงาน',       color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
+  cancelled:   { label: 'ยกเลิก',       color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
 }
 
 function formatDate(dateStr: string) {
@@ -52,7 +53,7 @@ function formatDate(dateStr: string) {
   })
 }
 
-export function RepairList({ refreshTrigger }: RepairListProps) {
+export function RepairList({ refreshTrigger, onTicketClick }: RepairListProps) {
   const { data: tickets = [], isLoading } = useQuery<Repair[]>({
     queryKey: ['repairs-list', refreshTrigger],
     queryFn: async () => {
@@ -92,23 +93,24 @@ export function RepairList({ refreshTrigger }: RepairListProps) {
             {tickets.map((ticket) => {
               const status = statusConfig[ticket.status] || statusConfig.pending
               return (
-                <div
+                <button
                   key={ticket.id}
-                  className="p-4 rounded-lg border hover:bg-accent/30 transition-colors space-y-3"
+                  onClick={() => onTicketClick(ticket.id)}
+                  className="w-full text-left p-4 rounded-lg border hover:bg-accent/50 hover:border-primary/30 active:scale-[0.99] transition-all space-y-3 cursor-pointer"
                 >
                   {/* Header: ticket_no + status */}
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="font-semibold text-sm">{ticket.ticketNo}</span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${status.color}`}>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${status.color}`}>
                       {status.label}
                     </span>
                   </div>
 
                   {/* ข้อมูลอุปกรณ์ */}
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">📦 {ticket.assetName}</p>
+                    <p className="text-sm font-medium truncate">📦 {ticket.assetName}</p>
                     {ticket.asset && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         🔖 {ticket.asset.assetCode}
                         {ticket.asset.location && ` • 📍 ${ticket.asset.location.buildingName}, ${ticket.asset.location.roomName}`}
                       </p>
@@ -117,15 +119,15 @@ export function RepairList({ refreshTrigger }: RepairListProps) {
 
                   {/* ปัญหา */}
                   {ticket.problemDetails && (
-                    <p className="text-sm text-muted-foreground">⚠️ {ticket.problemDetails}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">⚠️ {ticket.problemDetails}</p>
                   )}
 
                   {/* Footer */}
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground pt-1 border-t">
-                    <span>👤 ผู้แจ้ง: {ticket.reporterName || '-'}</span>
-                    <span>{formatDate(ticket.createdAt)}</span>
+                    <span className="truncate">👤 {ticket.reporterName || '-'}</span>
+                    <span className="whitespace-nowrap">{formatDate(ticket.createdAt)}</span>
                   </div>
-                </div>
+                </button>
               )
             })}
           </div>
