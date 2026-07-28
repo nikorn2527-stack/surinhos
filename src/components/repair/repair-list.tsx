@@ -1,7 +1,6 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Wrench } from 'lucide-react'
 
@@ -35,14 +34,13 @@ interface RepairListProps {
   onTicketClick: (ticketId: string) => void
 }
 
-// สถานะ 6 ขั้น (เพิ่ม cancelled)
-const statusConfig: Record<string, { label: string; color: string }> = {
-  pending:     { label: 'รอรับเรื่อง',   color: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' },
-  accepted:    { label: 'รับเรื่องแล้ว', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
-  in_progress: { label: 'กำลังซ่อม',    color: 'bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300' },
-  returned:    { label: 'ส่งคืนแล้ว',   color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' },
-  closed:      { label: 'ปิดงาน',       color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
-  cancelled:   { label: 'ยกเลิก',       color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
+const statusDot: Record<string, string> = {
+  pending: 'bg-amber-400',
+  accepted: 'bg-blue-400',
+  in_progress: 'bg-violet-400',
+  returned: 'bg-emerald-400',
+  closed: 'bg-gray-400',
+  cancelled: 'bg-red-400',
 }
 
 function formatDate(dateStr: string) {
@@ -64,75 +62,55 @@ export function RepairList({ refreshTrigger, onTicketClick }: RepairListProps) {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
-        <CardContent className="space-y-4">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 w-full rounded-lg" />)}
-        </CardContent>
-      </Card>
+      <div className="space-y-1.5 px-1">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Skeleton key={i} className="h-16 w-full rounded-lg" />
+        ))}
+      </div>
+    )
+  }
+
+  if (tickets.length === 0) {
+    return (
+      <div className="text-center py-10 text-gray-300">
+        <Wrench className="h-10 w-10 mx-auto mb-3 opacity-50" />
+        <p className="text-sm">📋 ยังไม่มีรายการแจ้งซ่อม</p>
+      </div>
     )
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Wrench className="h-4 w-4 text-emerald-600" />
-          รายการแจ้งซ่อม
-          <span className="text-sm font-normal text-muted-foreground">({tickets.length} รายการ)</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {tickets.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground">
-            <Wrench className="h-10 w-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">📋 ยังไม่มีรายการแจ้งซ่อม</p>
+    <div className="space-y-0.5">
+      {tickets.map((ticket) => (
+        <button
+          key={ticket.id}
+          onClick={() => onTicketClick(ticket.id)}
+          className="ticket-row w-full text-left px-3 py-3 rounded-lg group"
+        >
+          {/* Row header: dot + ticket number + date */}
+          <div className="flex items-center gap-3 mb-1">
+            <div className={`status-dot ${statusDot[ticket.status] || 'bg-gray-400'}`} />
+            <span className="text-[13px] font-semibold text-gray-800 font-mono">
+              {ticket.ticketNo}
+            </span>
+            <span className="ml-auto text-[11px] text-gray-400">
+              {formatDate(ticket.createdAt).split(' ')[0]}
+            </span>
           </div>
-        ) : (
-          <div className="space-y-3 max-h-[600px] overflow-y-auto">
-            {tickets.map((ticket) => {
-              const status = statusConfig[ticket.status] || statusConfig.pending
-              return (
-                <button
-                  key={ticket.id}
-                  onClick={() => onTicketClick(ticket.id)}
-                  className="w-full text-left p-4 rounded-lg border hover:bg-accent/50 hover:border-primary/30 active:scale-[0.99] transition-all space-y-3 cursor-pointer"
-                >
-                  {/* Header: ticket_no + status */}
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-semibold text-sm">{ticket.ticketNo}</span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${status.color}`}>
-                      {status.label}
-                    </span>
-                  </div>
-
-                  {/* ข้อมูลอุปกรณ์ */}
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium truncate">📦 {ticket.assetName}</p>
-                    {ticket.asset && (
-                      <p className="text-xs text-muted-foreground truncate">
-                        🔖 {ticket.asset.assetCode}
-                        {ticket.asset.location && ` • 📍 ${ticket.asset.location.buildingName}, ${ticket.asset.location.roomName}`}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* ปัญหา */}
-                  {ticket.problemDetails && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">⚠️ {ticket.problemDetails}</p>
-                  )}
-
-                  {/* Footer */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground pt-1 border-t">
-                    <span className="truncate">👤 {ticket.reporterName || '-'}</span>
-                    <span className="whitespace-nowrap">{formatDate(ticket.createdAt)}</span>
-                  </div>
-                </button>
-              )
-            })}
+          {/* Asset info */}
+          <div className="pl-5">
+            <p className="text-[13px] text-gray-700 truncate">
+              {ticket.assetName}
+            </p>
+            <p className="text-[11px] text-gray-400 truncate mt-0.5">
+              {ticket.asset?.assetCode || '-'}
+              {ticket.asset?.location
+                ? ` · ${ticket.asset.location.buildingName}, ${ticket.asset.location.roomName}`
+                : ''}
+            </p>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </button>
+      ))}
+    </div>
   )
 }
