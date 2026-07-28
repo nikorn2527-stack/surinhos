@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Wrench, Plus, Send, Loader2, CheckCircle2 } from 'lucide-react'
+import { Wrench, Plus, Send, Loader2, CheckCircle2, Camera, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { AssetSearch } from './asset-search'
 import { QRScanner } from './qr-scanner'
@@ -45,9 +45,13 @@ export function RepairForm({ onSubmit }: RepairFormProps) {
     reporterName: '',    // ชื่อผู้แจ้ง
   })
 
+  // Photo upload state
+  const [photoFiles, setPhotoFiles] = useState<string[]>([]) // base64 data URLs
+
   const resetForm = useCallback(() => {
     setSelectedAsset(null)
     setFormData({ assetName: '', problemDetails: '', reporterName: '' })
+    setPhotoFiles([])
     setSubmitted(false)
     setSubmittedTicketNo('')
   }, [])
@@ -96,6 +100,7 @@ export function RepairForm({ onSubmit }: RepairFormProps) {
           assetName: formData.assetName,
           problemDetails: formData.problemDetails,
           reporterName: formData.reporterName,
+          photos: photoFiles.length > 0 ? JSON.stringify(photoFiles) : null,
         }),
       })
 
@@ -212,6 +217,64 @@ export function RepairForm({ onSubmit }: RepairFormProps) {
                   value={formData.reporterName}
                   onChange={(e) => setFormData((prev) => ({ ...prev, reporterName: e.target.value }))}
                 />
+              </div>
+
+              {/* Photo Upload */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5">
+                  <Camera className="size-3.5" />
+                  รูปประกอบ (ถ่ายรูปอาการเสีย)
+                </Label>
+                <div
+                  className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-emerald-300 hover:bg-emerald-50/30 transition"
+                  onClick={() => document.getElementById('photo-upload-input')?.click()}
+                >
+                  <input
+                    id="photo-upload-input"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || [])
+                      files.forEach(file => {
+                        const reader = new FileReader()
+                        reader.onload = (ev) => {
+                          if (ev.target?.result) {
+                            setPhotoFiles(prev => [...prev, ev.target.result as string])
+                          }
+                        }
+                        reader.readAsDataURL(file)
+                      })
+                    }}
+                  />
+                  <Camera className="h-6 w-6 mx-auto mb-1 text-gray-300" />
+                  <p className="text-xs text-muted-foreground">คลิกเพื่อแนบรูป (รองรับหลายรูป)</p>
+                </div>
+                {photoFiles.length > 0 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {photoFiles.map((src, i) => (
+                      <div key={i} className="relative group">
+                        <div className="w-16 h-16 rounded-md border border-gray-200 overflow-hidden">
+                          <img src={src} alt={`รูปที่ ${i + 1}`} className="w-full h-full object-cover" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setPhotoFiles(prev => prev.filter((_, idx) => idx !== i))}
+                          className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </div>
+                    ))}
+                    <div
+                      className="w-16 h-16 rounded-md border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-emerald-300 hover:bg-emerald-50/30 transition"
+                      onClick={() => document.getElementById('photo-upload-input')?.click()}
+                    >
+                      <Plus className="size-4 text-gray-300" />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

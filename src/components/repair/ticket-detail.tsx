@@ -103,6 +103,13 @@ interface RepairTicket {
   totalCost: number | null
   costStatus: string | null
   cancelReason: string | null
+  photos: string | null  // JSON string array of base64/URLs
+  disposalStatus: string | null  // pending_review / approved / disposed
+  disposalReason: string | null
+  disposalMethod: string | null
+  disposalValue: number | null
+  disposalApprovedBy: string | null
+  disposalComRef: string | null
   createdAt: string
   updatedAt: string
   asset: AssetInfo | null
@@ -144,6 +151,11 @@ const statusConfig: Record<
     color: 'bg-red-100 text-red-700',
     icon: 'XCircle',
   },
+  disposed: {
+    label: 'ตีแทงจำหน่าย',
+    color: 'bg-orange-100 text-orange-700',
+    icon: 'AlertTriangle',
+  },
 }
 
 const statusTimeline = ['pending', 'accepted', 'in_progress', 'returned', 'closed']
@@ -155,6 +167,13 @@ const iconMap: Record<string, React.ReactNode> = {
   PackageOpen: <PackageOpen className="size-4" />,
   CheckCircle2: <CheckCircle2 className="size-4" />,
   XCircle: <XCircle className="size-4" />,
+  AlertTriangle: <AlertTriangle className="size-4" />,
+}
+
+const disposalStatusLabel: Record<string, string> = {
+  pending_review: 'รอพิจารณา',
+  approved: 'อนุมัติแล้ว',
+  disposed: 'จำหน่ายแล้ว',
 }
 
 const costStatusLabel: Record<string, string> = {
@@ -188,7 +207,7 @@ function formatCurrency(amount: number | null) {
 }
 
 function getTimelineIndex(status: string): number {
-  if (status === 'cancelled') return -1
+  if (status === 'cancelled' || status === 'disposed') return -1
   return statusTimeline.indexOf(status)
 }
 
@@ -211,6 +230,14 @@ export default function TicketDetail({
   // cancel modal
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
+
+  // disposal modal
+  const [showDisposalModal, setShowDisposalModal] = useState(false)
+  const [disposalReason, setDisposalReason] = useState('')
+  const [disposalMethod, setDisposalMethod] = useState('')
+  const [disposalValue, setDisposalValue] = useState('')
+  const [disposalApprovedBy, setDisposalApprovedBy] = useState('')
+  const [disposalComRef, setDisposalComRef] = useState('')
 
   // estimate modal
   const [showEstimateModal, setShowEstimateModal] = useState(false)
@@ -410,6 +437,41 @@ export default function TicketDetail({
       setShowCancelModal(false)
       setCancelReason('')
       toast.success('ยกเลิกใบแจ้งซ่อมเรียบร้อยแล้ว')
+      onUpdate()
+    },
+    onError: (err: Error) => {
+      toast.error(err.message)
+    },
+  })
+
+  const disposalMutation = useMutation({
+    mutationFn: async (data: {
+      disposalReason: string
+      disposalMethod: string
+      disposalValue?: number
+      disposalApprovedBy?: string
+      disposalComRef?: string
+    }) => {
+      const res = await fetch(`/api/repairs/${ticketId}/disposal`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'ล้มเหลว')
+      }
+      return res.json()
+    },
+    onSuccess: (updated) => {
+      setTicket(updated)
+      setShowDisposalModal(false)
+      setDisposalReason('')
+      setDisposalMethod('')
+      setDisposalValue('')
+      setDisposalApprovedBy('')
+      setDisposalComRef('')
+      toast.success('บันทึกการตีแทงจำหน่ายเรียบร้อยแล้ว')
       onUpdate()
     },
     onError: (err: Error) => {
@@ -789,8 +851,76 @@ export default function TicketDetail({
           </CardContent>
         </Card>
 
+        {/* ========== PHOTOS ========== */}
+        {(() => {
+          let photoList: string[] = []
+          try { photoList = ticket.photos ? JSON.parse(ticket.photos) : [] } catch { photoList = [] }
+          if (photoList.length === 0) return null
+          return (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">📷 รูปประกอบ ({photoList.length} รูป)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-2 flex-wrap">
+                  {photoList.map((src, i) => (
+                    <div key={i} className="w-20 h-20 rounded-md border border-gray-200 overflow-hidden bg-gray-50">
+                      <img src={src} alt={`รูปที่ ${i + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })()}
+
+        {/* ========== DISPOSAL INFO ========== */}
+        {ticket.disposalStatus && (
+          <Card className="border-orange-200 bg-orange-50/50">
+            <CardHeader>
+              <CardTitle className="text-base text-orange-700">🗑️ ตีแทงจำหน่ายครุภัณฑ์</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">สถานะ</p>
+                <p className="mt-0.5 font-medium text-orange-700">{disposalStatusLabel[ticket.disposalStatus] || ticket.disposalStatus}</p>
+              </div>
+              {ticket.disposalReason && (
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <p className="text-xs font-medium text-muted-foreground">เหตุผล</p>
+                  <p className="mt-0.5 text-sm">{ticket.disposalReason}</p>
+                </div>
+              )}
+              {ticket.disposalMethod && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">วิธีจำหน่าย</p>
+                  <p className="mt-0.5 font-medium">{ticket.disposalMethod}</p>
+                </div>
+              )}
+              {ticket.disposalValue != null && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">ราคาประเมิน</p>
+                  <p className="mt-0.5 font-semibold">{formatCurrency(ticket.disposalValue)}</p>
+                </div>
+              )}
+              {ticket.disposalApprovedBy && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">ผู้อนุมัติ</p>
+                  <p className="mt-0.5 font-medium">{ticket.disposalApprovedBy}</p>
+                </div>
+              )}
+              {ticket.disposalComRef && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">หนังสือ ครม.</p>
+                  <p className="mt-0.5 font-mono font-medium">{ticket.disposalComRef}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* ========== ACTION BUTTONS ========== */}
-        {ticket.status !== 'cancelled' && (
+        {ticket.status !== 'cancelled' && ticket.status !== 'disposed' && (
           <Card>
             <CardHeader>
               <CardTitle className="text-base">การดำเนินการ</CardTitle>
@@ -835,6 +965,22 @@ export default function TicketDetail({
                       <XCircle className="size-4" />
                       ยกเลิก
                     </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full sm:w-auto border-orange-200 text-orange-600 hover:bg-orange-50"
+                      onClick={() => {
+                        setDisposalReason('')
+                        setDisposalMethod('')
+                        setDisposalValue('')
+                        setDisposalApprovedBy('')
+                        setDisposalComRef('')
+                        setShowDisposalModal(true)
+                      }}
+                      disabled={isAnyMutationLoading}
+                    >
+                      <AlertTriangle className="size-4" />
+                      ตีแทงจำหน่าย
+                    </Button>
                   </>
                 )}
 
@@ -877,6 +1023,22 @@ export default function TicketDetail({
                     >
                       <XCircle className="size-4" />
                       ยกเลิก
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full sm:w-auto border-orange-200 text-orange-600 hover:bg-orange-50"
+                      onClick={() => {
+                        setDisposalReason('')
+                        setDisposalMethod('')
+                        setDisposalValue('')
+                        setDisposalApprovedBy('')
+                        setDisposalComRef('')
+                        setShowDisposalModal(true)
+                      }}
+                      disabled={isAnyMutationLoading}
+                    >
+                      <AlertTriangle className="size-4" />
+                      ซ่อมไม่ได้ — ตีแทง
                     </Button>
                   </>
                 )}
@@ -1150,6 +1312,107 @@ export default function TicketDetail({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ========== DISPOSAL MODAL ========== */}
+      <Dialog open={showDisposalModal} onOpenChange={setShowDisposalModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>🗑️ ตีแทงจำหน่ายครุภัณฑ์</DialogTitle>
+            <DialogDescription>
+              {ticket.ticketNo} — {ticket.assetName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="disposal-reason">
+                เหตุผลที่ต้องจำหน่าย <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="disposal-reason"
+                placeholder="เช่น อะไหล่หมดสต็อก ยี่ห้อหยุดผลิตรุ่นนี้"
+                rows={2}
+                value={disposalReason}
+                onChange={(e) => setDisposalReason(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="disposal-method">
+                  วิธีจำหน่าย <span className="text-destructive">*</span>
+                </Label>
+                <Select value={disposalMethod} onValueChange={setDisposalMethod}>
+                  <SelectTrigger id="disposal-method">
+                    <SelectValue placeholder="เลือก" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="จำหน่าย/ชำระ">จำหน่าย/ชำระ (ประมูล)</SelectItem>
+                    <SelectItem value="ทำลาย">ทำลาย</SelectItem>
+                    <SelectItem value="บริจาค">บริจาค</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="disposal-value">ราคาประเมิน (฿)</Label>
+                <Input
+                  id="disposal-value"
+                  type="number"
+                  placeholder="0.00"
+                  value={disposalValue}
+                  onChange={(e) => setDisposalValue(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="disposal-approver">ผู้อนุมัติ</Label>
+                <Input
+                  id="disposal-approver"
+                  placeholder="ชื่อ-นามสกุล"
+                  value={disposalApprovedBy}
+                  onChange={(e) => setDisposalApprovedBy(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="disposal-comref">หนังสือ ครม.</Label>
+                <Input
+                  id="disposal-comref"
+                  placeholder="เช่น ครม.ที่ 1/2569"
+                  value={disposalComRef}
+                  onChange={(e) => setDisposalComRef(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDisposalModal(false)}
+            >
+              ยกเลิก
+            </Button>
+            <Button
+              className="bg-orange-600 hover:bg-orange-700"
+              onClick={() => {
+                if (!disposalReason.trim() || !disposalMethod) {
+                  toast.error('กรุณาระบุเหตุผลและวิธีจำหน่าย')
+                  return
+                }
+                disposalMutation.mutate({
+                  disposalReason: disposalReason.trim(),
+                  disposalMethod,
+                  disposalValue: disposalValue ? parseFloat(disposalValue) : undefined,
+                  disposalApprovedBy: disposalApprovedBy.trim() || undefined,
+                  disposalComRef: disposalComRef.trim() || undefined,
+                })
+              }}
+              disabled={disposalMutation.isPending}
+            >
+              {disposalMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+              บันทึกการตีแทง
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ========== RECEIPT PREVIEW DIALOG ========== */}
       <Dialog open={showReceiptPreview} onOpenChange={setShowReceiptPreview}>

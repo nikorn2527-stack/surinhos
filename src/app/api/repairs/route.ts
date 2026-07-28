@@ -31,7 +31,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { assetCode, assetName, problemDetails, reporterName } = body
+    const { assetCode, assetName, problemDetails, reporterName, photos } = body
 
     if (!assetName || !reporterName) {
       return NextResponse.json(
@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
         assetName,
         problemDetails,
         reporterName,
+        photos: photos || null,
         status: 'pending',
       },
       include: {

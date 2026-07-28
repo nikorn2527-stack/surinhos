@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Wrench, ArrowLeft, Building2, Loader2, Search } from 'lucide-react'
+import { Wrench, Building2, Loader2, Search } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,6 +25,7 @@ const statusDot: Record<string, string> = {
   returned: 'bg-emerald-400',
   closed: 'bg-gray-400',
   cancelled: 'bg-red-400',
+  disposed: 'bg-orange-400',
 }
 
 const statusBg: Record<string, string> = {
@@ -34,6 +35,7 @@ const statusBg: Record<string, string> = {
   returned: 'bg-emerald-50 text-emerald-600',
   closed: 'bg-gray-50 text-gray-600',
   cancelled: 'bg-red-50 text-red-600',
+  disposed: 'bg-orange-50 text-orange-600',
 }
 
 const shortLabel: Record<string, string> = {
@@ -43,6 +45,7 @@ const shortLabel: Record<string, string> = {
   returned: 'ส่ง',
   closed: 'ปิด',
   cancelled: 'ยก',
+  disposed: 'ตีแทง',
 }
 
 export default function Home() {
@@ -74,6 +77,7 @@ export default function Home() {
     returned: tickets.filter((r) => r.status === 'returned').length,
     closed: tickets.filter((r) => r.status === 'closed').length,
     cancelled: tickets.filter((r) => r.status === 'cancelled').length,
+    disposed: tickets.filter((r) => r.status === 'disposed').length,
   }
 
   const handleRepairSubmitted = useCallback(() => {
@@ -124,6 +128,7 @@ export default function Home() {
               { k: 'returned', v: stats.returned, label: shortLabel.returned, cls: statusBg.returned },
               { k: 'closed', v: stats.closed, label: shortLabel.closed, cls: statusBg.closed },
               { k: 'cancelled', v: stats.cancelled, label: shortLabel.cancelled, cls: statusBg.cancelled },
+              { k: 'disposed', v: stats.disposed, label: shortLabel.disposed, cls: statusBg.disposed },
             ]
               .filter((s) => s.v > 0)
               .map((s) => (
