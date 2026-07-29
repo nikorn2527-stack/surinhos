@@ -155,7 +155,6 @@ const SignaturePad = forwardRef(function SignaturePad(
   }
 );
 
-});
 
 SignaturePad.displayName = 'SignaturePad';
 export default SignaturePad;
