@@ -312,8 +312,9 @@ export default function RepairsPage() {
 
       {/* ===== NEW REPAIR MODAL ===== */}
       {showNewForm && (
-        <dialog className="modal modal-open" open>
-          <div className="modal-box max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center" onClick={() => setShowNewForm(false)}>
+          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-bold text-lg">📝 ฟอร์มแจ้งซ่อมอุปกรณ์</h3>
             <form onSubmit={handleSubmitRepair} className="space-y-4 mt-4">
               {/* Asset Search */}
@@ -380,7 +381,7 @@ export default function RepairsPage() {
                 )}
               </div>
 
-              <div className="modal-action">
+              <div className="flex justify-end gap-3 pt-4 border-t">
                 <button type="button" className="btn btn-ghost" onClick={() => setShowNewForm(false)}>ยกเลิก</button>
                 <button type="submit" className="btn bg-emerald-600 text-white border-none hover:bg-emerald-700" disabled={isSubmitting}>
                   {isSubmitting ? <span className="loading loading-spinner loading-xs"></span> : '💾 บันทึกแจ้งซ่อม'}
@@ -388,10 +389,7 @@ export default function RepairsPage() {
               </div>
             </form>
           </div>
-          <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowNewForm(false)}>ปิด</button>
-          </form>
-        </dialog>
+        </div>
       )}
     </div>
   );
