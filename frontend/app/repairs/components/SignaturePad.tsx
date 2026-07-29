@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useRef, useEffect, forwardRef, useImperativeHandle, type Ref } from 'react';
 
 interface SignaturePadProps {
   title?: string;
@@ -14,8 +14,10 @@ export interface SignaturePadRef {
   isEmpty: () => boolean;
 }
 
-const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
-  ({ title, width = 400, height = 150 }, ref) => {
+const SignaturePad = forwardRef(function SignaturePad(
+  { title, width = 400, height = 150 }: SignaturePadProps,
+  ref: Ref<SignaturePadRef>
+) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const isDrawing = useRef(false);
     const lastPoint = useRef({ x: 0, y: 0 });
@@ -152,6 +154,8 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
     );
   }
 );
+
+});
 
 SignaturePad.displayName = 'SignaturePad';
 export default SignaturePad;
