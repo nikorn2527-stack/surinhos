@@ -87,7 +87,7 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: Props) {
     try {
       const res = await fetch(`${API_BASE}/api/repairs/${ticketId}`, { headers: { Authorization: `Bearer ${getToken()}` } });
       if (res.ok) setTicket(await res.json());
-    } catch {} finally { setLoading(false); }
+    } catch (e) { // ignore } finally { setLoading(false); }
   }, [ticketId]);
 
   useEffect(() => { fetchTicket(); }, [fetchTicket]);
@@ -102,7 +102,7 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: Props) {
       });
       if (res.ok) { setTicket(await res.json()); onUpdate(); return true; }
       const err = await res.json(); alert(`❌ ${err.error || 'Error'}`); return false;
-    } catch { alert('❌ Connection error'); return false; }
+    } catch (e) { alert('❌ Connection error'); return false; }
     finally { setActing(false); }
   };
 
@@ -173,7 +173,7 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: Props) {
       </div></div>
 
       {/* PHOTOS */}
-      {(() => { let p: string[] = []; try { p = ticket.photos ? JSON.parse(ticket.photos) : []; } catch {} return p.length > 0 ? (
+      {(() => { let p: string[] = []; try { p = ticket.photos ? JSON.parse(ticket.photos) : []; } catch (e) { // ignore } return p.length > 0 ? (
         <div className="card bg-white shadow-sm border border-gray-100"><div className="card-body p-4">
           <h3 className="font-bold text-sm text-gray-500 mb-3">📷 รูป ({p.length})</h3>
           <div className="flex gap-2 flex-wrap">{p.map((s, i) => <div key={i} className="w-20 h-20 rounded-lg border overflow-hidden"><img src={s} className="w-full h-full object-cover" /></div>)}</div>
