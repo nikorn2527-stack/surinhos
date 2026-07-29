@@ -517,7 +517,7 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: TicketDeta
 
       {/* ACCEPT MODAL */}
       {showAcceptModal && (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
           <div className="modal-box max-w-md">
             <h3 className="font-bold text-lg">🔧 รับเรื่องแจ้งซ่อม</h3>
             <div className="space-y-4 mt-4">
@@ -535,13 +535,13 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: TicketDeta
               </button>
             </div>
           </div>
-          <div className="modal-backdrop" onClick={() => setShowAcceptModal(false)}></div>
-        </div>
+          <form method="dialog" className="modal-backdrop"><button onClick={() => setShowAcceptModal(false)}>ปิด</button></form>
+        </dialog>
       )}
 
       {/* ESTIMATE MODAL */}
       {showEstimateModal && (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
           <div className="modal-box max-w-md">
             <h3 className="font-bold text-lg">💰 เสนอราคาซ่อม</h3>
             <div className="space-y-4 mt-4">
@@ -581,13 +581,13 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: TicketDeta
               </button>
             </div>
           </div>
-          <div className="modal-backdrop" onClick={() => setShowEstimateModal(false)}></div>
-        </div>
+          <form method="dialog" className="modal-backdrop"><button onClick={() => setShowEstimateModal(false)}>ปิด</button></form>
+        </dialog>
       )}
 
       {/* RETURN MODAL */}
       {showReturnModal && (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
           <div className="modal-box max-w-lg">
             <h3 className="font-bold text-lg">📦 ส่งคืนครุภัณฑ์</h3>
             <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto">
@@ -620,13 +620,13 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: TicketDeta
               </button>
             </div>
           </div>
-          <div className="modal-backdrop" onClick={() => setShowReturnModal(false)}></div>
-        </div>
+          <form method="dialog" className="modal-backdrop"><button onClick={() => setShowReturnModal(false)}>ปิด</button></form>
+        </dialog>
       )}
 
       {/* CANCEL MODAL */}
       {showCancelModal && (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
           <div className="modal-box max-w-md">
             <h3 className="font-bold text-lg text-red-600">❌ ยกเลิกใบแจ้งซ่อม</h3>
             <div className="mt-4">
@@ -641,13 +641,13 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: TicketDeta
               </button>
             </div>
           </div>
-          <div className="modal-backdrop" onClick={() => setShowCancelModal(false)}></div>
-        </div>
+          <form method="dialog" className="modal-backdrop"><button onClick={() => setShowCancelModal(false)}>ปิด</button></form>
+        </dialog>
       )}
 
       {/* DISPOSAL MODAL */}
       {showDisposalModal && (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
           <div className="modal-box max-w-md">
             <h3 className="font-bold text-lg text-orange-600">🗑️ ตีแทงจำหน่ายครุภัณฑ์</h3>
             <p className="text-sm text-gray-500 mt-1">{ticket.ticketNo} — {ticket.assetName}</p>
@@ -690,13 +690,13 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: TicketDeta
               </button>
             </div>
           </div>
-          <div className="modal-backdrop" onClick={() => setShowDisposalModal(false)}></div>
-        </div>
+          <form method="dialog" className="modal-backdrop"><button onClick={() => setShowDisposalModal(false)}>ปิด</button></form>
+        </dialog>
       )}
 
       {/* RECEIPT PREVIEW */}
       {showReceiptPreview && (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
           <div className="modal-box max-w-sm p-0">
             <div className="flex items-center justify-between px-4 pt-4 pb-2">
               <span className="text-sm font-medium">🖨️ {printType === 'return' ? 'ใบส่งคืน' : 'ใบรับซ่อม'}</span>
@@ -712,8 +712,8 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: TicketDeta
               </button>
             </div>
           </div>
-          <div className="modal-backdrop" onClick={() => setShowReceiptPreview(false)}></div>
-        </div>
+          <form method="dialog" className="modal-backdrop"><button onClick={() => setShowReceiptPreview(false)}>ปิด</button></form>
+        </dialog>
       )}
 
       {/* PRINT STYLES */}

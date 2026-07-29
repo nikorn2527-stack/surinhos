@@ -312,7 +312,7 @@ export default function RepairsPage() {
 
       {/* ===== NEW REPAIR MODAL ===== */}
       {showNewForm && (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
           <div className="modal-box max-w-lg max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg">📝 ฟอร์มแจ้งซ่อมอุปกรณ์</h3>
             <form onSubmit={handleSubmitRepair} className="space-y-4 mt-4">
@@ -388,8 +388,10 @@ export default function RepairsPage() {
               </div>
             </form>
           </div>
-          <div className="modal-backdrop" onClick={() => setShowNewForm(false)}></div>
-        </div>
+          <form method="dialog" className="modal-backdrop">
+            <button onClick={() => setShowNewForm(false)}>ปิด</button>
+          </form>
+        </dialog>
       )}
     </div>
   );
