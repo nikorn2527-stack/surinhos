@@ -171,7 +171,7 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: Props) {
         <h3 className="font-bold text-sm text-gray-500 mb-3">📋 ข้อมูลใบแจ้งซ่อม</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
           <div><span className="text-gray-500">อุปกรณ์:</span><span className="ml-2 font-semibold">{ticket.assetName}</span></div>
-          {ticket.asset?.assetCode && <div><span className="text-gray-500">รหัส:</span><span className="ml-2 font-mono text-indigo-600">{ticket.asset.assetCode}</span></div>}
+          {ticket.asset?.assetCode && <div><span className="text-gray-500">รหัส:</span><span className="ml-2 font-mono text-teal-600">{ticket.asset.assetCode}</span></div>}
           {ticket.asset?.location && <div><span className="text-gray-500">สถานที่:</span><span className="ml-2">📍 {ticket.asset.location.buildingName} {ticket.asset.location.roomName}</span></div>}
           <div className="sm:col-span-2"><span className="text-gray-500">ปัญหา:</span><span className="ml-2">{ticket.problemDetails || '-'}</span></div>
           <div><span className="text-gray-500">ผู้แจ้ง:</span><span className="ml-2 font-medium">👤 {ticket.reporterName || '-'}</span></div>
@@ -220,7 +220,7 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: Props) {
         <div className="grid grid-cols-3 gap-3 text-center">
           <div className="bg-gray-50 rounded-lg p-2"><div className="text-xs text-gray-500">อะไหล่</div><div className="font-bold">{fmtMoney(ticket.repairCost)}</div></div>
           <div className="bg-gray-50 rounded-lg p-2"><div className="text-xs text-gray-500">แรง</div><div className="font-bold">{fmtMoney(ticket.laborCost)}</div></div>
-          <div className="bg-indigo-50 rounded-lg p-2"><div className="text-xs text-indigo-600">รวม</div><div className="font-bold text-indigo-700">{fmtMoney(ticket.totalCost)}</div></div>
+          <div className="bg-teal-50 rounded-lg p-2"><div className="text-xs text-teal-600">รวม</div><div className="font-bold text-teal-700">{fmtMoney(ticket.totalCost)}</div></div>
         </div>
       </div></div>}
 
@@ -261,8 +261,8 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: Props) {
               <div key={step} className="flex flex-1 items-center">
                 {idx > 0 && <div className={`h-0.5 flex-1 ${done ? 'bg-emerald-400' : 'bg-gray-200'}`} />}
                 <div className="flex flex-col items-center mx-1">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm border-2 ${curr ? 'border-indigo-500 bg-indigo-500 text-white' : done ? 'border-emerald-400 bg-emerald-50 text-emerald-600' : 'border-gray-200 bg-gray-50 text-gray-400'}`}>{done && !curr ? '✓' : sc.icon}</div>
-                  <span className={`text-[10px] mt-1 text-center font-medium ${curr ? 'text-indigo-600' : done ? 'text-emerald-600' : 'text-gray-400'}`}>{sc.label}</span>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm border-2 ${curr ? 'border-teal-500 bg-teal-500 text-white' : done ? 'border-emerald-400 bg-emerald-50 text-emerald-600' : 'border-gray-200 bg-gray-50 text-gray-400'}`}>{done && !curr ? '✓' : sc.icon}</div>
+                  <span className={`text-[10px] mt-1 text-center font-medium ${curr ? 'text-teal-600' : done ? 'text-emerald-600' : 'text-gray-400'}`}>{sc.label}</span>
                 </div>
                 {idx < statusTimeline.length - 1 && <div className={`h-0.5 flex-1 ${idx < ti ? 'bg-emerald-400' : 'bg-gray-200'}`} />}
               </div>
@@ -325,7 +325,7 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: Props) {
             <div><label className="label"><span className="label-text font-semibold">ค่าอะไหล่ *</span></label><input type="number" min="0" step="0.01" className="input input-bordered w-full" placeholder="0.00" value={estRepair} onChange={e => setEstRepair(e.target.value)} /></div>
             <div><label className="label"><span className="label-text font-semibold">ค่าแรง *</span></label><input type="number" min="0" step="0.01" className="input input-bordered w-full" placeholder="0.00" value={estLabor} onChange={e => setEstLabor(e.target.value)} /></div>
           </div>
-          <div className="bg-indigo-50 rounded-lg p-3 text-center"><div className="text-xs text-indigo-600">รวม</div><div className="text-xl font-bold text-indigo-700">{fmtMoney((parseFloat(estRepair) || 0) + (parseFloat(estLabor) || 0))}</div></div>
+          <div className="bg-teal-50 rounded-lg p-3 text-center"><div className="text-xs text-teal-600">รวม</div><div className="text-xl font-bold text-teal-700">{fmtMoney((parseFloat(estRepair) || 0) + (parseFloat(estLabor) || 0))}</div></div>
           <div><label className="label"><span className="label-text font-semibold">สถานะอนุมัติ *</span></label>
           <select className="select select-bordered w-full" value={estStatus} onChange={e => setEstStatus(e.target.value)}><option value="pending">รออนุมัติ</option><option value="approved">อนุมัติ</option><option value="rejected">ไม่อนุมัติ</option></select>
           {estStatus === 'rejected' && <p className="text-xs text-red-500 mt-1">⚠️ ไม่อนุมัติ = ยกเลิกใบแจ้งซ่อมอัตโนมัติ</p>}</div>
@@ -341,8 +341,8 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: Props) {
         <div className="space-y-4">
           <div><label className="label"><span className="label-text font-semibold">วิธีส่งคืน *</span></label>
           <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => setRetMethod('หน่วยงานมารับเอง')} className={`btn btn-sm ${retMethod === 'หน่วยงานมารับเอง' ? 'bg-indigo-600 text-white' : 'btn-outline'}`}>🏢 มารับเอง</button>
-            <button type="button" onClick={() => setRetMethod('ช่างไปส่งคืน')} className={`btn btn-sm ${retMethod === 'ช่างไปส่งคืน' ? 'bg-indigo-600 text-white' : 'btn-outline'}`}>🚗 ไปส่งคืน</button>
+            <button type="button" onClick={() => setRetMethod('หน่วยงานมารับเอง')} className={`btn btn-sm ${retMethod === 'หน่วยงานมารับเอง' ? 'bg-teal-600 text-white' : 'btn-outline'}`}>🏢 มารับเอง</button>
+            <button type="button" onClick={() => setRetMethod('ช่างไปส่งคืน')} className={`btn btn-sm ${retMethod === 'ช่างไปส่งคืน' ? 'bg-teal-600 text-white' : 'btn-outline'}`}>🚗 ไปส่งคืน</button>
           </div></div>
           <div><label className="label"><span className="label-text font-semibold">ชื่อผู้ส่งคืน *</span></label><input type="text" className="input input-bordered w-full" placeholder="ชื่อ" value={retName} onChange={e => setRetName(e.target.value)} /></div>
           <div className="divider my-2"></div>
@@ -391,7 +391,7 @@ export default function TicketDetail({ ticketId, onClose, onUpdate }: Props) {
         <div className="flex justify-center"><ThermalReceipt ticket={ticket} type={printType} /></div>
         <div className="flex justify-end gap-2 pt-4 border-t mt-4">
           <button className="btn btn-ghost btn-sm" onClick={() => setMReceipt(false)}>ปิด</button>
-          <button className="btn btn-sm bg-indigo-600 text-white border-none" onClick={() => { setMReceipt(false); setTimeout(() => window.print(), 300); }}>🖨️ ปริ้น</button>
+          <button className="btn btn-sm bg-teal-600 text-white border-none" onClick={() => { setMReceipt(false); setTimeout(() => window.print(), 300); }}>🖨️ ปริ้น</button>
         </div>
       </Modal>
 

@@ -134,11 +134,11 @@ export default function PermissionsSettings() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="table w-full">
-              <thead className="bg-indigo-50 text-indigo-900 text-[15px]">
+              <thead className="bg-teal-50 text-teal-900 text-[15px]">
                 <tr>
                   <th className="w-1/3 py-4 text-left pl-6 rounded-tl-2xl">ฟังก์ชันการทำงาน</th>
                   {roles.map(role => (
-                    <th key={role.id} className="text-center py-4 border-l border-indigo-100 w-40">
+                    <th key={role.id} className="text-center py-4 border-l border-teal-100 w-40">
                       <div className="font-bold">{role.name}</div>
                     </th>
                   ))}
@@ -148,7 +148,7 @@ export default function PermissionsSettings() {
                 {Object.entries(groupedPermissions).map(([groupName, perms]) => (
                   <React.Fragment key={groupName}>
                     <tr className="bg-gray-100/50">
-                      <td colSpan={roles.length + 1} className="font-bold text-indigo-800 py-3 pl-6 border-y border-gray-200 text-md">
+                      <td colSpan={roles.length + 1} className="font-bold text-teal-800 py-3 pl-6 border-y border-gray-200 text-md">
                         {groupName}
                       </td>
                     </tr>

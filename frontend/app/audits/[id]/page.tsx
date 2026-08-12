@@ -354,7 +354,7 @@ export default function AuditDetail() {
               <input 
                 ref={scanInputRef}
                 type="text" 
-                className="input input-bordered input-lg w-full pl-12 bg-indigo-50/50 border-indigo-200 focus:border-indigo-500 font-medium"
+                className="input input-bordered input-lg w-full pl-12 bg-teal-50/50 border-teal-200 focus:border-teal-500 font-medium"
                 placeholder="สแกนด้วยปืนยิง หรือพิมพ์รหัส..."
                 value={scanInput}
                 onChange={(e) => setScanInput(e.target.value)}

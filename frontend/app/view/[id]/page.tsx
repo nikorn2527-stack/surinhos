@@ -187,7 +187,7 @@ export default function ViewAsset() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
                   <div><div className="text-sm text-gray-500 font-semibold mb-1">ชื่อรายการ</div><div className="text-lg font-bold text-gray-900">{asset.name || '-'}</div></div>
                   <div><div className="text-sm text-gray-500 font-semibold mb-1">หมวดหมู่</div><div className="text-gray-800">{asset.category || '-'}</div></div>
-                  <div><div className="text-sm text-gray-500 font-semibold mb-1">หมายเลขครุภัณฑ์ 1</div><div className="text-indigo-700 font-bold tracking-wide">{asset.asset_number_1 || '-'}</div></div>
+                  <div><div className="text-sm text-gray-500 font-semibold mb-1">หมายเลขครุภัณฑ์ 1</div><div className="text-teal-700 font-bold tracking-wide">{asset.asset_number_1 || '-'}</div></div>
                   <div><div className="text-sm text-gray-500 font-semibold mb-1">หมายเลขครุภัณฑ์เดิม</div><div className="text-gray-800">{asset.asset_number_2 || '-'}</div></div>
                   <div><div className="text-sm text-gray-500 font-semibold mb-1">ยี่ห้อ / รุ่น / ขนาด</div><div className="text-gray-800">{asset.brand || '-'}</div></div>
                   <div><div className="text-sm text-gray-500 font-semibold mb-1">Serial Number (S/N)</div><div className="text-gray-800 font-mono">{asset.serial_number || '-'}</div></div>

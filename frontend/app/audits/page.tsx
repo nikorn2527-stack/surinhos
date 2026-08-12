@@ -112,7 +112,7 @@ export default function AuditList() {
           ) : (
             <div className="overflow-x-auto">
               <table className="table w-full">
-                <thead className="bg-indigo-50 text-indigo-900 text-[15px]">
+                <thead className="bg-teal-50 text-teal-900 text-[15px]">
                   <tr>
                     <th className="py-4 pl-6 text-left">วันที่สร้าง</th>
                     <th className="py-4 text-left">ชื่อรอบการตรวจนับ</th>
@@ -166,7 +166,7 @@ export default function AuditList() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-            <div className="p-6 border-b border-gray-100 bg-indigo-50/50">
+            <div className="p-6 border-b border-gray-100 bg-teal-50/50">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">📋 เปิดรอบตรวจนับใหม่</h3>
               <p className="text-sm text-gray-500 mt-1">ระบบจะดึงครุภัณฑ์ที่ "ใช้งานปกติ" มารอให้ตรวจนับอัตโนมัติ</p>
             </div>

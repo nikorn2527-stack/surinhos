@@ -121,7 +121,7 @@ export default function OrganizationSettings() {
             <div className="flex flex-col md:flex-row gap-8 mb-8 items-start">
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hover:border-indigo-400 transition-all overflow-hidden shrink-0 group relative bg-gray-50/50"
+                className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hover:border-teal-400 transition-all overflow-hidden shrink-0 group relative bg-gray-50/50"
               >
                 <input 
                   type="file" 

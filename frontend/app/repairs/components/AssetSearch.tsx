@@ -105,10 +105,10 @@ export default function AssetSearch({ onSelect, selectedAsset, onClear }: AssetS
             <button
               key={asset.id}
               type="button"
-              className="w-full text-left px-3 py-2 hover:bg-indigo-50 border-b border-gray-50 last:border-0 transition-colors"
+              className="w-full text-left px-3 py-2 hover:bg-teal-50 border-b border-gray-50 last:border-0 transition-colors"
               onClick={() => handleSelect(asset)}
             >
-              <div className="font-semibold text-sm text-indigo-700">{asset.asset_code}</div>
+              <div className="font-semibold text-sm text-teal-700">{asset.asset_code}</div>
               <div className="text-xs text-gray-600">{asset.name}</div>
               <div className="text-xs text-gray-400">
                 {asset.building || ''} {asset.floor ? `ชั้น ${asset.floor}` : ''} {asset.department || ''}
@@ -119,10 +119,10 @@ export default function AssetSearch({ onSelect, selectedAsset, onClear }: AssetS
       )}
 
       {selectedAsset && (
-        <div className="mt-2 p-2 bg-indigo-50 rounded-lg border border-indigo-100 text-sm">
+        <div className="mt-2 p-2 bg-teal-50 rounded-lg border border-teal-100 text-sm">
           <div className="flex justify-between items-start">
             <div>
-              <span className="font-bold text-indigo-700">{selectedAsset.asset_code}</span>
+              <span className="font-bold text-teal-700">{selectedAsset.asset_code}</span>
               <span className="text-gray-600 ml-2">{selectedAsset.name}</span>
             </div>
             <button

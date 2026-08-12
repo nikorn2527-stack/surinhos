@@ -35,8 +35,8 @@
   color: #e5e7eb;
 }
 .dark input:focus, .dark select:focus, .dark textarea:focus {
-  border-color: #6366f1;
-  ring-color: #6366f1;
+  border-color: #14b8a6;
+  ring-color: #14b8a6;
 }
 .dark .btn-ghost { color: #d1d5db; }
 .dark .btn-ghost:hover { background-color: #374151; }
@@ -55,7 +55,7 @@ aside {
 }
 
 /* Active nav item glow */
-aside nav a.bg-indigo-600 {
+aside nav a.bg-teal-600 {
   box-shadow: 0 4px 14px -3px rgba(99, 102, 241, 0.4);
 }
 

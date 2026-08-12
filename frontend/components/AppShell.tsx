@@ -185,7 +185,7 @@ export default function AppShell({ children }: AppShellProps) {
       onClick={() => setSidebarOpen(false)}
       className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
         isActive(href)
-          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+          ? 'bg-teal-600 text-white shadow-md shadow-teal-200'
           : `text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white ${color || ''}`
       }`}
     >
@@ -229,12 +229,12 @@ export default function AppShell({ children }: AppShellProps) {
             {org.logo ? (
               <img src={org.logo} alt="Logo" className="w-24 h-24 object-contain shrink-0" />
             ) : (
-              <div className="w-24 h-24 bg-transparent text-indigo-600 flex items-center justify-center font-bold text-5xl shrink-0">
+              <div className="w-24 h-24 bg-transparent text-teal-600 flex items-center justify-center font-bold text-5xl shrink-0">
                 {org.orgName ? org.orgName.charAt(0) : 'P'}
               </div>
             )}
             <div className="flex flex-col justify-center items-center w-full px-2">
-              <h1 className={`text-[17px] font-bold leading-tight line-clamp-2 ${darkMode ? 'text-indigo-400' : 'text-indigo-700'}`} title={`${org.prefix} ${org.orgName}`}>
+              <h1 className={`text-[17px] font-bold leading-tight line-clamp-2 ${darkMode ? 'text-teal-400' : 'text-teal-700'}`} title={`${org.prefix} ${org.orgName}`}>
                 {org.prefix} {org.orgName}
               </h1>
               <p className={`text-[16px] mt-1.5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>ระบบบริหารจัดการครุภัณฑ์</p>
@@ -260,7 +260,7 @@ export default function AppShell({ children }: AppShellProps) {
             <div className="mt-4">
               <h3 className={`text-xs font-bold uppercase tracking-wider mb-3 px-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>ตรวจนับและซ่อมบำรุง</h3>
               <div className="space-y-1">
-                {navItem('/audits', '📋', 'ระบบตรวจนับครุภัณฑ์', 'text-indigo-600')}
+                {navItem('/audits', '📋', 'ระบบตรวจนับครุภัณฑ์', 'text-teal-600')}
                 {navItem('/repairs', '🛠️', 'ระบบแจ้งซ่อม', 'text-orange-500')}
               </div>
             </div>
@@ -323,7 +323,7 @@ export default function AppShell({ children }: AppShellProps) {
               onChange={(e) => handleGlobalSearch(e.target.value)}
               onFocus={() => globalSearch.length >= 2 && setShowSearch(true)}
               onBlur={() => setTimeout(() => setShowSearch(false), 200)}
-              className={`w-full px-4 py-2 rounded-xl text-sm border focus:ring-2 focus:ring-indigo-500 focus:outline-none transition ${
+              className={`w-full px-4 py-2 rounded-xl text-sm border focus:ring-2 focus:ring-teal-500 focus:outline-none transition ${
                 darkMode
                   ? 'bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400'
                   : 'bg-gray-50 border-gray-200 placeholder-gray-400'
@@ -341,7 +341,7 @@ export default function AppShell({ children }: AppShellProps) {
                       darkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-50 hover:bg-gray-50'
                     }`}
                   >
-                    <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xs font-bold shrink-0">
+                    <div className="w-8 h-8 bg-teal-100 dark:bg-teal-900 rounded-lg flex items-center justify-center text-teal-600 dark:text-teal-400 text-xs font-bold shrink-0">
                       {asset.status === 'ใช้งานปกติ' ? '✅' : asset.status === 'ชำรุดรอซ่อม' ? '🔧' : '📦'}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -359,7 +359,7 @@ export default function AppShell({ children }: AppShellProps) {
                   href="/"
                   onClick={() => { setShowSearch(false); setGlobalSearch(''); }}
                   className={`block text-center py-2.5 text-sm font-medium transition ${
-                    darkMode ? 'text-indigo-400 hover:bg-gray-700' : 'text-indigo-600 hover:bg-gray-50'
+                    darkMode ? 'text-teal-400 hover:bg-gray-700' : 'text-teal-600 hover:bg-gray-50'
                   }`}
                 >
                   ดูผลลัพธ์ทั้งหมด →

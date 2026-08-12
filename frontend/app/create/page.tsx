@@ -616,7 +616,7 @@ export default function CreateAsset() {
                   <button 
                     type="button" 
                     onClick={() => fileInputRef.current?.click()} 
-                    className="w-32 h-32 flex flex-col items-center justify-center border-2 border-dashed border-primary text-primary rounded-xl hover:bg-indigo-50 transition-colors bg-white shadow-sm"
+                    className="w-32 h-32 flex flex-col items-center justify-center border-2 border-dashed border-primary text-primary rounded-xl hover:bg-teal-50 transition-colors bg-white shadow-sm"
                   >
                     <span className="text-3xl mb-1">➕</span>
                     <span className="text-sm font-bold">เพิ่มรูปภาพ</span>
@@ -679,7 +679,7 @@ export default function CreateAsset() {
               </div>
               <div className="flex justify-end items-center gap-6 mt-6 pt-5 border-t border-gray-200">
                 <button type="button" className="font-bold text-gray-600 hover:text-gray-900" onClick={() => setShowVendorModal(false)}>ยกเลิก</button>
-                <button type="button" className="btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-white px-8" onClick={saveVendor}>💾 บันทึก</button>
+                <button type="button" className="btn btn-primary bg-teal-600 hover:bg-teal-700 text-white px-8" onClick={saveVendor}>💾 บันทึก</button>
               </div>
             </div>
 

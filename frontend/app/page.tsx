@@ -228,7 +228,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
             <p className="text-xs text-gray-500 dark:text-gray-400">จำนวนอุปกรณ์ทั้งหมด</p>
-            <p className="text-3xl font-bold text-indigo-600 mt-1">{assets.length}</p>
+            <p className="text-3xl font-bold text-teal-600 mt-1">{assets.length}</p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
             <p className="text-xs text-gray-500 dark:text-gray-400">มูลค่ารวม (บาท)</p>
@@ -287,7 +287,7 @@ export default function Dashboard() {
                 });
                 const sorted = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 6);
                 const max = sorted[0]?.[1] || 1;
-                const colors = ['bg-indigo-500', 'bg-blue-500', 'bg-cyan-500', 'bg-teal-500', 'bg-emerald-500', 'bg-gray-400'];
+                const colors = ['bg-teal-500', 'bg-blue-500', 'bg-cyan-500', 'bg-teal-500', 'bg-emerald-500', 'bg-gray-400'];
                 return sorted.map(([cat, count], i) => (
                   <div key={cat} className="space-y-1">
                     <div className="flex justify-between text-xs">
@@ -375,7 +375,7 @@ export default function Dashboard() {
                         <div className="flex gap-2">
                           <button 
                             onClick={() => router.push(`/view/${asset.id}`)} 
-                            className="btn btn-sm btn-ghost bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 font-bold"
+                            className="btn btn-sm btn-ghost bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/50 font-bold"
                           >
                             👁️
                           </button>
