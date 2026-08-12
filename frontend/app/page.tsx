@@ -224,15 +224,85 @@ export default function Dashboard() {
           <h2 className="text-3xl font-bold">รายการครุภัณฑ์ทั้งหมด</h2>
         </div>
 
-        <div className="stats shadow w-full bg-base-100">
-          <div className="stat">
-            <div className="stat-title">จำนวนอุปกรณ์ในระบบ</div>
-            <div className="stat-value text-primary">{assets.length}</div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400">จำนวนอุปกรณ์ทั้งหมด</p>
+            <p className="text-3xl font-bold text-indigo-600 mt-1">{assets.length}</p>
           </div>
-          <div className="stat">
-            <div className="stat-title">มูลค่ารวม (บาท)</div>
-            <div className="stat-value text-secondary">
-              ฿{totalValue.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400">มูลค่ารวม (บาท)</p>
+            <p className="text-3xl font-bold text-emerald-600 mt-1">฿{totalValue.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400">ใช้งานปกติ</p>
+            <p className="text-3xl font-bold text-emerald-500 mt-1">{assets.filter(a => a.status === 'ใช้งานปกติ').length}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400">ชำรุด / รอซ่อม</p>
+            <p className="text-3xl font-bold text-amber-500 mt-1">{assets.filter(a => a.status === 'ชำรุดรอซ่อม').length}</p>
+          </div>
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Status Distribution Chart */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <h3 className="font-bold text-sm text-gray-800 dark:text-gray-200 mb-4">📊 สรุปสถานะครุภัณฑ์</h3>
+            <div className="space-y-3">
+              {[
+                { label: 'ใช้งานปกติ', count: assets.filter(a => a.status === 'ใช้งานปกติ').length, color: 'bg-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/30' },
+                { label: 'ชำรุดรอซ่อม', count: assets.filter(a => a.status === 'ชำรุดรอซ่อม').length, color: 'bg-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/30' },
+                { label: 'เสื่อมสภาพ/รอจำหน่าย', count: assets.filter(a => a.status === 'เสื่อมสภาพ/รอจำหน่าย').length, color: 'bg-red-500', bg: 'bg-red-50 dark:bg-red-900/30' },
+                { label: 'แทงจำหน่ายแล้ว', count: assets.filter(a => a.status === 'แทงจำหน่ายแล้ว').length, color: 'bg-gray-400', bg: 'bg-gray-50 dark:bg-gray-700' },
+              ].map((item) => {
+                const pct = assets.length > 0 ? (item.count / assets.length) * 100 : 0;
+                return (
+                  <div key={item.label} className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-600 dark:text-gray-400 font-medium">{item.label}</span>
+                      <span className="text-gray-800 dark:text-gray-200 font-bold">{item.count} ({pct.toFixed(1)}%)</span>
+                    </div>
+                    <div className={`w-full h-3 rounded-full ${item.bg} overflow-hidden`}>
+                      <div
+                        className={`h-full rounded-full ${item.color} transition-all duration-700 ease-out`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Category Distribution Chart */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <h3 className="font-bold text-sm text-gray-800 dark:text-gray-200 mb-4">📁 ครุภัณฑ์แยกตามหมวดหมู่</h3>
+            <div className="space-y-2">
+              {(() => {
+                const catMap: Record<string, number> = {};
+                assets.forEach(a => {
+                  const cat = (a.category || 'ไม่ระบุ').split(' - ').pop() || 'ไม่ระบุ';
+                  catMap[cat] = (catMap[cat] || 0) + 1;
+                });
+                const sorted = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 6);
+                const max = sorted[0]?.[1] || 1;
+                const colors = ['bg-indigo-500', 'bg-blue-500', 'bg-cyan-500', 'bg-teal-500', 'bg-emerald-500', 'bg-gray-400'];
+                return sorted.map(([cat, count], i) => (
+                  <div key={cat} className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-600 dark:text-gray-400 font-medium truncate max-w-[70%]" title={cat}>{cat}</span>
+                      <span className="text-gray-800 dark:text-gray-200 font-bold">{count}</span>
+                    </div>
+                    <div className="w-full h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${colors[i] || colors[colors.length - 1]} transition-all duration-700 ease-out`}
+                        style={{ width: `${(count / max) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         </div>
@@ -256,12 +326,12 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <input 
-            type="text" placeholder="ค้นหาจากรหัส หรือ รายการ..." className="input input-bordered w-full"
+            type="text" placeholder="ค้นหาจากรหัส หรือ รายการ..." className="input input-bordered w-full dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
             value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <select className="select select-bordered w-64" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+          <select className="select select-bordered w-full sm:w-64 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
             <option value="ทั้งหมด">สถานะทั้งหมด</option>
             <option value="ใช้งานปกติ">ใช้งานปกติ</option>
             <option value="ชำรุดรอซ่อม">ชำรุดรอซ่อม</option>
@@ -270,35 +340,34 @@ export default function Dashboard() {
           </select>
         </div>
 
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body p-0 overflow-hidden rounded-2xl">
-            <div className="overflow-x-auto">
-              <table className="table table-zebra w-full">
-                <thead className="bg-base-200 text-base">
-                  <tr>
-                    <th>หมายเลขควบคุม</th>
-                    <th>ชื่อรายการ</th>
-                    <th>หมวดหมู่</th>
-                    <th>วันที่ได้มา</th>
-                    <th>ราคา</th>
-                    <th>สถานะ</th>
-                    <th>จัดการ</th>
-                  </tr>
-                </thead>
-                <tbody>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="table w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700 text-sm text-gray-600 dark:text-gray-300">
+                <tr>
+                  <th className="font-semibold">หมายเลขควบคุม</th>
+                  <th className="font-semibold">ชื่อรายการ</th>
+                  <th className="font-semibold hidden md:table-cell">หมวดหมู่</th>
+                  <th className="font-semibold hidden lg:table-cell">วันที่ได้มา</th>
+                  <th className="font-semibold">ราคา</th>
+                  <th className="font-semibold">สถานะ</th>
+                  <th className="font-semibold">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody>
                   {filteredAssets.map((asset) => (
-                    <tr key={asset.id} className="hover">
+                    <tr key={asset.id} className="hover dark:hover:bg-gray-700/50 border-t border-gray-50 dark:border-gray-700">
                       <td className="font-semibold">
-                        {asset.asset_code}
-                        <div className="text-xs text-gray-500 font-normal">{asset.asset_number_1}</div>
-                        {asset.asset_number_2 && <div className="text-[11px] text-gray-400 font-normal mt-0.5">(เลขเดิม: {asset.asset_number_2})</div>}
+                        <p className="dark:text-gray-200">{asset.asset_code}</p>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 font-normal">{asset.asset_number_1}</div>
+                        {asset.asset_number_2 && <div className="text-[11px] text-gray-400 dark:text-gray-500 font-normal mt-0.5">(เลขเดิม: {asset.asset_number_2})</div>}
                       </td>
-                      <td>{asset.name}</td>
-                      <td className="max-w-[180px] truncate" title={asset.category}>{asset.category}</td>
-                      <td className="text-sm whitespace-nowrap">{formatThaiDate(asset.acquired_date)}</td>
-                      <td>฿{Number(asset.price).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td className="dark:text-gray-300">{asset.name}</td>
+                      <td className="max-w-[180px] truncate hidden md:table-cell text-gray-500 dark:text-gray-400" title={asset.category}>{asset.category}</td>
+                      <td className="text-sm whitespace-nowrap hidden lg:table-cell text-gray-500 dark:text-gray-400">{formatThaiDate(asset.acquired_date)}</td>
+                      <td className="dark:text-gray-300 font-medium">฿{Number(asset.price).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       <td>
-                        <div className={`badge ${asset.status === 'ใช้งานปกติ' ? 'badge-success' : 'badge-warning'} text-white`}>
+                        <div className={`badge ${asset.status === 'ใช้งานปกติ' ? 'badge-success' : 'badge-warning'} text-white`">
                           {asset.status}
                         </div>
                       </td>
@@ -306,9 +375,9 @@ export default function Dashboard() {
                         <div className="flex gap-2">
                           <button 
                             onClick={() => router.push(`/view/${asset.id}`)} 
-                            className="btn btn-sm btn-ghost bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-bold"
+                            className="btn btn-sm btn-ghost bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 font-bold"
                           >
-                            👁️ ดูข้อมูล
+                            👁️
                           </button>
                           
                           {hasPermission('delete_asset') && (
@@ -319,7 +388,7 @@ export default function Dashboard() {
                     </tr>
                   ))}
                   {filteredAssets.length === 0 && (
-                    <tr><td colSpan={7} className="text-center py-8 text-gray-500">ไม่พบข้อมูลครุภัณฑ์ที่ค้นหา</td></tr>
+                    <tr><td colSpan={7} className="text-center py-8 text-gray-500 dark:text-gray-400">ไม่พบข้อมูลครุภัณฑ์ที่ค้นหา</td></tr>
                   )}
                 </tbody>
               </table>
