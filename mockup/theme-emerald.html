@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Surinhos - 💚 Emerald Official</title>
+ <script src="https://cdn.tailwindcss.com"></script>
+ <style>
+ @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap');
+ * { font-family: 'Sarabun', sans-serif; }
+ .dark body, .dark { background: #111827; color: #e5e7eb; }
+ .dark .bg-white { background-color: #1f2937 !important; }
+ .dark .bg-gray-50, .dark body { background-color: #111827 !important; }
+ .dark .text-gray-900, .dark .text-gray-800 { color: #f3f4f6 !important; }
+ .dark .text-gray-700, .dark .text-gray-600 { color: #d1d5db !important; }
+ .dark .text-gray-500, .dark .text-gray-400 { color: #9ca3af !important; }
+ .dark .border-gray-100, .dark .border-gray-200 { border-color: #374151 !important; }
+ .dark input, .dark select { background: #1f2937 !important; border-color: #4b5563 !important; color: #e5e7eb !important; }
+ .dark .shadow-sm, .dark .shadow-xl { box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important; }
+ .dark aside { background: #1f2937 !important; border-color: #374151 !important; }
+ .dark aside .text-gray-600 { color: #d1d5db !important; }
+ .dark aside .text-gray-500, .dark aside .text-gray-400 { color: #9ca3af !important; }
+ .dark table thead { background: #374151 !important; }
+ .dark table th { color: #9ca3af !important; }
+ .dark table td { color: #d1d5db !important; }
+ .dark .bg-gray-50 { background: #111827 !important; }
+ .dark .bg-indigo-50, .dark .bg-emerald-50, .dark .bg-amber-50, .dark .bg-red-50, .dark .bg-blue-50, .dark .bg-violet-50 { background: rgba(99,102,241,0.1) !important; }
+ body { margin: 0; overflow: hidden; }
+ .sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+ .page-content { transition: opacity 0.25s ease, transform 0.25s ease; }
+ .page-content.active { animation: fadeIn 0.3s ease forwards; }
+ @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+ .nav-item { transition: all 0.2s ease; cursor: pointer; }
+ .nav-item:hover { background: #f3f4f6; }
+ .nav-item.active { background: #059669; color: white; box-shadow: 0 4px 14px -3px rgba(99,102,241,0.4); }
+ .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+ .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1); }
+ .row-hover { transition: background 0.15s ease; }
+ .row-hover:hover { background: #f9fafb; }
+ .modal-backdrop { animation: fadeBg 0.2s ease; }
+ @keyframes fadeBg { from { opacity:0; } to { opacity:1; } }
+ .modal-content { animation: slideUp 0.3s ease; }
+ @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+ ::-webkit-scrollbar { width: 5px; }
+ ::-webkit-scrollbar-track { background: transparent; }
+ ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+ .tab-active { border-bottom: 2px solid #059669; color: #059669; font-weight: 600; }
+ .tooltip { position: relative; }
+ .tooltip:hover::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; white-space: nowrap; }
+ </style>
+</head>
+<body class="bg-gray-50 h-screen flex overflow-hidden">
+
+<!-- ============ SIDEBAR ============ -->
+<aside id="sidebar" class="sidebar fixed lg:sticky top-0 left-0 z-50 h-screen w-72 bg-white shadow-xl flex flex-col -translate-x-full lg:translate-x-0">
+ <div class="p-6 overflow-y-auto flex-1">
+ <div class="flex flex-col items-center text-center gap-3 py-4 border-b border-gray-100">
+ <div class="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-4xl rounded-2xl shadow-lg shadow-indigo-200">P</div>
+ <div>
+ <h1 class="text-[16px] font-bold text-emerald-700">Pacific Plus IT</h1>
+ <p class="text-xs text-gray-400 mt-1">ระบบบริหารจัดการครุภัณฑ์</p>
+ </div>
+ </div>
+ <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-3 rounded-xl border border-indigo-100 mt-5 text-center">
+ <p class="text-sm font-semibold text-gray-800">สมชาย ใจดี</p>
+ <p class="text-xs text-indigo-500 mt-0.5">ผู้ดูแลระบบ</p>
+ </div>
+ <nav class="mt-6 flex flex-col gap-1.5">
+ <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 px-2">จัดการครุภัณฑ์</p>
+ <div class="nav-item active flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm" onclick="go('dashboard')"><span>📊</span><span>หน้าหลัก</span></div>
+ <div class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600" onclick="go('create')"><span>➕</span><span>ขึ้นทะเบียนใหม่</span></div>
+ <div class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600" onclick="go('view')"><span>👁️</span><span>ดูรายละเอียด</span></div>
+ <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 mt-4 px-2">ตรวจนับและซ่อมบำรุง</p>
+ <div class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600" onclick="go('audits')"><span>📋</span><span>ตรวจนับครุภัณฑ์</span></div>
+ <div class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600" onclick="go('repairs')"><span>🛠️</span><span>ระบบแจ้งซ่อม</span></div>
+ <div class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600" onclick="go('repair-detail')"><span>🔧</span><span>รายละเอียดซ่อม</span></div>
+ <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 mt-4 px-2">รายงานและตั้งค่า</p>
+ <div class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600" onclick="go('users')"><span>👥</span><span>จัดการผู้ใช้</span></div>
+ <div class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600" onclick="go('org')"><span>🏢</span><span>ตั้งค่าหน่วยงาน</span></div>
+ <div class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600" onclick="go('permissions')"><span>⚙️</span><span>สิทธิ์การใช้งาน</span></div>
+ <div class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600" onclick="go('sticker')"><span>🏷️</span><span>สติ๊กเกอร์ QR</span></div>
+ </nav>
+ </div>
+ <div class="p-4 border-t border-gray-100 shrink-0">
+ <button class="w-full py-2 border border-red-300 text-red-500 rounded-xl text-xs font-medium hover:bg-red-50 transition">ออกจากระบบ</button>
+ </div>
+</aside>
+
+<div id="overlay" class="fixed inset-0 bg-black/40 z-40 lg:hidden hidden" onclick="toggleSidebar()"></div>
+
+<!-- ============ MAIN ============ -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden">
+ <div class="lg:hidden sticky top-0 z-30 bg-white border-b px-4 py-3 flex items-center gap-3">
+ <button onclick="toggleSidebar()" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100">
+ <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+ </button>
+ <span class="font-bold text-gray-700 text-sm">Pacific Plus IT</span>
+ </div>
+
+ <div id="pages" class="flex-1 overflow-y-auto">
+
+<!-- ============================== DASHBOARD ============================== -->
+<div id="pg-dashboard" class="page-content active p-6 lg:p-8">
+ <div class="space-y-5">
+ <h2 class="text-2xl font-bold text-gray-900">รายการครุภัณฑ์ทั้งหมด</h2>
+ <div class="grid grid-cols-2 gap-4">
+ <div class="card-hover bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+ <p class="text-xs text-gray-500">จำนวนอุปกรณ์</p>
+ <p class="text-3xl font-bold text-emerald-600 mt-1">1,247</p>
+ </div>
+ <div class="card-hover bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+ <p class="text-xs text-gray-500">มูลค่ารวม</p>
+ <p class="text-3xl font-bold text-emerald-600 mt-1">฿12.4M</p>
+ </div>
+ </div>
+ <div class="flex flex-wrap gap-2">
+ <button class="px-3 py-1.5 text-xs border border-emerald-300 text-emerald-600 rounded-lg bg-white hover:bg-emerald-50">📄 Excel</button>
+ <button class="px-3 py-1.5 text-xs border border-red-300 text-red-600 rounded-lg bg-white hover:bg-red-50">📕 PDF</button>
+ <button class="px-3 py-1.5 text-xs border border-blue-300 text-blue-600 rounded-lg bg-white hover:bg-blue-50">📥 นำเข้า</button>
+ <button class="px-3 py-1.5 text-xs border border-indigo-300 text-emerald-600 rounded-lg bg-white hover:bg-emerald-50">📤 ฟอร์มนำเข้า</button>
+ </div>
+ <div class="flex gap-3">
+ <input type="text" placeholder="ค้นหาจากรหัส หรือ รายการ..." class="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+ <select class="w-48 px-3 py-2 border border-gray-300 rounded-xl text-sm"><option>สถานะทั้งหมด</option><option>ใช้งานปกติ</option><option>ชำรุดรอซ่อม</option></select>
+ </div>
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+ <table class="w-full text-sm">
+ <thead class="bg-gray-50 text-gray-600"><tr>
+ <th class="text-left py-3 px-4 font-semibold">หมายเลข</th><th class="text-left py-3 px-4 font-semibold">ชื่อรายการ</th>
+ <th class="text-left py-3 px-4 font-semibold">หมวดหมู่</th><th class="text-left py-3 px-4 font-semibold">ราคา</th>
+ <th class="text-left py-3 px-4 font-semibold">สถานะ</th><th class="text-left py-3 px-4 font-semibold">จัดการ</th>
+ </tr></thead>
+ <tbody>
+ <tr class="row-hover border-t border-gray-50"><td class="py-3 px-4"><p class="font-semibold">SR-0000001</p><p class="text-[11px] text-gray-400">7440-001-0001/67</p></td><td class="py-3 px-4">คอมพิวเตอร์ All In One</td><td class="py-3 px-4 text-gray-500">ครุภัณฑ์คอมพิวเตอร์</td><td class="py-3 px-4 font-medium">฿15,000</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-[11px] rounded-full bg-emerald-100 text-emerald-700 font-medium">ใช้งานปกติ</span></td><td class="py-3 px-4"><button onclick="go('view')" class="px-2.5 py-1 text-[11px] font-bold bg-indigo-50 text-emerald-600 rounded-lg hover:bg-indigo-100">👁️ ดู</button></td></tr>
+ <tr class="row-hover border-t border-gray-50"><td class="py-3 px-4"><p class="font-semibold">SR-0000002</p><p class="text-[11px] text-gray-400">7440-001-0002/67</p></td><td class="py-3 px-4">เครื่องพิมพ์ LaserJet Pro</td><td class="py-3 px-4 text-gray-500">ครุภัณฑ์สำนักงาน</td><td class="py-3 px-4 font-medium">฿8,500</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-[11px] rounded-full bg-emerald-100 text-emerald-700 font-medium">ใช้งานปกติ</span></td><td class="py-3 px-4"><button onclick="go('view')" class="px-2.5 py-1 text-[11px] font-bold bg-indigo-50 text-emerald-600 rounded-lg hover:bg-indigo-100">👁️ ดู</button></td></tr>
+ <tr class="row-hover border-t border-gray-50"><td class="py-3 px-4"><p class="font-semibold">SR-0000003</p><p class="text-[11px] text-gray-400">7440-002-0001/67</p></td><td class="py-3 px-4">เครื่องปรับอากาศ 24000 BTU</td><td class="py-3 px-4 text-gray-500">ครุภัณฑ์ไฟฟ้า</td><td class="py-3 px-4 font-medium">฿22,000</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-[11px] rounded-full bg-amber-100 text-amber-700 font-medium">ชำรุดรอซ่อม</span></td><td class="py-3 px-4"><button onclick="go('view')" class="px-2.5 py-1 text-[11px] font-bold bg-indigo-50 text-emerald-600 rounded-lg hover:bg-indigo-100">👁️ ดู</button></td></tr>
+ <tr class="row-hover border-t border-gray-50"><td class="py-3 px-4"><p class="font-semibold">SR-0000004</p><p class="text-[11px] text-gray-400">7440-003-0001/68</p></td><td class="py-3 px-4">โปรเจคเตอร์ EPSON EB-X51</td><td class="py-3 px-4 text-gray-500">ครุภัณฑ์คอมพิวเตอร์</td><td class="py-3 px-4 font-medium">฿18,900</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-[11px] rounded-full bg-emerald-100 text-emerald-700 font-medium">ใช้งานปกติ</span></td><td class="py-3 px-4"><button onclick="go('view')" class="px-2.5 py-1 text-[11px] font-bold bg-indigo-50 text-emerald-600 rounded-lg hover:bg-indigo-100">👁️ ดู</button></td></tr>
+ <tr class="row-hover border-t border-gray-50"><td class="py-3 px-4"><p class="font-semibold">SR-0000005</p><p class="text-[11px] text-gray-400">7440-001-0001/68</p></td><td class="py-3 px-4">Notebook Lenovo ThinkPad</td><td class="py-3 px-4 text-gray-500">ครุภัณฑ์คอมพิวเตอร์</td><td class="py-3 px-4 font-medium">฿28,500</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-[11px] rounded-full bg-red-100 text-red-700 font-medium">เสื่อมสภาพ/รอจำหน่าย</span></td><td class="py-3 px-4"><button onclick="go('view')" class="px-2.5 py-1 text-[11px] font-bold bg-indigo-50 text-emerald-600 rounded-lg hover:bg-indigo-100">👁️ ดู</button></td></tr>
+ </tbody>
+ </table>
+ </div>
+ </div>
+</div>
+
+<!-- ============================== CREATE ============================== -->
+<div id="pg-create" class="page-content p-6 lg:p-8 hidden">
+ <div class="">
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
+ <div class="p-6 border-b border-gray-100">
+ <h2 class="text-xl font-bold text-emerald-600">ทะเบียนประวัติครุภัณฑ์ (สพ.4)</h2>
+ <p class="text-xs text-gray-500 mt-1">บันทึกรายละเอียดครุภัณฑ์ตามระเบียบพัสดุภาครัฐ</p>
+ </div>
+ <div class="p-6 space-y-5">
+ <!-- Section 1 -->
+ <section class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+ <h3 class="font-bold text-sm text-emerald-600 mb-4">📦 1. รหัสและรายละเอียดครุภัณฑ์</h3>
+ <div class="grid grid-cols-2 gap-3">
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">หมายเลขควบคุม (Auto)</label><input value="SR-0000006" readonly class="w-full px-3 py-2 border rounded-lg bg-white text-emerald-600 font-bold text-sm tracking-wider"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">สถานะ</label><select class="w-full px-3 py-2 border rounded-lg text-sm text-emerald-600 font-semibold"><option>ใช้งานปกติ</option><option>ชำรุดรอซ่อม</option></select></div>
+ </div>
+ <div class="mt-3 bg-white p-4 rounded-xl border border-indigo-100">
+ <label class="block text-xs font-bold text-emerald-600 mb-2">สร้างหมายเลขครุภัณฑ์ 1</label>
+ <div class="grid grid-cols-2 gap-3">
+ <div><label class="block text-[11px] text-gray-500 mb-1">1. ประเภทหลัก</label><select class="w-full px-2 py-1.5 border rounded-lg text-xs"><option>7440 - ครุภัณฑ์คอมพิวเตอร์</option><option>7441 - ครุภัณฑ์สำนักงาน</option></select></div>
+ <div><label class="block text-[11px] text-gray-500 mb-1">2. ชนิดครุภัณฑ์</label><select class="w-full px-2 py-1.5 border rounded-lg text-xs"><option>001 - เครื่องคอมพิวเตอร์</option><option>002 - เครื่องพิมพ์</option></select></div>
+ <div><label class="block text-[11px] text-gray-500 mb-1">3. ลำดับ (Auto)</label><input value="00003" class="w-full px-2 py-1.5 border rounded-lg text-xs text-center font-bold text-emerald-600"></div>
+ <div><label class="block text-[11px] text-gray-500 mb-1">4. ปีงบประมาณ</label><input value="68" class="w-full px-2 py-1.5 border rounded-lg text-xs text-center font-bold text-emerald-600"></div>
+ </div>
+ <div class="mt-3 p-2 bg-indigo-50 rounded-lg flex items-center justify-between border border-indigo-100">
+ <span class="text-xs font-semibold text-emerald-600">ผลลัพธ์:</span>
+ <span class="text-sm font-bold text-emerald-700 tracking-wider">7440-001-00003/68</span>
+ </div>
+ </div>
+ <div class="mt-3"><label class="block text-xs font-semibold text-gray-600 mb-1">รายการ (ชื่ออุปกรณ์) *</label><input placeholder="เช่น เครื่องคอมพิวเตอร์ All In One" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div class="grid grid-cols-2 gap-3 mt-3">
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">ยี่ห้อ / รุ่น</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">Serial Number</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">จำนวน *</label><input type="number" value="1" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">หน่วยนับ *</label><input value="เครื่อง" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ </div>
+ </section>
+ <!-- Section 2 -->
+ <section class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+ <h3 class="font-bold text-sm text-emerald-600 mb-4">📄 2. ข้อมูลการได้มาและการประเมิน</h3>
+ <div class="grid grid-cols-3 gap-3">
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">วันที่ได้มา *</label><input type="date" value="2026-08-12" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">วิธีการได้มา</label><select class="w-full px-3 py-2 border rounded-lg text-sm"><option>ตกลงราคา</option><option>สอบราคา</option></select></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">ประเภทเงิน</label><select class="w-full px-3 py-2 border rounded-lg text-sm"><option>เงินงบประมาณ</option><option>เงินบำรุง</option></select></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">ราคาต่อหน่วย (บาท) *</label><input type="number" class="w-full px-3 py-2 border rounded-lg text-sm text-right"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">อายุการใช้งาน (ปี) *</label><input type="number" value="5" class="w-full px-3 py-2 border rounded-lg text-sm text-center"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">สิ้นสุดประกัน</label><input type="date" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ </div>
+ </section>
+ <!-- Section 3 -->
+ <section class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+ <h3 class="font-bold text-sm text-emerald-600 mb-4">🏢 3. ผู้ขาย สถานที่ และการใช้งาน</h3>
+ <div class="grid grid-cols-2 gap-3">
+ <div class="col-span-2"><label class="block text-xs font-semibold text-gray-600 mb-1">ชื่อผู้ขาย</label><select class="w-full px-3 py-2 border rounded-lg text-sm"><option>-- เลือกบริษัท --</option><option>บริษัท ไอที จำกัด</option><option>อื่นๆ</option></select></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">อาคาร</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">ชั้น</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div class="col-span-2"><label class="block text-xs font-semibold text-gray-600 mb-1">แผนก/หน่วยงาน</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ </div>
+ </section>
+ <!-- Section 4 -->
+ <section class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+ <h3 class="font-bold text-sm text-emerald-600 mb-3">📸 4. รูปภาพครุภัณฑ์ (สูงสุด 5 รูป)</h3>
+ <div class="flex gap-3">
+ <div class="w-24 h-24 border-2 border-dashed border-indigo-300 rounded-xl flex flex-col items-center justify-center text-indigo-500 hover:bg-emerald-50 cursor-pointer transition"><span class="text-2xl">➕</span><span class="text-[10px]">เพิ่มรูป</span></div>
+ </div>
+ </section>
+ <div class="flex justify-end gap-3 pt-4 border-t">
+ <button onclick="go('dashboard')" class="px-5 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-xl">ยกเลิก</button>
+ <button class="px-5 py-2 text-sm bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-200">💾 บันทึกทะเบียน (สพ.4)</button>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ============================== VIEW DETAIL ============================== -->
+<div id="pg-view" class="page-content p-6 lg:p-8 hidden">
+ <div class="">
+ <div class="flex items-center justify-between mb-6">
+ <div>
+ <h1 class="text-2xl font-bold text-gray-900">รายละเอียดครุภัณฑ์</h1>
+ <div class="flex items-center gap-2 mt-1 text-sm text-gray-500">
+ <span>หมายเลขควบคุม: SR-0000001</span>
+ <span class="px-2 py-0.5 text-[11px] rounded-full bg-emerald-100 text-emerald-700 font-medium">ใช้งานปกติ</span>
+ </div>
+ </div>
+ <div class="flex gap-2">
+ <button class="px-3 py-2 text-xs border border-pink-300 text-pink-600 rounded-lg bg-white hover:bg-pink-50">🏷️ สติ๊กเกอร์</button>
+ <button class="px-3 py-2 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600">🖨️ พิมพ์ สพ.4</button>
+ <button class="px-3 py-2 text-xs bg-amber-500 text-white rounded-lg hover:bg-amber-600">✏️ แก้ไข</button>
+ </div>
+ </div>
+ <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+ <!-- Image -->
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+ <div class="aspect-square bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
+ <div class="text-center"><span class="text-5xl block mb-2">📷</span><span class="text-sm">ไม่มีรูปภาพ</span></div>
+ </div>
+ <div class="flex gap-2 mt-3">
+ <div class="w-14 h-14 bg-gray-200 rounded-lg"></div>
+ <div class="w-14 h-14 bg-gray-200 rounded-lg"></div>
+ <div class="w-14 h-14 bg-gray-200 rounded-lg opacity-50"></div>
+ </div>
+ </div>
+ <!-- Details -->
+ <div class="lg:col-span-2 space-y-5">
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+ <h2 class="text-base font-bold text-emerald-600 border-b pb-2 mb-4">📦 ข้อมูลหลัก</h2>
+ <div class="grid grid-cols-2 gap-y-3 gap-x-6 text-sm">
+ <div><p class="text-gray-500 text-xs mb-0.5">ชื่อรายการ</p><p class="font-bold text-gray-900">เครื่องคอมพิวเตอร์ All In One</p></div>
+ <div><p class="text-gray-500 text-xs mb-0.5">หมวดหมู่</p><p class="text-gray-800">ครุภัณฑ์คอมพิวเตอร์</p></div>
+ <div><p class="text-gray-500 text-xs mb-0.5">หมายเลขครุภัณฑ์ 1</p><p class="font-bold text-emerald-600 tracking-wide">7440-001-0001/67</p></div>
+ <div><p class="text-gray-500 text-xs mb-0.5">ยี่ห้อ / รุ่น</p><p class="text-gray-800">Lenovo ThinkCentre M920</p></div>
+ <div><p class="text-gray-500 text-xs mb-0.5">Serial Number</p><p class="text-gray-800 font-mono">SN-20260101-XYZ</p></div>
+ <div><p class="text-gray-500 text-xs mb-0.5">จำนวน</p><p class="text-gray-800">1 เครื่อง</p></div>
+ </div>
+ </div>
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+ <h2 class="text-base font-bold text-emerald-600 border-b pb-2 mb-4">📄 การได้มาและมูลค่า</h2>
+ <div class="grid grid-cols-2 gap-y-3 gap-x-6 text-sm">
+ <div><p class="text-gray-500 text-xs mb-0.5">วันที่ได้มา</p><p class="text-gray-800 font-medium">15 ก.ค. 2567</p></div>
+ <div><p class="text-gray-500 text-xs mb-0.5">วิธีการได้มา</p><p class="text-gray-800">ตกลงราคา</p></div>
+ <div><p class="text-gray-500 text-xs mb-0.5">ราคาต่อหน่วย</p><p class="text-emerald-600 font-bold text-lg">฿15,000.00</p></div>
+ <div><p class="text-gray-500 text-xs mb-0.5">อายุการใช้งาน</p><p class="text-gray-800"><span class="font-bold text-emerald-600">5</span> ปี</p></div>
+ </div>
+ <!-- Depreciation -->
+ <div class="mt-4 pt-4 border-t border-gray-100">
+ <p class="text-sm font-bold text-gray-800 mb-3">📉 สรุปมูลค่าทางบัญชี (ค่าเสื่อมราคาแบบเส้นตรง)</p>
+ <div class="grid grid-cols-3 gap-3">
+ <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+ <p class="text-[11px] text-gray-500 font-semibold mb-1">ค่าเสื่อม/ปี</p>
+ <p class="text-sm font-bold text-gray-700">฿2,999.80</p>
+ </div>
+ <div class="bg-red-50 p-3 rounded-lg border border-red-100">
+ <p class="text-[11px] text-red-600 font-semibold mb-1">ค่าเสื่อมสะสม</p>
+ <p class="text-sm font-bold text-red-700">฿7,499.50</p>
+ </div>
+ <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+ <p class="text-[11px] text-emerald-700 font-bold mb-1">มูลค่าสุทธิ (NBV)</p>
+ <p class="text-lg font-black text-emerald-700">฿7,500.50</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+ <h2 class="text-base font-bold text-blue-600 border-b pb-2 mb-4">🏢 สถานที่ตั้ง และ ผู้ขาย</h2>
+ <div class="grid grid-cols-2 gap-4">
+ <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+ <p class="text-xs font-bold text-blue-700 mb-2">📍 สถานที่ตั้ง</p>
+ <div class="text-sm text-gray-700 space-y-1">
+ <p><span class="text-gray-500 w-14 inline-block">อาคาร:</span> อาคาร 14</p>
+ <p><span class="text-gray-500 w-14 inline-block">ชั้น:</span> 3</p>
+ <p><span class="text-gray-500 w-14 inline-block">แผนก:</span> <span class="font-bold">IT Department</span></p>
+ </div>
+ </div>
+ <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+ <p class="text-xs font-bold text-gray-700 mb-2">🤝 ผู้ขาย</p>
+ <div class="text-sm text-gray-700 space-y-1">
+ <p class="font-bold">บริษัท ไอที จำกัด</p>
+ <p><span class="text-gray-500">โทร:</span> 042-222-456</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ============================== AUDITS ============================== -->
+<div id="pg-audits" class="page-content p-6 lg:p-8 hidden">
+ <div class="">
+ <div class="flex items-center justify-between mb-6">
+ <div><h1 class="text-2xl font-bold text-gray-900">ระบบตรวจนับครุภัณฑ์ (Audit)</h1><p class="text-gray-500 text-xs mt-1">จัดการรอบการตรวจเช็คสภาพ</p></div>
+ <button onclick="showModal('audit-modal')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium shadow-lg shadow-emerald-200">➕ เปิดรอบใหม่</button>
+ </div>
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+ <table class="w-full text-sm">
+ <thead class="bg-indigo-50 text-indigo-900"><tr><th class="text-left py-3 pl-6 font-semibold">วันที่</th><th class="text-left py-3 font-semibold">ชื่อรอบ</th><th class="text-left py-3 font-semibold">เงื่อนไข</th><th class="text-center py-3 font-semibold">สถานะ</th><th class="text-center py-3 font-semibold">จัดการ</th></tr></thead>
+ <tbody>
+ <tr class="row-hover border-t"><td class="py-3 pl-6 text-gray-500 text-xs">12 ส.ค. 2569</td><td class="py-3 font-bold">ตรวจนับอุปกรณ์ IT ส.ค.</td><td class="py-3 text-xs text-gray-600">ทั้งหมด</td><td class="py-3 text-center"><span class="px-2 py-0.5 text-[11px] rounded-full bg-amber-100 text-amber-800 font-bold">กำลังตรวจนับ</span></td><td class="py-3 text-center"><button class="px-3 py-1 text-xs border border-indigo-300 text-emerald-600 rounded-lg hover:bg-emerald-50">🔍 สแกน</button></td></tr>
+ <tr class="row-hover border-t"><td class="py-3 pl-6 text-gray-500 text-xs">1 ก.ค. 2569</td><td class="py-3 font-bold">ตรวจนับ ก.ค.</td><td class="py-3 text-xs text-gray-600">ครุภัณฑ์คอมพิวเตอร์</td><td class="py-3 text-center"><span class="px-2 py-0.5 text-[11px] rounded-full bg-emerald-100 text-emerald-700 font-bold">ปิดยอดแล้ว</span></td><td class="py-3 text-center"><button class="px-3 py-1 text-xs border border-gray-300 text-gray-600 rounded-lg">📄 รายงาน</button></td></tr>
+ </tbody>
+ </table>
+ </div>
+ <!-- Scan area mockup -->
+ <div class="mt-6 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+ <h3 class="font-bold text-gray-800 mb-4">🔍 หน้าสแกนตรวจนับ (รอบ ส.ค.)</h3>
+ <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <div class="border-2 border-dashed border-indigo-300 rounded-xl p-8 text-center bg-indigo-50/50">
+ <span class="text-5xl block mb-3">📷</span>
+ <p class="text-sm font-semibold text-emerald-600">สแกน QR Code / Barcode</p>
+ <p class="text-xs text-gray-500 mt-1">ยกกล้องสแกนที่ป้ายครุภัณฑ์</p>
+ </div>
+ <div>
+ <label class="block text-xs font-semibold text-gray-600 mb-1">หรือพิมพ์หมายเลขครุภัณฑ์</label>
+ <div class="flex gap-2">
+ <input placeholder="7440-001-0001/67" class="flex-1 px-3 py-2 border rounded-lg text-sm font-mono">
+ <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm">✓ ยืนยัน</button>
+ </div>
+ <div class="mt-4 p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+ <p class="text-xs font-bold text-emerald-700">✅ ตรวจนับสำเร็จ!</p>
+ <p class="text-sm font-semibold mt-1">SR-0000001 — คอมพิวเตอร์ All In One</p>
+ <p class="text-xs text-gray-500 mt-1">สภาพ: ปกติ | สถานที่: อาคาร 14 ชั้น 3</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ============================== REPAIRS ============================== -->
+<div id="pg-repairs" class="page-content p-6 lg:p-8 hidden">
+ <div class="">
+ <div class="flex items-center justify-between mb-5">
+ <div><h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">🔧 ระบบแจ้งซ่อม</h1><p class="text-gray-500 text-xs mt-1">Repair Tracking System</p></div>
+ <button class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 shadow-md">+ แจ้งซ่อม</button>
+ </div>
+ <div class="flex gap-2 mb-5 overflow-x-auto pb-1">
+ <div class="flex flex-col items-center px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 shrink-0"><span class="text-base font-bold">8</span><span class="text-[10px]">ทั้งหมด</span></div>
+ <div class="flex flex-col items-center px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 shrink-0"><span class="text-base font-bold">3</span><span class="text-[10px]">รอรับเรื่อง</span></div>
+ <div class="flex flex-col items-center px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 shrink-0"><span class="text-base font-bold">2</span><span class="text-[10px]">รับเรื่อง</span></div>
+ <div class="flex flex-col items-center px-3 py-1.5 rounded-lg bg-violet-50 text-violet-700 shrink-0"><span class="text-base font-bold">1</span><span class="text-[10px]">กำลังซ่อม</span></div>
+ <div class="flex flex-col items-center px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 shrink-0"><span class="text-base font-bold">2</span><span class="text-[10px]">ส่งคืน</span></div>
+ </div>
+ <div class="space-y-2">
+ <div onclick="go('repair-detail')" class="bg-white rounded-xl border border-gray-100 p-4 border-l-4 border-l-amber-400 cursor-pointer hover:bg-gray-50 transition">
+ <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-amber-400"></div><span class="text-sm font-bold font-mono">RPT-20260812-001</span><span class="ml-auto text-xs text-gray-400">12 ส.ค.</span></div>
+ <p class="text-sm text-gray-700 mt-1 pl-4">เครื่องคอมพิวเตอร์ ห้อง 301 — เปิดไม่ติด</p>
+ <span class="ml-4 mt-1 inline-block text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">รอรับเรื่อง</span>
+ </div>
+ <div onclick="go('repair-detail')" class="bg-white rounded-xl border border-gray-100 p-4 border-l-4 border-l-violet-400 cursor-pointer hover:bg-gray-50 transition">
+ <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-violet-400"></div><span class="text-sm font-bold font-mono">RPT-20260811-003</span><span class="ml-auto text-xs text-gray-400">11 ส.ค.</span></div>
+ <p class="text-sm text-gray-700 mt-1 pl-4">เครื่องปรับอากาศ ห้องประชุม — น้ำหยด</p>
+ <span class="ml-4 mt-1 inline-block text-[10px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-700">กำลังซ่อม</span>
+ </div>
+ <div onclick="go('repair-detail')" class="bg-white rounded-xl border border-gray-100 p-4 border-l-4 border-l-emerald-400 cursor-pointer hover:bg-gray-50 transition">
+ <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-400"></div><span class="text-sm font-bold font-mono">RPT-20260810-002</span><span class="ml-auto text-xs text-gray-400">10 ส.ค.</span></div>
+ <p class="text-sm text-gray-700 mt-1 pl-4">เครื่องพิมพ์ HP LaserJet ชั้น 2 — กระดาษติด</p>
+ <span class="ml-4 mt-1 inline-block text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">ส่งคืนแล้ว</span>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ============================== REPAIR DETAIL ============================== -->
+<div id="pg-repair-detail" class="page-content p-6 lg:p-8 hidden">
+ <div class="">
+ <div class="flex items-center gap-3 mb-6">
+ <button onclick="go('repairs')" class="w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-sm hover:bg-gray-100 border border-gray-200">←</button>
+ <div><h1 class="text-xl font-bold text-gray-900">รายละเอียดใบแจ้งซ่อม</h1><p class="text-xs text-gray-500 font-mono">RPT-20260812-001</p></div>
+ </div>
+ <div class="space-y-4">
+ <!-- Status timeline -->
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+ <h3 class="font-bold text-sm text-gray-800 mb-4">📊 สถานะใบแจ้งซ่อม</h3>
+ <div class="flex items-center gap-2 overflow-x-auto pb-2">
+ <div class="flex flex-col items-center shrink-0"><div class="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center text-xs font-bold">1</div><span class="text-[10px] mt-1 text-amber-600 font-semibold">รอรับเรื่อง</span></div>
+ <div class="w-8 h-0.5 bg-gray-200 shrink-0"></div>
+ <div class="flex flex-col items-center shrink-0"><div class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-xs">2</div><span class="text-[10px] mt-1 text-gray-400">รับเรื่อง</span></div>
+ <div class="w-8 h-0.5 bg-gray-200 shrink-0"></div>
+ <div class="flex flex-col items-center shrink-0"><div class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-xs">3</div><span class="text-[10px] mt-1 text-gray-400">กำลังซ่อม</span></div>
+ <div class="w-8 h-0.5 bg-gray-200 shrink-0"></div>
+ <div class="flex flex-col items-center shrink-0"><div class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-xs">4</div><span class="text-[10px] mt-1 text-gray-400">ส่งคืน</span></div>
+ <div class="w-8 h-0.5 bg-gray-200 shrink-0"></div>
+ <div class="flex flex-col items-center shrink-0"><div class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-xs">5</div><span class="text-[10px] mt-1 text-gray-400">ปิดงาน</span></div>
+ </div>
+ </div>
+ <!-- Info -->
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+ <h3 class="font-bold text-sm text-gray-800 mb-4">📝 ข้อมูลการแจ้งซ่อม</h3>
+ <div class="grid grid-cols-2 gap-y-3 gap-x-6 text-sm">
+ <div><p class="text-gray-500 text-xs">อุปกรณ์</p><p class="font-bold">เครื่องคอมพิวเตอร์ All In One</p></div>
+ <div><p class="text-gray-500 text-xs">ผู้แจ้ง</p><p class="font-bold">สมหญิง รักษ์ดี</p></div>
+ <div><p class="text-gray-500 text-xs">วันที่แจ้ง</p><p>12 ส.ค. 2569 09:30</p></div>
+ <div><p class="text-gray-500 text-xs">สถานะ</p><span class="px-2 py-0.5 text-[11px] rounded-full bg-amber-100 text-amber-700 font-bold">รอรับเรื่อง</span></div>
+ <div class="col-span-2"><p class="text-gray-500 text-xs mb-1">รายละเอียดปัญหา</p><p class="text-gray-800 bg-gray-50 p-3 rounded-lg border border-gray-200">เปิดเครื่องไม่ติดเลยค่ะ กดปุ่ม Power แล้วไม่มีอะไรเกิดขึ้น ไฟไม่เข้า</p></div>
+ </div>
+ </div>
+ <!-- Photos -->
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+ <h3 class="font-bold text-sm text-gray-800 mb-3">📷 รูปประกอบ</h3>
+ <div class="flex gap-3">
+ <div class="w-24 h-24 bg-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-3xl">🖥️</div>
+ <div class="w-24 h-24 bg-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-3xl">🔌</div>
+ </div>
+ </div>
+ <!-- Actions -->
+ <div class="flex gap-3">
+ <button class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 shadow-md">✅ รับเรื่อง</button>
+ <button class="flex-1 py-3 bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm hover:bg-gray-300">❌ ยกเลิก</button>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ============================== USERS ============================== -->
+<div id="pg-users" class="page-content p-6 lg:p-8 hidden">
+ <div class="">
+ <div class="flex items-center justify-between mb-6">
+ <div><h1 class="text-2xl font-bold text-gray-900">จัดการผู้ใช้งาน</h1><p class="text-gray-500 text-xs mt-1">เพิ่ม ลบ และกำหนดสิทธิ์</p></div>
+ <button onclick="showModal('user-modal')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium shadow-lg shadow-emerald-200">➕ เพิ่มผู้ใช้</button>
+ </div>
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+ <table class="w-full text-sm">
+ <thead class="bg-gray-50 text-gray-600"><tr><th class="text-left py-3 px-4 font-semibold">ลำดับ</th><th class="text-left py-3 px-4 font-semibold">ชื่อ</th><th class="text-left py-3 px-4 font-semibold">Username</th><th class="text-left py-3 px-4 font-semibold">ตำแหน่ง</th><th class="text-center py-3 px-4 font-semibold">จัดการ</th></tr></thead>
+ <tbody>
+ <tr class="row-hover border-t"><td class="py-3 px-4">1</td><td class="py-3 px-4 font-semibold">สมชาย ใจดี</td><td class="py-3 px-4 text-gray-500 font-mono">somchai</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-[11px] rounded-full bg-indigo-100 text-emerald-700 font-bold">Admin</span></td><td class="py-3 px-4 text-center"><button class="px-2.5 py-1 text-[11px] bg-amber-500 text-white rounded-lg mr-1">✏️</button><button class="px-2.5 py-1 text-[11px] bg-red-500 text-white rounded-lg">🗑️</button></td></tr>
+ <tr class="row-hover border-t"><td class="py-3 px-4">2</td><td class="py-3 px-4 font-semibold">สมหญิง รักษ์ดี</td><td class="py-3 px-4 text-gray-500 font-mono">somying</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-[11px] rounded-full bg-gray-100 text-gray-700">เจ้าหน้าที่</span></td><td class="py-3 px-4 text-center"><button class="px-2.5 py-1 text-[11px] bg-amber-500 text-white rounded-lg mr-1">✏️</button><button class="px-2.5 py-1 text-[11px] bg-red-500 text-white rounded-lg">🗑️</button></td></tr>
+ <tr class="row-hover border-t"><td class="py-3 px-4">3</td><td class="py-3 px-4 font-semibold">วิชัย ตรวจสอบ</td><td class="py-3 px-4 text-gray-500 font-mono">wichai</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-[11px] rounded-full bg-gray-100 text-gray-700">ผู้ตรวจนับ</span></td><td class="py-3 px-4 text-center"><button class="px-2.5 py-1 text-[11px] bg-amber-500 text-white rounded-lg mr-1">✏️</button><button class="px-2.5 py-1 text-[11px] bg-red-500 text-white rounded-lg">🗑️</button></td></tr>
+ </tbody>
+ </table>
+ </div>
+ </div>
+</div>
+
+<!-- ============================== ORG SETTINGS ============================== -->
+<div id="pg-org" class="page-content p-6 lg:p-8 hidden">
+ <div class="">
+ <div class="mb-6"><h1 class="text-2xl font-bold text-gray-900">ตั้งค่าหน่วยงาน</h1><p class="text-gray-500 text-xs mt-1">จัดการชื่อ โลโก้ ที่อยู่ สำหรับออกเอกสาร</p></div>
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+ <div class="flex items-center gap-6">
+ <div class="w-28 h-28 bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-5xl font-bold rounded-2xl shadow-lg cursor-pointer hover:scale-105 transition">P</div>
+ <div class="flex-1 grid grid-cols-2 gap-3">
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">คำนำหน้า</label><select class="w-full px-3 py-2 border rounded-lg text-sm"><option>บริษัท</option><option>ห้างหุ้นส่วน</option></select></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">ชื่อหน่วยงาน</label><input value="Pacific Plus IT" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ </div>
+ </div>
+ <div class="grid grid-cols-2 gap-3">
+ <div class="col-span-2"><label class="block text-xs font-semibold text-gray-600 mb-1">ที่อยู่</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">ตำบล/แขวง</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">อำเภอ/เขต</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">จังหวัด</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">รหัสไปรษณีย์</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">เบอร์โทร</label><input value="042 222 456" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-semibold text-gray-600 mb-1">อีเมล</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ </div>
+ <div class="flex justify-end gap-3 pt-4 border-t">
+ <button onclick="go('dashboard')" class="px-5 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-xl">ยกเลิก</button>
+ <button class="px-5 py-2 text-sm bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-200">💾 บันทึก</button>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ============================== PERMISSIONS ============================== -->
+<div id="pg-permissions" class="page-content p-6 lg:p-8 hidden">
+ <div class="">
+ <div class="mb-6"><h1 class="text-2xl font-bold text-gray-900">สิทธิ์การใช้งาน (Permissions)</h1><p class="text-gray-500 text-xs mt-1">กำหนดขอบเขตการเข้าถึงของแต่ละตำแหน่ง</p></div>
+ <div class="space-y-4">
+ <!-- Admin Role -->
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+ <div class="flex items-center justify-between mb-4">
+ <div class="flex items-center gap-3"><span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-emerald-700 font-bold">Admin</span><span class="text-sm text-gray-500">3 ผู้ใช้</span></div>
+ </div>
+ <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success" disabled><span>👁️ ดู Dashboard</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success" disabled><span>➕ สร้างครุภัณฑ์</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success" disabled><span>✏️ แก้ไข</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success" disabled><span>🗑️ ลบ</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success" disabled><span>📥 นำเข้า</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success" disabled><span>👥 จัดการผู้ใช้</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success" disabled><span>⚙️ ตั้งค่าสิทธิ์</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success" disabled><span>🏢 ตั้งค่าหน่วยงาน</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success" disabled><span>🏷️ QR Code</span></label>
+ </div>
+ </div>
+ <!-- Staff Role -->
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+ <div class="flex items-center justify-between mb-4">
+ <div class="flex items-center gap-3"><span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-700 font-bold">เจ้าหน้าที่</span><span class="text-sm text-gray-500">5 ผู้ใช้</span></div>
+ </div>
+ <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success"><span>👁️ ดู Dashboard</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success"><span>➕ สร้างครุภัณฑ์</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm"><input type="checkbox" checked class="checkbox checkbox-sm checkbox-success"><span>✏️ แก้ไข</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-400"><input type="checkbox" class="checkbox checkbox-sm"><span>🗑️ ลบ</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-400"><input type="checkbox" class="checkbox checkbox-sm"><span>📥 นำเข้า</span></label>
+ <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-400"><input type="checkbox" class="checkbox checkbox-sm"><span>👥 จัดการผู้ใช้</span></label>
+ </div>
+ </div>
+ <div class="flex justify-end"><button class="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 shadow-md shadow-indigo-200">💾 บันทึกสิทธิ์ทั้งหมด</button></div>
+ </div>
+ </div>
+</div>
+
+<!-- ============================== STICKER ============================== -->
+<div id="pg-sticker" class="page-content p-6 lg:p-8 hidden">
+ <div class="flex justify-center">
+ <div class="mb-6"><h1 class="text-2xl font-bold text-gray-900">🏷️ พิมพ์สติ๊กเกอร์ QR Code</h1><p class="text-gray-500 text-xs mt-1">สร้างป้าย QR สำหรับแปะครุภัณฑ์</p></div>
+ <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+ <div class="flex flex-col items-center">
+ <div class="border-2 border-dashed border-gray-300 p-6 rounded-xl bg-white w-64 text-center">
+ <p class="text-xs font-bold text-gray-800 uppercase tracking-wide mb-1">Pacific Plus IT</p>
+ <div class="w-36 h-36 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-3">
+ <svg viewBox="0 0 100 100" class="w-28 h-28"><rect x="5" y="5" width="25" height="25" fill="#1f2937" rx="3"/><rect x="70" y="5" width="25" height="25" fill="#1f2937" rx="3"/><rect x="5" y="70" width="25" height="25" fill="#1f2937" rx="3"/><rect x="10" y="10" width="15" height="15" fill="white" rx="2"/><rect x="75" y="10" width="15" height="15" fill="white" rx="2"/><rect x="10" y="75" width="15" height="15" fill="white" rx="2"/><rect x="14" y="14" width="7" height="7" fill="#1f2937" rx="1"/><rect x="79" y="14" width="7" height="7" fill="#1f2937" rx="1"/><rect x="14" y="79" width="7" height="7" fill="#1f2937" rx="1"/><rect x="35" y="5" width="5" height="5" fill="#1f2937"/><rect x="45" y="5" width="5" height="5" fill="#1f2937"/><rect x="55" y="5" width="5" height="5" fill="#1f2937"/><rect x="35" y="15" width="5" height="5" fill="#1f2937"/><rect x="55" y="15" width="5" height="5" fill="#1f2937"/><rect x="35" y="25" width="5" height="5" fill="#1f2937"/><rect x="45" y="25" width="5" height="5" fill="#1f2937"/><rect x="55" y="25" width="5" height="5" fill="#1f2937"/><rect x="5" y="35" width="5" height="5" fill="#1f2937"/><rect x="15" y="35" width="5" height="5" fill="#1f2937"/><rect x="25" y="35" width="5" height="5" fill="#1f2937"/><rect x="70" y="35" width="5" height="5" fill="#1f2937"/><rect x="80" y="35" width="5" height="5" fill="#1f2937"/><rect x="90" y="35" width="5" height="5" fill="#1f2937"/><rect x="35" y="35" width="30" height="30" fill="#1f2937" rx="4"/><rect x="40" y="40" width="20" height="20" fill="white" rx="2"/><rect x="45" y="45" width="10" height="10" fill="#1f2937" rx="1"/><rect x="5" y="45" width="5" height="5" fill="#1f2937"/><rect x="15" y="55" width="5" height="5" fill="#1f2937"/><rect x="25" y="45" width="5" height="5" fill="#1f2937"/><rect x="70" y="45" width="5" height="5" fill="#1f2937"/><rect x="90" y="55" width="5" height="5" fill="#1f2937"/><rect x="70" y="70" width="5" height="5" fill="#1f2937"/><rect x="80" y="70" width="5" height="5" fill="#1f2937"/><rect x="90" y="70" width="5" height="5" fill="#1f2937"/><rect x="75" y="80" width="5" height="5" fill="#1f2937"/><rect x="85" y="85" width="5" height="5" fill="#1f2937"/><rect x="70" y="90" width="5" height="5" fill="#1f2937"/><rect x="90" y="85" width="5" height="5" fill="#1f2937"/></svg>
+ </div>
+ <p class="text-sm font-bold text-emerald-700 tracking-wider">SR-0000001</p>
+ <p class="text-[11px] text-gray-600 mt-1">7440-001-0001/67</p>
+ <p class="text-[11px] text-gray-500 mt-1">คอมพิวเตอร์ All In One</p>
+ </div>
+ <div class="mt-6 flex gap-3">
+ <button class="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 shadow-md">🖨️ พิมพ์สติ๊กเกอร์</button>
+ <button class="px-6 py-2.5 border border-gray-300 text-gray-600 rounded-xl text-sm hover:bg-gray-50">📄 พิมพ์หลายรายการ</button>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+
+ </div>
+</main>
+
+<!-- ============================== MODALS ============================== -->
+<div id="audit-modal" class="fixed inset-0 z-[9999] hidden">
+ <div class="modal-backdrop absolute inset-0 bg-black/50" onclick="hideModal('audit-modal')"></div>
+ <div class="modal-content relative z-10 flex items-center justify-center h-full p-4">
+ <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+ <div class="p-5 border-b bg-indigo-50/50"><h3 class="text-lg font-bold text-gray-800">📋 เปิดรอบตรวจนับใหม่</h3><p class="text-xs text-gray-500 mt-1">ระบบจะดึงครุภัณฑ์ที่ใช้งานปกติมารอตรวจนับ</p></div>
+ <div class="p-5 space-y-3">
+ <div><label class="block text-xs font-bold text-gray-700 mb-1">ชื่อรอบการตรวจนับ</label><input placeholder="เช่น ตรวจนับอุปกรณ์ IT ประจำเดือน..." class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div class="grid grid-cols-2 gap-3">
+ <div><label class="block text-xs font-bold text-gray-700 mb-1">ประเภท</label><select class="w-full px-3 py-2 border rounded-lg text-sm"><option>รายเดือน</option><option>รายปี</option></select></div>
+ <div><label class="block text-xs font-bold text-gray-700 mb-1">หมวดหมู่</label><select class="w-full px-3 py-2 border rounded-lg text-sm"><option>ทั้งหมด</option><option>คอมพิวเตอร์</option></select></div>
+ </div>
+ <div class="flex justify-end gap-3 pt-3 border-t">
+ <button onclick="hideModal('audit-modal')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">ยกเลิก</button>
+ <button class="px-5 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">💾 บันทึกและเริ่มสแกน</button>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<div id="user-modal" class="fixed inset-0 z-[9999] hidden">
+ <div class="modal-backdrop absolute inset-0 bg-black/50" onclick="hideModal('user-modal')"></div>
+ <div class="modal-content relative z-10 flex items-center justify-center h-full p-4">
+ <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+ <div class="p-5 border-b bg-gray-50"><h3 class="text-lg font-bold">➕ เพิ่มผู้ใช้งานใหม่</h3></div>
+ <div class="p-5 space-y-3">
+ <div><label class="block text-xs font-bold text-gray-700 mb-1">ชื่อ-นามสกุล</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-bold text-gray-700 mb-1">Username</label><input class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-bold text-gray-700 mb-1">Password</label><input type="password" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+ <div><label class="block text-xs font-bold text-gray-700 mb-1">ตำแหน่ง / สิทธิ์</label><select class="w-full px-3 py-2 border rounded-lg text-sm"><option>Admin</option><option>เจ้าหน้าที่</option><option>ผู้ตรวจนับ</option></select></div>
+ <div class="flex justify-end gap-3 pt-3 border-t">
+ <button onclick="hideModal('user-modal')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">ยกเลิก</button>
+ <button class="px-5 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">💾 บันทึก</button>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- Notification Bell -->
+<div class="fixed top-4 right-20 z-50 bg-white dark:bg-gray-700 px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium cursor-pointer hover:scale-105 transition flex items-center gap-1.5" onclick="alert('🔔 การแจ้งเตือน:
+
+⚠️ คอมพิวเตอร์ All In One (SR-0000001) — ประกันหมดใน 15 วัน
+🕐 เครื่องพิมพ์ LaserJet (SR-0000002) — อายุใช้งานจะครบใน 45 วัน
+🔧 เครื่องปรับอากาศ (SR-0000003) — ชำรุดรอซ่อม')">
+ 🔔 <span class="bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">3</span>
+</div>
+<!-- Badge -->
+<!-- Dark Mode Toggle Button -->
+<div id="dark-toggle" onclick="toggleDark()" class="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-700 px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium cursor-pointer hover:scale-105 transition flex items-center gap-1.5">
+ <span id="dark-icon">🌙</span> <span id="dark-label">โหมดมืด</span>
+</div>
+<div class="fixed bottom-4 right-4 z-50 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-xl shadow-lg text-xs font-medium">
+ 💚 Emerald Official Mockup — กดเมนูด้านซ้ายเพื่อดูแต่ละฟังก์ชัน
+</div>
+
+<script>
+function go(page) {
+ document.querySelectorAll('.page-content').forEach(el => { el.classList.add('hidden'); el.classList.remove('active'); });
+ const t = document.getElementById('pg-' + page);
+ if (t) { t.classList.remove('hidden'); void t.offsetWidth; t.classList.add('active'); }
+ document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active'); el.classList.add('text-gray-600'); });
+ const nav = document.querySelector(`.nav-item[onclick="go('${page}')"]`);
+ if (nav) { nav.classList.add('active'); nav.classList.remove('text-gray-600'); }
+ document.getElementById('sidebar').classList.remove('open');
+ document.getElementById('sidebar').classList.add('-translate-x-full','lg:translate-x-0');
+ document.getElementById('overlay').classList.add('hidden');
+}
+function toggleSidebar() {
+ const s = document.getElementById('sidebar');
+ const o = document.getElementById('overlay');
+ s.classList.toggle('-translate-x-full');
+ s.classList.toggle('open');
+ o.classList.toggle('hidden');
+}
+function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+</script>
+<script>
+let isDark = false;
+function toggleDark() {
+ isDark = !isDark;
+ document.documentElement.classList.toggle('dark', isDark);
+ document.getElementById('dark-icon').textContent = isDark ? '☀️' : '🌙';
+ document.getElementById('dark-label').textContent = isDark ? 'โหมดสว่าง' : 'โหมดมืด';
+ document.getElementById('dark-toggle').className = isDark 
+ ? 'fixed top-4 right-4 z-50 bg-gray-700 px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium cursor-pointer hover:scale-105 transition flex items-center gap-1.5 text-yellow-400'
+ : 'fixed top-4 right-4 z-50 bg-gray-200 px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium cursor-pointer hover:scale-105 transition flex items-center gap-1.5';
+}
+</script>
+</body>
+</html>
