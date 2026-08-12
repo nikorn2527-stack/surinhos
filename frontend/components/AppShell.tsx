@@ -4,6 +4,7 @@ import { useState, useEffect, ReactNode, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/components/ThemeProvider';
 
 const API_BASE = 'http://192.168.1.120:5000';
 
@@ -14,13 +15,11 @@ interface AppShellProps {
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { token, userName, roleName, hasPermission, handleLogout, isLoading } = useAuth();
-
+    const { token, userName, roleName, hasPermission, handleLogout, isLoading } = useAuth();
+  const { isDark: darkMode, toggleMode: toggleDarkMode } = useTheme();
   const [org, setOrg] = useState({ prefix: '', orgName: 'Pacific Plus IT', logo: '' });
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Dark mode
-  const [darkMode, setDarkMode] = useState(false);
 
   // Global search
   const [globalSearch, setGlobalSearch] = useState('');
@@ -32,28 +31,6 @@ export default function AppShell({ children }: AppShellProps) {
   const [showNotif, setShowNotif] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
 
-  // Load dark mode from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('darkMode');
-    if (saved === 'true') {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  // Toggle dark mode
-  const toggleDarkMode = useCallback(() => {
-    setDarkMode(prev => {
-      const next = !prev;
-      localStorage.setItem('darkMode', String(next));
-      if (next) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      return next;
-    });
-  }, []);
 
   // Fetch org info
   useEffect(() => {
@@ -185,9 +162,10 @@ export default function AppShell({ children }: AppShellProps) {
       onClick={() => setSidebarOpen(false)}
       className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
         isActive(href)
-          ? 'bg-teal-600 text-white shadow-md shadow-teal-200'
+          ? 'text-white shadow-md'
           : `text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white ${color || ''}`
       }`}
+      style={isActive(href) ? { backgroundColor: 'var(--theme-primary)' } : undefined}
     >
       <span className="text-lg">{icon}</span>
       <span className="truncate">{label}</span>
@@ -208,7 +186,10 @@ export default function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <div className={`flex min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+    <div
+      className={`flex min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}
+      style={{ backgroundColor: 'var(--theme-background)', color: 'var(--theme-text)' }}
+    >
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -222,6 +203,7 @@ export default function AppShell({ children }: AppShellProps) {
         className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-72 shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${darkMode ? 'bg-gray-800 border-r border-gray-700' : 'bg-white'}`}
+        style={{ backgroundColor: 'var(--theme-sidebar-bg)' }}
       >
         {/* Org header */}
         <div className="p-6 overflow-y-auto flex-1">
@@ -229,12 +211,12 @@ export default function AppShell({ children }: AppShellProps) {
             {org.logo ? (
               <img src={org.logo} alt="Logo" className="w-24 h-24 object-contain shrink-0" />
             ) : (
-              <div className="w-24 h-24 bg-transparent text-teal-600 flex items-center justify-center font-bold text-5xl shrink-0">
+              <div className="w-24 h-24 bg-transparent flex items-center justify-center font-bold text-5xl shrink-0" style={{ color: 'var(--theme-primary)' }}>
                 {org.orgName ? org.orgName.charAt(0) : 'P'}
               </div>
             )}
             <div className="flex flex-col justify-center items-center w-full px-2">
-              <h1 className={`text-[17px] font-bold leading-tight line-clamp-2 ${darkMode ? 'text-teal-400' : 'text-teal-700'}`} title={`${org.prefix} ${org.orgName}`}>
+              <h1 className="text-[17px] font-bold leading-tight line-clamp-2" style={{ color: 'var(--theme-primary)' }} title={`${org.prefix} ${org.orgName}`}>
                 {org.prefix} {org.orgName}
               </h1>
               <p className={`text-[16px] mt-1.5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>ระบบบริหารจัดการครุภัณฑ์</p>
@@ -262,6 +244,13 @@ export default function AppShell({ children }: AppShellProps) {
               <div className="space-y-1">
                 {navItem('/audits', '📋', 'ระบบตรวจนับครุภัณฑ์', 'text-teal-600')}
                 {navItem('/repairs', '🛠️', 'ระบบแจ้งซ่อม', 'text-orange-500')}
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <h3 className={`text-xs font-bold uppercase tracking-wider mb-3 px-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>การแสดงผล</h3>
+              <div className="space-y-1">
+                {navItem('/settings/theme', '🎨', 'ธีมและการแสดงผล', 'text-teal-600')}
               </div>
             </div>
 

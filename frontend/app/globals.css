@@ -4,6 +4,32 @@
 /* Sarabun Font - Thai Government/Formal */
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap');
 
+/* Theme token fallbacks. ThemeProvider replaces these values at runtime. */
+:root {
+  --theme-primary: #0d9488;
+  --theme-primary-light: #f0fdfa;
+  --theme-primary-dark: #115e59;
+  --theme-accent: #14b8a6;
+  --theme-sidebar-bg: #ffffff;
+  --theme-sidebar-text: #0d9488;
+  --theme-button-bg: #0d9488;
+  --theme-button-text: #ffffff;
+  --theme-badge-bg: #ccfbf1;
+  --theme-badge-text: #115e59;
+  --theme-background: #f8fafc;
+  --theme-surface: #ffffff;
+  --theme-surface-muted: #f8fafc;
+  --theme-text: #111827;
+  --theme-text-muted: #6b7280;
+  --theme-border: #e5e7eb;
+  --theme-focus: #14b8a6;
+}
+
+body {
+  background-color: var(--theme-background);
+  color: var(--theme-text);
+}
+
 /* Global font override */
 * {
   font-family: 'Sarabun', sans-serif;
