@@ -8,6 +8,23 @@
  <style>
   @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap');
   * { font-family: 'Sarabun', sans-serif; }
+    .dark body, .dark { background: #111827; color: #e5e7eb; }
+    .dark .bg-white { background-color: #1f2937 !important; }
+    .dark .bg-gray-50, .dark body { background-color: #111827 !important; }
+    .dark .text-gray-900, .dark .text-gray-800 { color: #f3f4f6 !important; }
+    .dark .text-gray-700, .dark .text-gray-600 { color: #d1d5db !important; }
+    .dark .text-gray-500, .dark .text-gray-400 { color: #9ca3af !important; }
+    .dark .border-gray-100, .dark .border-gray-200 { border-color: #374151 !important; }
+    .dark input, .dark select { background: #1f2937 !important; border-color: #4b5563 !important; color: #e5e7eb !important; }
+    .dark .shadow-sm, .dark .shadow-xl { box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important; }
+    .dark aside { background: #1f2937 !important; border-color: #374151 !important; }
+    .dark aside .text-gray-600 { color: #d1d5db !important; }
+    .dark aside .text-gray-500, .dark aside .text-gray-400 { color: #9ca3af !important; }
+    .dark table thead { background: #374151 !important; }
+    .dark table th { color: #9ca3af !important; }
+    .dark table td { color: #d1d5db !important; }
+    .dark .bg-gray-50 { background: #111827 !important; }
+    .dark .bg-indigo-50, .dark .bg-emerald-50, .dark .bg-amber-50, .dark .bg-red-50, .dark .bg-blue-50, .dark .bg-violet-50 { background: rgba(99,102,241,0.1) !important; }
   body { margin: 0; overflow: hidden; }
   .sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   .page-content { transition: opacity 0.25s ease, transform 0.25s ease; }
@@ -578,7 +595,19 @@
  </div>
 </div>
 
+<!-- Notification Bell -->
+<div class="fixed top-4 right-20 z-50 bg-white dark:bg-gray-700 px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium cursor-pointer hover:scale-105 transition flex items-center gap-1.5" onclick="alert('🔔 การแจ้งเตือน:
+
+⚠️ คอมพิวเตอร์ All In One (SR-0000001) — ประกันหมดใน 15 วัน
+🕐 เครื่องพิมพ์ LaserJet (SR-0000002) — อายุใช้งานจะครบใน 45 วัน
+🔧 เครื่องปรับอากาศ (SR-0000003) — ชำรุดรอซ่อม')">
+  🔔 <span class="bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">3</span>
+</div>
 <!-- Badge -->
+<!-- Dark Mode Toggle Button -->
+<div id="dark-toggle" onclick="toggleDark()" class="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-700 px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium cursor-pointer hover:scale-105 transition flex items-center gap-1.5">
+  <span id="dark-icon">🌙</span> <span id="dark-label">โหมดมืด</span>
+</div>
 <div class="fixed bottom-4 right-4 z-50 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-xl shadow-lg text-xs font-medium">
  🎨 Surinhos Full Mockup — กดเมนูด้านซ้ายเพื่อดูแต่ละฟังก์ชัน
 </div>
@@ -604,6 +633,18 @@ function toggleSidebar() {
 }
 function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+</script>
+<script>
+let isDark = false;
+function toggleDark() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark', isDark);
+  document.getElementById('dark-icon').textContent = isDark ? '☀️' : '🌙';
+  document.getElementById('dark-label').textContent = isDark ? 'โหมดสว่าง' : 'โหมดมืด';
+  document.getElementById('dark-toggle').className = isDark 
+    ? 'fixed top-4 right-4 z-50 bg-gray-700 px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium cursor-pointer hover:scale-105 transition flex items-center gap-1.5 text-yellow-400'
+    : 'fixed top-4 right-4 z-50 bg-gray-200 px-3 py-1.5 rounded-xl shadow-lg text-xs font-medium cursor-pointer hover:scale-105 transition flex items-center gap-1.5';
+}
 </script>
 </body>
 </html>
