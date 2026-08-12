@@ -33,7 +33,7 @@ export default function AssetDetail() {
 
   return (
     <div className="min-h-screen bg-base-200 p-8">
-      <div className="max-w-4xl mx-auto flex gap-6">
+      <div className="flex gap-6">
         
         {/* แผงควบคุม อัปเดตสถานะ */}
         <div className="card bg-base-100 shadow-xl flex-1">

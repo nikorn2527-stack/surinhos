@@ -317,7 +317,7 @@ export default function AuditDetail() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-3 md:p-10 font-sans pb-24">
-      <div className="max-w-7xl mx-auto">
+      <div className="">
         
         {/* หัวกระดาษ */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-white p-5 rounded-2xl shadow-sm border border-gray-200">

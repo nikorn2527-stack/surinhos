@@ -58,7 +58,7 @@ export default function RunningNumberSettings() {
 
   return (
     <div className="min-h-screen bg-base-200 p-8">
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="space-y-6">
         
         <div className="flex justify-between items-center mb-6">
           <div>

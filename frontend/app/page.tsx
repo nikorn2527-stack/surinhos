@@ -219,7 +219,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="space-y-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-3xl font-bold">รายการครุภัณฑ์ทั้งหมด</h2>
         </div>

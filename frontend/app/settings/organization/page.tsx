@@ -99,7 +99,7 @@ export default function OrganizationSettings() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-sans">
-      <div className="max-w-5xl mx-auto">
+      <div className="">
         
         {/* หัวกระดาษ */}
         <div className="flex items-center gap-5 mb-8">

@@ -379,7 +379,7 @@ export default function EditAsset() {
 
   return (
     <div className="min-h-screen bg-base-200 py-8 px-4 flex justify-center relative">
-      <div className="card w-full max-w-4xl bg-base-100 shadow-xl">
+      <div className="card w-full bg-base-100 shadow-xl">
         <div className="card-body">
           
           <div className="flex justify-between items-center border-b pb-4 mb-6">

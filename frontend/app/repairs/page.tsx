@@ -275,7 +275,7 @@ export default function RepairsPage() {
         {selectedTicketId ? (
           <>
             <div className="flex-1 overflow-y-auto p-6 lg:p-8">
-              <div className="max-w-4xl mx-auto">
+              <div className="">
                 <TicketDetail
                   ticketId={selectedTicketId}
                   onClose={() => setSelectedTicketId(null)}

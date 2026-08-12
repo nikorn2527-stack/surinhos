@@ -1,8 +1,12 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-/* Smooth page transitions */
+/* Sarabun Font - Thai Government/Formal */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap');
+
+/* Global font override */
 * {
+  font-family: 'Sarabun', sans-serif;
   scroll-behavior: smooth;
 }
 
