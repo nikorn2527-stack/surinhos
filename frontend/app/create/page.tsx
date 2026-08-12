@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function CreateAsset() {
   const router = useRouter();
+  const { token } = useAuth();
   
   const [assetCode, setAssetCode] = useState('กำลังสร้างรหัส...'); 
   
@@ -160,7 +162,6 @@ export default function CreateAsset() {
   }, [mainCat, subCat]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) {
       router.push('/login');
       return;
@@ -173,8 +174,8 @@ export default function CreateAsset() {
       .then(data => {
         if(data.next_code) setAssetCode(data.next_code); 
       })
-      .catch(err => setAssetCode('ไม่สามารถดึงรหัสได้'));
-  }, [router]);
+      .catch(() => setAssetCode('ไม่สามารถดึงรหัสได้'));
+  }, [router, token]);
 
 // ================= ฟังก์ชันจัดการและบีบอัดรูปภาพ (ลดขนาดไฟล์) =================
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -380,7 +381,6 @@ export default function CreateAsset() {
               <h2 className="text-2xl font-bold text-primary">ทะเบียนประวัติครุภัณฑ์ (สพ.4)</h2>
               <p className="text-sm text-gray-500">บันทึกรายละเอียดครุภัณฑ์ตามระเบียบพัสดุภาครัฐ</p>
             </div>
-            <button onClick={() => router.push('/')} className="btn btn-ghost btn-sm">✕ ปิด</button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">

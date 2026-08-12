@@ -1,2 +1,77 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+/* Smooth page transitions */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Sidebar transition polish */
+aside {
+  will-change: transform;
+}
+
+/* Active nav item glow */
+aside nav a.bg-indigo-600 {
+  box-shadow: 0 4px 14px -3px rgba(99, 102, 241, 0.4);
+}
+
+/* Hover lift for cards */
+.card:hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+}
+
+/* Table row hover effect */
+.table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+/* Mobile sidebar backdrop */
+aside + main {
+  transition: opacity 0.2s ease;
+}
+
+/* Badge pulse for active status */
+.badge-success {
+  animation: none;
+}
+
+/* Smooth button transitions */
+.btn {
+  transition: all 0.2s ease;
+}
+
+/* Stat cards hover */
+.stats .stat {
+  transition: background-color 0.2s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* No scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

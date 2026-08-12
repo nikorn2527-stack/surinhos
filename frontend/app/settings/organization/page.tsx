@@ -103,14 +103,6 @@ export default function OrganizationSettings() {
         
         {/* หัวกระดาษ */}
         <div className="flex items-center gap-5 mb-8">
-          <button 
-            onClick={() => router.push('/')} 
-            className="w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-sm hover:shadow-md hover:bg-gray-100 transition-all text-gray-600"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-          </button>
           <div>
             <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">ตั้งค่าหน่วยงาน</h1>
             <p className="text-gray-500 mt-1 text-sm">จัดการชื่อ ที่อยู่ โลโก้ และข้อมูลการติดต่อสำหรับออกเอกสาร</p>

@@ -56,7 +56,6 @@ export default function AssetDetail() {
               </select>
             </div>
             <button onClick={handleUpdateStatus} className="btn btn-primary w-full">บันทึกสถานะ</button>
-            <button onClick={() => router.push('/')} className="btn btn-ghost mt-2 w-full">กลับหน้าหลัก</button>
           </div>
         </div>
 

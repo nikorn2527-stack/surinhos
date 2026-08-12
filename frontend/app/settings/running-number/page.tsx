@@ -65,7 +65,6 @@ export default function RunningNumberSettings() {
             <h1 className="text-3xl font-bold text-primary">ตั้งค่าเลขที่ทั้งหมด (Running Number)</h1>
             <p className="text-gray-500">กำหนดรูปแบบรหัสครุภัณฑ์อัตโนมัติ</p>
           </div>
-          <button onClick={() => router.push('/')} className="btn btn-ghost">กลับหน้าหลัก</button>
         </div>
 
         <div className="card bg-base-100 shadow-xl border border-base-300">

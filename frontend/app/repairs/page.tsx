@@ -176,9 +176,6 @@ export default function RepairsPage() {
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <button onClick={() => router.push('/')} className="btn btn-circle btn-ghost btn-sm">
-                ←
-              </button>
               <div>
                 <h1 className="text-lg font-bold flex items-center gap-2">🔧 ระบบแจ้งซ่อม</h1>
                 <p className="text-xs text-gray-400">Repair Tracking System</p>

@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function UserManagement() {
   const router = useRouter();
+  const { token, handleForceLogout } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,26 +19,12 @@ export default function UserManagement() {
     username: '',
     password: '',
     name: '',
-    role_id: 2 // ค่าเริ่มต้นเป็น 2 (สมมติว่าเป็นสิทธิ์พนักงานทั่วไป)
+    role_id: 2
   });
-
-  // 💡 ดึง Token ปัจจุบัน
-  const getToken = () => {
-    return localStorage.getItem('token') || sessionStorage.getItem('token');
-  };
-
-  // 💡 ฟังก์ชันเตะออกจากระบบ
-  const handleForceLogout = (message: string) => {
-    alert(`⚠️ ${message}`);
-    localStorage.clear();
-    sessionStorage.clear();
-    router.push('/login');
-  };
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const token = getToken();
       if (!token) return handleForceLogout('กรุณาเข้าสู่ระบบ');
 
       const headers = { 'Authorization': `Bearer ${token}` };
@@ -46,10 +34,8 @@ export default function UserManagement() {
         fetch('http://192.168.1.120:5000/api/roles', { headers }).then(r => r.json())
       ]);
 
-      // เช็คว่าโดนเตะออกจากระบบหรือไม่
       if (usersRes?.forceLogout) return handleForceLogout(usersRes.error);
 
-      // 💡 เช็กให้ชัวร์ว่าเป็น Array ค่อยเอาไปเซ็ตค่า
       setUsers(Array.isArray(usersRes) ? usersRes : []);
       setRoles(Array.isArray(rolesRes) ? rolesRes : []);
       
@@ -87,7 +73,6 @@ export default function UserManagement() {
     const method = editingId ? 'PUT' : 'POST';
 
     try {
-      const token = getToken();
       const res = await fetch(url, {
         method,
         headers: { 
@@ -113,7 +98,6 @@ export default function UserManagement() {
   const handleDelete = async (id: number, name: string) => {
     if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้งาน: ${name} ?`)) {
       try {
-        const token = getToken();
         const res = await fetch(`http://192.168.1.120:5000/api/users/${id}`, { 
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
@@ -137,9 +121,6 @@ export default function UserManagement() {
         {/* หัวกระดาษ */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-5">
-            <button onClick={() => router.push('/')} className="w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-sm hover:shadow-md hover:bg-gray-100 transition-all text-gray-600">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-            </button>
             <div>
               <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">จัดการผู้ใช้งาน</h1>
               <p className="text-gray-500 mt-1 text-sm">เพิ่ม ลบ และกำหนดสิทธิ์ผู้เข้าใช้งานระบบ</p>

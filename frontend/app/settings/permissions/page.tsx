@@ -121,9 +121,6 @@ export default function PermissionsSettings() {
         
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-5">
-            <button onClick={() => router.push('/')} className="w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-sm hover:shadow-md hover:bg-gray-100 transition-all text-gray-600">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-            </button>
             <div>
               <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">สิทธิ์การใช้งาน (Permissions)</h1>
               <p className="text-gray-500 mt-1 text-sm">กำหนดขอบเขตการเข้าถึงและแก้ไขข้อมูลของแต่ละตำแหน่งในระบบอย่างละเอียด</p>

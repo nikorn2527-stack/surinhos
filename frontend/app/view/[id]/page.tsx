@@ -2,30 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function ViewAsset() {
   const router = useRouter();
   const params = useParams();
   const id = params.id;
+  const { token, hasPermission } = useAuth();
 
   const [asset, setAsset] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeImage, setActiveImage] = useState<string | null>(null);
 
-  const [roleName, setRoleName] = useState('');
-  const [userPermissions, setUserPermissions] = useState<string[]>([]);
-
   useEffect(() => {
-    // ดึงสิทธิ์ของ User
-    setRoleName(localStorage.getItem('roleName') || sessionStorage.getItem('roleName') || '');
-    const permsString = localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '[]';
-    setUserPermissions(JSON.parse(permsString));
-
-    if (!id) return;
+    if (!id || !token) return;
 
     const fetchAsset = async () => {
       try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const res = await fetch(`http://192.168.1.120:5000/api/assets/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -49,13 +42,7 @@ export default function ViewAsset() {
     };
 
     fetchAsset();
-  }, [id, router]);
-
-  const hasPermission = (key: string) => {
-    const roleLower = (roleName || '').toLowerCase();
-    if (roleLower.includes('admin') || roleLower.includes('ผู้ดูแลระบบ')) return true; 
-    return userPermissions.includes(key);
-  };
+  }, [id, router, token]);
 
   const formatThaiDate = (dateString: string) => {
     if (!dateString) return '-';
@@ -124,9 +111,6 @@ export default function ViewAsset() {
         {/* Header & รวมปุ่มจัดการ */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div className="flex items-center gap-4">
-            <button onClick={() => router.push('/')} className="btn btn-circle btn-ghost bg-white shadow-sm hover:bg-gray-200">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-            </button>
             <div>
               <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">รายละเอียดครุภัณฑ์</h1>
               <div className="text-sm text-gray-500 mt-1 flex items-center gap-2">
